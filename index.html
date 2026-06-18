@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISSSTE - C.M.F. ERMITA</title>
+    <style>
+        :root {
+            --guinda: #611232;
+            --gris-oscuro: #98989a;
+            --gris-claro: #f4f4f4;
+            --blanco: #ffffff;
+	    --negro-footer: #111111; /* Negro profundo */
+            --verde-issste: #285c4d;
+            --dorado-calidad: #b38e5d;
+            --azul-issste: #1d4ed8;
+            --morado-issste: #800080;
+
+        }
+
+        html, body { height: 100%; margin: 0; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--gris-claro); 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        header { background-color: var(--guinda); color: var(--blanco); padding: 20px; text-align: center; border-bottom: 4px solid var(--gris-oscuro); }
+
+        .main-content { flex: 1; padding: 20px; }        
+        .container { max-width: 1300px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* LOGIN GRID - 4 SECCIONES */
+        .login-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .card { padding: 25px; border: 1px solid #ddd; border-radius: 8px; background: #fff; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { margin-top: 0; font-size: 1.2em; border-bottom: 2px solid var(--gris-claro); padding-bottom: 10px; }
+        
+        /* Colores por Rol */
+        .card-admin { border-top: 8px solid var(--dorado-calidad); }
+        .card-doctor { border-top: 8px solid #5d8ab3; } /* Azul suave para médicos */
+        .card-staff { border-top: 8px solid var(--guinda); }
+        .card-patient { border-top: 8px solid var(--verde-issste); }
+        .card-rol { border: 2px solid #ddd; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .card-coord { border-top: 8px solid var(--morado-issste); }
+        .card-archivo { border-top: 8px solid var(--guinda); }
+
+        
+
+        /* UI ELEMENTS */
+        .btn-save { color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-top: 5px; }
+
+
+        .teaching-hero { background: #fdfaf6; border: 2px solid var(--dorado-calidad); padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 25px; }
+
+        #phrase-container { font-style: italic; color: var(--guinda); font-size: 1.2em; font-weight: bold; transition: opacity 0.8s; }
+
+
+
+	/* PIE DE PÁGINA (ESTILO NEGRO Y BLANCO) */
+        footer { background-color: var(--negro-footer); color: var(--blanco); text-align: center; padding: 25px 10px; font-size: 0.95em; border-top: 3px solid var(--dorado-calidad); }
+        footer strong { color: var(--dorado-calidad); }
+
+
+        /* NAVEGACIÓN PANEL ARCHIVO */
+        .nav-archivo { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            margin-bottom: 25px; 
+            background: #f0f0f0; 
+            padding: 15px; 
+            border-radius: 8px; 
+        }
+
+
+        .btn-nav { 
+            padding: 12px 15px; 
+            border: none; 
+            background: var(--gris-oscuro); 
+            color: white; 
+            cursor: pointer; 
+            font-weight: bold; 
+            border-radius: 4px; 
+            flex: 1; 
+            min-width: 180px;
+        }
+
+        .btn-nav.active { background: var(--guinda); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-nav:hover { background: var(--dorado-calidad); }
+
+
+
+        /* SECCIONES DE CONTENIDO */
+        .section-content { display: none; padding: 25px; border: 1px solid #ddd; border-radius: 8px; background: #fff; margin-top: 10px; }
+        .section-content.active { display: block; animation: fadeIn 0.4s; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+
+
+        /* FORMULARIOS Y TABLAS */
+        .header-registro {
+            background-color: var(--verde-issste); color: white; padding: 15px; border-radius: 8px 8px 0 0;
+            display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; align-items: center;
+        }
+        .form-box { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border: 1px solid #eee; border-top: none; }
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+        label { display: block; font-size: 0.8em; font-weight: bold; color: #555; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--gris-oscuro); border-radius: 4px; box-sizing: border-box; }
+        .full-width { grid-column: span 3; }
+        
+
+        .btn-save { background-color: var(--verde-issste); color: white; padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-action { background: var(--verde-issste); color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f4f4f4; color: var(--guinda); }
+
+
+        .panel-nuevo { background: #eff6ff; border-left: 5px solid var(--azul-issste); }
+        .panel-nuevo label { color: var(--azul-issste); }
+        .panel-actual { background: #fdf0f5; border-left: 5px solid var(--guinda); }
+
+
+
+        /* Badges */
+        .badge { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; display: inline-block; }
+        .badge-pendiente { background: #fef3c7; color: var(--amarillo); }
+        .badge-aprobada { background: #dcfce7; color: var(--verde); }
+        .badge-rechazada { background: #fee2e2; color: var(--rojo); }
+
+
+        .view { display: none; }
+        .active-view { display: block !important; }
+
+        .error-msg { color: #cc0000; font-weight: bold; margin-top: 10px; display: none; }
+
+    </style>
+</head>
+
+
+
+
+<body>
+
+<header>
+    <h1>C.M.F. ERMITA - ADMINISTRACIÓN DE SERVICIOS</h1>
+</header>
+
+<div class="main-content">
+    <div class="container">
+
+        <div id="section-login" class="view active-view">
+            <div class="teaching-hero">
+                <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
+            <div id="phrase-container">"Cargando pensamiento institucional..."</div>
+        </div>
+
+        <div class="login-grid">
+
+	<div class="card card-admin">
+		<h3>Panel Administrador</h3>
+		<p style="font-size: 0.85em; color: #666;">Acceso total a configuración de plantilla médica y reportes globales.</p>
+		<label>Usuario Admin:</label>
+		<input type="text" placeholder="ID Administrador">
+                <button class="btn-save" style="background: var(--dorado-calidad)" onclick="entrar('admin')">INGRESAR COMO ADMIN</button>
+	</div>
+
+	<div class="card card-doctor">
+                <h3 style="color: #2c4e72; text-align: center; font-size: 2.85em;">Médicos</h3>
+                <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para Médicos de la C.M.F. Ermita.</p>
+                <label style="text-align: center;">Al ingresar deberá proporcionar su clave</label>
+                <button class="btn-save" style="background: #2c4e72" onclick="solicitarClaveMedico()">INGRESAR AL MENÚ DE MÉDICOS</button>
+	</div>
+
+	<div class="card card-coord">
+                <h3 style="color: #800080; text-align: center; font-size: 2.50em;">Coordinación Médica</h3>
+                <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para el Servicio de Coordinación Médica de la C.M.F. Ermita.</p>
+                <button class="btn-save" style="background: #800080" onclick="entrar('coordinacion')">ACCESO COORDINACIÓN MÉDICA</button>
+	</div>
+	</div>
+
+
+        <div class="card-patient">
+                <h3 style="text-align: center; font-size: 2.85em;">Derechohabientes</h3>
+                <p style="font-size: 1.30em; color: #f00; text-align: center;">Para ver los tramites que puede realizar, por favor de oprima el botón verde OPCIONES DERECHOHABIENTES</p>
+                <label style="font-size: 1.30em; text-align: center;">Derechohabiente, la C.M.F. Ermita se complace en atenderte</label>
+                <button class="btn-save" onclick="entrar('derechohabientes')">OPCIONES DERECHOHABIENTES</button>
+	</div>	
+
+    </div>
+
+
+
+
+
+
+	<div id="panel-coordinacion" class="view">
+	    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--guinda); margin-bottom: 20px; padding-bottom: 10px;">
+	        <h2 style="color:var(--guinda); margin:0;">Panel Archivo Clínico</h2>
+                <button onclick="location.reload()" style="background:#cc0000; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Cerrar Sesión</button>
+	    </div> 
+
+    	    <div id="section-login" class="view active-view">
+                <div class="teaching-hero">
+                    <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
+                    <div id="phrase-container">"Trabajando juntos para transformar la atención a la salud"</div>
+                </div>
+            <div class="login-grid">
+
+            <div class="card card-admin">
+                <h3 style="color:var(--dorado-calidad); text-align: center;">Registro de Médicos</h3>
+                <p style="font-size: 0.85em; color: #666;">Alta y modificación de plantilla médica.</p>
+                <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('modulo-medicos', this)">REGISTRO DE MÉDICOS</button>
+                <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('mod-lista', this)">VER PLANTILLA DE MÉDICOS</button>
+            </div>
+
+            <div class="card card-doctor">
+                <h3 style="color: #2c4e72; text-align: center;">Cambios de Consultorio</h3>
+                <p style="font-size: 0.8em; color: #666; text-align: center;">Consulta de estatus de cambios de Consultorio.</p>
+                <button class="btn-save" style="background: #2c4e72" onclick="activarModulo('vista-coordinacion', this)">ESTATUS CAMBIOS DE CONSULTORIO</button>
+            </div>
+
+            <div class="card card-archivo">
+                <h3>Reporte por Médico</h3>
+                <p style="font-size: 0.85em; color: #666;">Generación de reporte de citas por médico.</p>
+                <button class="btn-save" style="background: var(--guinda)" onclick="activarModulo('modulo-rep-medico', this)">REPORTE POR MÉDICO</button>
+            </div>
+
+            <div class="card card-patient">
+                <h3>Reporte por Fecha</h3>
+                <p style="font-size: 0.85em; color: #666;">Generación de reporte de citas por fecha.</p>
+                <button class="btn-save" id="btn-rep-fec" onclick="activarModulo('modulo-rep-fecha', this)">REPORTE POR FECHA</button>
+            </div>
+
+        </div> 
+
+
+	<div id="modulo-medicos" class="section-content">
+            <p id="msg-error-med" class="error-msg"></p>
+            <h3 style="border-left: 5px solid var(--dorado-calidad); padding-left:10px;">Registro de Médicos</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; background:#f9f9f9; padding:20px; border-radius:8px;">
+                <div class="form-group">
+                    <label>Número de Empleado:</label>
+                    <input type="text" id="reg-emp" placeholder="Ej: 110293">
+                </div>
+                <div class="form-group">
+                    <label>Nombre del Médico:</label>
+                    <input type="text" id="reg-nom" placeholder="Nombre Completo">
+                </div>
+                <div class="form-group">
+                    <label>Ubicación / Consultorio:</label>
+                    <select id="reg-ubi">
+                        <option>Consultorio 1</option><option>Consultorio 2</option><option>Consultorio 3</option><option>Consultorio 4</option>
+                        <option>Consultorio 5</option><option>Consultorio 6</option><option>Consultorio 7</option><option>Consultorio 8</option>
+                        <option>Consultorio 9</option><option>Consultorio 10</option><option>Consultorio 11</option><option>Consultorio 12</option>
+                        <option>Consultorio 13</option><option>Consultorio 14</option><option>Gerontología</option><option>Planificación Familiar</option>
+		        <option>Nutrición</option><option>Módulo MIDE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Turno del Médico:</label>
+                    <select id="reg-tur"><option>Matutino</option><option>Vespertino</option></select>
+                </div>
+                </div>
+                    <button class="btn-action" style="grid-column: span 2; background:var(--guinda)" onclick="db_guardarMedico()">GUARDAR EN BASE DE DATOS</button>
+                </div>
+            </div>
+	</div>
+
+	<div id="mod-lista" class="section-content">
+            <h3>Médicos Registrados</h3>
+            <table id="tabla-medicos">
+                <thead>
+                    <tr><th>N° Empleado</th><th>Médico</th><th>Ubicación</th><th>Turno</th><th>Acción</th></tr>
+                </thead>
+                <tbody id="db-body"></tbody>
+            </table>
+            <button class="btn-action" style="background:#cc0000; margin-top:20px; width:auto;" onclick="db_borrarTodo()">BORRAR TODA LA BASE DE DATOS</button>
+        </div>
+
+
+
+
+	<div id="panel-derechohabientes" class="view">
+	    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--guinda); margin-bottom: 20px; padding-bottom: 10px;">
+	        <h2 style="color:var(--guinda); margin:0; text-align: center;">Panel Derechohabientes</h2>
+                <button onclick="location.reload()" style="background:#cc0000; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Cerrar Sesión</button>
+	    </div> 
+
+
+            <div class="teaching-hero">
+                <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
+                <div id="phrase-container">"Trabajando juntos para transformar la atención a la salud"</div>
+            </div>
+
+            <div class="card card-admin">
+                <h3 style="text-align:center;">Solicitud de Cambio de Consultorio</h3>
+                <p style="font-size: 1.15em; color: #666; text-align:center;">Si requiere un cambio de consultorio, por favor inicie su tramité seleccionando el botón "Solicitar Cambio de Consultorio".</p>
+                <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('modulo-cambioconsultorio', this)">SOLICITAR CAMBIO DE CONSULTORIO</button>
+            </div>
+	</div>
+
+
+        <div id="modulo-cambioconsultorio" class="section-content">
+            <div style="background: #fdf0f5; padding: 15px; border-left: 5px solid var(--guinda); margin-bottom: 20px;">
+                <h3 style="margin:0; text-align: center;">Solicitud de Cambio de Consultorio</h3>
+                <p style="font-size: 0.9em; margin: 5px 0 0; text-align: center;">Complete los datos para generar su solicitud oficial.</p>
+            </div>
+
+            <div>
+                <label>Número Consecutivo (Folio):</label>
+                <input type="text" id="sol-folio" readonly>
+            </div>
+
+            <div class="grid-form">
+                <div class="full-width">
+                	<div class="full-width">
+				<h4 style="border-bottom: 1px solid #ddd; color: var(--gris-oscuro);">Datos del Trabajador</h4>
+			</div>
+
+			</div>
+				<div><label>Apellido Paterno:</label><input type="text" id="txt-app-paterno"></div>
+                		<div><label>Apellido Materno:</label><input type="text" id="txt-app-materno"></div>
+                		<div><label>Nombre(s):</label><input type="text" id="txt-app-nombre"></div>
+	                	<div><label>RFC:</label><input type="text" id="txt-app-registro"></div>
+	                <div>
+                    <label>¿Es Trabajador(a)?</label>
+                    <select>
+                        <option>NO</option>
+                        <option>SI</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>¿Es Pensionado(a)?</label>
+                    <select>
+                        <option>NO</option>
+                        <option>SI</option>
+                    </select>
+                </div>
+
+                <div class="full-width"><h4 style="border-bottom: 1px solid #ddd; color: var(--gris-oscuro);">Domicilio Actual</h4></div>
+                
+                <div style="grid-column: span 2;"><label>Calle:</label><input type="text"></div>
+                <div><label>C.P.:</label><input type="text"></div>
+                
+                <div><label>No. Exterior:</label><input type="text"></div>
+                <div><label>No. Interior:</label><input type="text" placeholder="Opcional"></div>
+                <div><label>Colonia:</label><input type="text"></div>
+
+
+                <div class="full-width"><h4 style="border-bottom: 1px solid #ddd; color: var(--gris-oscuro);">Datos de los Beneficiarios</h4></div>
+
+		<div><input type="text" id="APB1" placeholder="Apellido Paterno Beneficiario 1"></div>
+		<div><input type="text" id="AMB1" placeholder="Apellido Paterno Materno Beneficiario 1"></div>
+		<div><input type="text" id="NCB1" placeholder="Nombre Completo Beneficiario 1"></div>
+
+		<div><input type="text" id="APB2" placeholder="Apellido Paterno Beneficiario 2"></div>
+		<div><input type="text" id="AMB2" placeholder="Apellido Paterno Materno Beneficiario 2"></div>
+		<div><input type="text" id="NCB2" placeholder="Nombre Completo Beneficiario 2"></div>
+
+		<div><input type="text" id="APB3" placeholder="Apellido Paterno Beneficiario 3"></div>
+		<div><input type="text" id="AMB3" placeholder="Apellido Paterno Materno Beneficiario 3"></div>
+		<div><input type="text" id="NCB3" placeholder="Nombre Completo Beneficiario 3"></div>
+
+		<div><input type="text" id="APB4" placeholder="Apellido Paterno Beneficiario 4"></div>
+		<div><input type="text" id="AMB4" placeholder="Apellido Paterno Materno Beneficiario 4"></div>
+		<div><input type="text" id="NCB4" placeholder="Nombre Completo Beneficiario 4"></div>
+
+		<div><input type="text" id="APB5" placeholder="Apellido Paterno Beneficiario 5"></div>
+		<div><input type="text" id="AMB5" placeholder="Apellido Paterno Materno Beneficiario 5"></div>
+		<div><input type="text" id="NCB5" placeholder="Nombre Completo Beneficiario 5"></div>
+
+		<div><input type="text" id="APB6" placeholder="Apellido Paterno Beneficiario 6"></div>
+		<div><input type="text" id="AMB6" placeholder="Apellido Paterno Materno Beneficiario 6"></div>
+		<div><input type="text" id="NCB6" placeholder="Nombre Completo Beneficiario 6"></div>
+
+		<div><input type="text" id="APB7" placeholder="Apellido Paterno Beneficiario 7"></div>
+		<div><input type="text" id="AMB7" placeholder="Apellido Paterno Materno Beneficiario 7"></div>
+		<div><input type="text" id="NCB7" placeholder="Nombre Completo Beneficiario 7"></div>
+
+		<div><input type="text" id="APB8" placeholder="Apellido Paterno Beneficiario 8"></div>
+		<div><input type="text" id="AMB8" placeholder="Apellido Paterno Materno Beneficiario 8"></div>
+		<div><input type="text" id="NCB8" placeholder="Nombre Completo Beneficiario 8"></div>
+
+		<div><input type="text" id="APB9" placeholder="Apellido Paterno Beneficiario 9"></div>
+		<div><input type="text" id="AMB9" placeholder="Apellido Paterno Materno Beneficiario 9"></div>
+		<div><input type="text" id="NCB9" placeholder="Nombre Completo Beneficiario 9"></div>
+
+		<div><input type="text" id="APB10" placeholder="Apellido Paterno Beneficiario 10"></div>
+		<div><input type="text" id="AMB10" placeholder="Apellido Paterno Materno Beneficiario 10"></div>
+		<div><input type="text" id="NCB10" placeholder="Nombre Completo Beneficiario 10"></div>
+
+            </div>
+
+
+            <div style="background: #fdf0f5; padding: 15px; border-left: 5px solid var(--guinda); margin-bottom: 20px;">
+                <h3 style="color: var(--guinda); margin:0; text-align: center;">Consultorio y Médico Actual</h3>
+            </div>
+
+
+            <div class="full-width panel-medico panel-actual">
+                <label style="font-size: 1.1em; color: var(--guinda); text-align: center;">Seleccione su Médico Actual:</label>
+                <select id="sel-medico-actual" onchange="autoCompletarDatosMedico('actual')" style="border: 2px solid var(--guinda); font-size: 1em; padding: 10px;">
+                    <option value="">-- Buscar Médico Adscrito Actual --</option>
+                </select>
+            </div>
+
+
+            <div>
+                <label style="text-align: center; color: var(--guinda)">Consultorio Actual:</label>
+                <input type="text" id="txt-cons-actual" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--guinda);">
+            </div>
+
+            <div>
+                <label style="text-align: center; color: var(--guinda)">Turno:</label>
+                <input type="text" id="txt-turno-actual" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--guinda);">
+            </div>
+
+            <div>
+                <label style="text-align: center; color: var(--guinda)">No. Empleado Médico (Clave):</label>
+                <input type="text" id="txt-emp-actual" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--guinda);">
+            </div>
+
+
+            <div class="panel-nuevo" style="padding: 15px; border-left: 5px solid var(--azul-issste); margin-bottom: 20px;">
+                <h3 style="color: var(--azul-issste); margin:0; text-align: center;">Consultorio y Médico Solicitado</h3>
+            </div>
+
+
+            <div class="full-width panel-medico panel-nuevo" style="margin-top: 15px;">
+                <label style="font-size: 1.1em; text-align: center;">Seleccione el Médico al que solicita el cambio:</label>
+                <select id="sel-medico-nuevo" onchange="autoCompletarDatosMedico('nuevo')" style="border: 2px solid var(--azul-issste); font-size: 1em; padding: 10px;">
+                    <option value="">-- Seleccione su Médico para Cambio --</option>
+                </select>
+            </div>
+
+
+            <div>
+                <label style="text-align: center; color: var(--azul-issste)">Consultorio del Médico Solicitado:</label>
+                <input type="text" id="txt-cons-nuevo" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--azul-issste);">
+            </div>
+
+            <div>
+                <label style="text-align: center; color: var(--azul-issste)">No. Empleado del Médico Solicitado:</label>
+                <input type="text" id="txt-turno-nuevo" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--azul-issste);">
+            </div>
+
+            <div>
+                <label style="text-align: center; color: var(--azul-issste)">No. Empleado del Médico Solicitado:</label>
+                <input type="text" id="txt-emp-nuevo" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--azul-issste);">
+            </div>
+
+
+            <button class="btn-action" onclick="procesarSolicitudCambio()">ENVIAR SOLICITUD DE CAMBIO</button>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+    <div id="vista-coordinacion" class="section-content">
+        <button class="btn-volver" onclick="irInicio()">← Volver al Menú</button>
+        <h2>Bitácora General de Cambios de Consultorio</h2>
+        <p>Auditoría en tiempo real del estatus de cambios de consultorios solicitados por derechohabientes.</p>
+        
+        <div style="overflow-x:auto;">
+            <table id="tabla-coordinacion-general">
+                <thead>
+                    <tr>
+                        <th>ID Folio</th>
+                        <th>Paciente</th>
+                        <th>Médico Actual (Anterior)</th>
+                        <th>Consultorio Actual</th>
+                        <th>Médico Solicitado (Destino)</th>
+                        <th>Consultorio Destino</th>
+                        <th>Estatus Solicitud</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div> 
+</div> 
+
+<footer>
+    <p>&copy; 2026 Todos los derechos reservados</p>
+    <p>Desarrollado por: <strong>González Zamudio Manuel Alejandro</strong></p>
+    <p>Colaboración: <strong>Aldana Rodríguez Said Israel</strong></p>
+    <p style="font-size: 0.75em; opacity: 0.7; margin-top: 10px;">Clínica de Medicina Familiar Ermita - ISSSTE</p>
+</footer>
+
+
+
+
+
+
+
+<!-- ========================================== -->
+<!-- VENTANA FLOTANTE DE LOGIN (MODAL ACCESS)   -->
+<!-- ========================================== -->
+<div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; font-family: sans-serif;">
+    <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 380px; box-shadow: 0 4px 25px rgba(0,0,0,0.25); position: relative; box-sizing: border-box;">
+        
+        <h3 id="login-title" style="color: #800080; margin: 0 0 10px; text-align: center; font-size: 1.8em;">Iniciar Sesión</h3>
+        <p id="login-subtitle" style="font-size: 0.85em; text-align: center; color: #666; margin: 0 0 20px;">Acceso restringido para C.M.F. Ermita</p>
+        
+        <form onsubmit="procesarLogin(event)">
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #333;">Usuario:</label>
+                <input type="text" id="login-username" required style="width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
+            </div>
+            <div style="margin-bottom: 22px;">
+                <label style="display:block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #333;">Contraseña:</label>
+                <input type="password" id="login-password" required style="width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
+            </div>
+            
+            <button type="submit" style="width: 100%; background: #800080; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; transition: background 0.2s;">INGRESAR</button>
+            <button type="button" onclick="cerrarLogin()" style="width: 100%; background: none; color: #666; border: none; padding: 10px; margin-top: 5px; cursor: pointer; font-size: 0.9em;">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<script>
+
+
+    // --- LÓGICA DE BASE DE DATOS LOCAL ---
+    
+
+    // Al cargar la página, recuperamos los datos
+    let db_medicos = JSON.parse(localStorage.getItem('issste_medicos')) || [];
+    let dbSolicitudes = JSON.parse(localStorage.getItem('erm_solicitudes_v5')) || [];
+    let medicoAutenticado = null; // Guardará el objeto del médico logueado
+
+
+
+    // PASO 1: Solicitar contraseña inmediatamente al hacer click en la opción principal
+    function solicitarClaveMedico() {
+        let clave = prompt("ACCESO RESTRINGIDO MÈDICOS\nPor favor introduzca su Número de Empleado como clave de acceso:");
+        if (clave === null) return; // Cancelado por el usuario
+        clave = clave.trim();
+
+        // Verificar validez contra la plantilla de Archivo Clínico
+        let medicoEncontrado = db_medicos.find(m => m.emp === clave);
+
+        if(!medicoEncontrado) {
+            alert("Acceso Denegado: Código o número de empleado inválido.");
+            return;
+        }
+
+        // Si es válido, guardamos la sesión y lo mandamos al SUBMENÚ exclusivo
+        medicoAutenticado = medicoEncontrado;
+        document.getElementById('doctor-info-general').innerText = `Sesión Iniciada: ${medicoAutenticado.nombre} | Num. Empleado: ${medicoAutenticado.numEmpleado}`;
+        
+        verModulo('sub-menu-medicos-screen');
+    }
+
+
+
+
+
+
+
+
+
+
+
+    function db_guardarMedico() {
+        const emp = document.getElementById('reg-emp').value;
+        const nom = document.getElementById('reg-nom').value;
+        const ubi = document.getElementById('reg-ubi').value;
+        const tur = document.getElementById('reg-tur').value;
+        const errorDiv = document.getElementById('msg-error-med');
+
+
+	// 1. Validación de campos obligatorios
+
+        if(!emp || !nom) {
+            alert("Por favor, ingrese el Número de Empleado y el Nombre.");
+            return;
+        }
+
+
+
+        // 2. VALIDACIÓN A: Número de Empleado Único
+        const empleadoExistente = db_medicos.find(m => m.emp === emp);
+        if(empleadoExistente) {
+            errorDiv.innerText = `ERROR: El Número de Empleado "${emp}" ya está registrado a nombre de: ${empleadoExistente.nom}.`;
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+
+        // 3. VALIDACIÓN B: Consultorio y Turno disponible
+        const conflictoEspacio = db_medicos.find(m => m.ubi === ubi && m.tur === tur);
+        if(conflictoEspacio) {
+            errorDiv.innerText = `ERROR: El "${ubi}" ya está ocupado en el turno "${tur}" por: ${conflictoEspacio.nom}.`;
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+
+        // 4. Proceso de Guardado si las validaciones pasan
+
+        const nuevo = { emp, nom, ubi, tur };
+        db_medicos.push(nuevo);
+        
+        // Guardar en la "Base de Datos" del navegador
+        localStorage.setItem('issste_medicos', JSON.stringify(db_medicos));
+        
+        alert("Médico registrado correctamente.");
+        document.getElementById('reg-emp').value = "";
+        document.getElementById('reg-nom').value = "";
+        actualizarTabla();
+    }
+
+    function actualizarTabla() {
+        const body = document.getElementById('db-body');
+        body.innerHTML = "";
+
+//        if(db_medicos.length === 0) {
+//            body.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No hay médicos registrados.</td></tr>";
+//            return;
+//        }
+
+        db_medicos.forEach((m, index) => {
+            body.innerHTML += `
+	    <tr>
+                <td>${m.emp}</td>
+                <td>${m.nom}</td>
+                <td>${m.ubi}</td>
+                <td>${m.tur}</td>
+                <td><button onclick="db_eliminarUno(${index})" style="background:red; color:white; border:none; cursor:pointer; padding:5px;">Eliminar</button></td>
+            </tr>`;
+        });
+    }
+
+    function db_eliminarUno(idx) {
+        if(confirm("¿Desea eliminar este médico de la plantilla?")) {
+        db_medicos.splice(idx, 1);
+        localStorage.setItem('issste_medicos', JSON.stringify(db_medicos));
+        actualizarTabla();
+        }
+    }
+
+    function db_borrarTodo() {
+        if(confirm("¿Seguro que quieres borrar todos los registros?")) {
+            localStorage.removeItem('issste_medicos');
+            db_medicos = [];
+            actualizarTabla();
+        }
+    }
+
+
+
+
+
+
+
+
+    const CLAVE_EDIT = "ARCL000";
+    const consultorios = ["Consultorio 1", "Consultorio 2", "Consultorio 3", "Consultorio 4", "Consultorio 5", "Consultorio 6", "Consultorio 7", "Consultorio 8", "Consultorio 9", "Consultorio 10", "Consultorio 11", "Consultorio 12", "Consultorio 13", "Consultorio 14", "Módulo MIDE", "Gerontología", "Planificación Familiar", "Nutrición"];
+    let db = {};
+
+
+    // FRASES DINÁMICAS
+    const frases = [
+        "\"La calidad nunca es un accidente; siempre es el resultado de un esfuerzo de la inteligencia.\" - John Ruskin",
+        "\"Enseñar es aprender dos veces.\" - Joseph Joubert",
+        "\"La medicina es una ciencia de incertidumbre y un arte de probabilidad.\" - William Osler",
+        "\"La calidad de nuestro servicio es la base de nuestra calidez humana.\"",
+        "\"Formar profesionales con excelencia es garantizar la salud del mañana.\"",
+        "\"Donde quiera que se ame el arte de la medicina, se ama también a la humanidad.\" - Hipócrates",
+        "\"La educación es el arma más poderosa que puedes usar para cambiar el mundo.\" - Nelson Mandela"
+    ];
+
+    let currentPhraseIndex = 0;
+
+    function rotatePhrases() {
+        const container = document.getElementById('phrase-container');
+        container.style.opacity = 0;
+        
+        setTimeout(() => {
+            currentPhraseIndex = (currentPhraseIndex + 1) % frases.length;
+            container.innerText = frases[currentPhraseIndex];
+            container.style.opacity = 1;
+        }, 800);
+    }
+
+    window.onload = () => {
+
+        // Iniciar frases
+        document.getElementById('phrase-container').innerText = frases[0];
+        setInterval(rotatePhrases, 5000);
+
+        document.getElementById('p-fecha').valueAsDate = new Date();
+        const combo = document.getElementById('m-ubicacion');
+        consultorios.forEach(c => {
+            db[c] = { Matutino: "", Vespertino: "" };
+            combo.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+        updateTabMed();
+    };
+
+
+
+
+//Entrar
+
+
+javascript// =========================================================================
+// SISTEMA DE ACCESOS Y CAPAS VISUALES
+// =========================================================================
+let moduloDestino = ''; // Variable global para recordar a qué panel quería entrar
+
+// 1. FUNCIÓN PRINCIPAL: Controla qué paneles abren directo y cuáles piden contraseña
+function entrar(rol) {
+    // Si el rol es Coordinación o Doctor, activamos el bloqueo por contraseña de la BD
+    if (rol === 'coordinacion' || rol === 'doctor') {
+        moduloDestino = rol; // Guardamos el rol que se solicitó
+        
+        // Limpiamos los campos del cuadro de login por seguridad
+        document.getElementById('login-username').value = '';
+        document.getElementById('login-password').value = '';
+        
+        // Personalizamos los textos del cuadro según el botón presionado
+        if (rol === 'coordinacion') {
+            document.getElementById('login-title').innerText = 'Coordinación Médica';
+            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
+        } else if (rol === 'doctor') {
+            document.getElementById('login-title').innerText = 'Acceso Médico';
+            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para Personal Médico Autorizado';
+        }
+        
+        // Mostramos el cuadro flotante de inicio de sesión en pantalla
+        document.getElementById('login-modal').style.display = 'flex';
+    } 
+    
+    // PANELES DIRECTOS (No requieren contraseña de inicio)
+    else if (rol === 'archivo') {
+        document.getElementById('section-login').classList.remove('active-view');
+        document.getElementById('panel-archivo').classList.add('active-view');
+    } 
+    else if (rol === 'derechohabientes') {
+        document.getElementById('section-login').classList.remove('active-view');
+        document.getElementById('panel-derechohabientes').classList.add('active-view');
+    } 
+    else {
+        alert("Acceso al Panel de " + rol + " (Sin rol activado).");
+    }
+}
+
+// 2. FUNCIÓN: Cierra el cuadro de inicio de sesión si el usuario cancela
+function cerrarLogin() {
+    document.getElementById('login-modal').style.display = 'none';
+}
+
+// 3. FUNCIÓN: Procesa los datos contra tu servidor en Render y Clever Cloud
+async function procesarLogin(e) {
+    e.preventDefault();
+    
+    const userVal = document.getElementById('login-username').value.trim();
+    const passVal = document.getElementById('login-password').value.trim();
+
+    try {
+        // Petición POST a la API de tu servidor en Render (asegúrate de que BASE_URL esté declarada)
+        const response = await fetch(`${BASE_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: userVal,
+                password: passVal,
+                requiredRole: moduloDestino // Valida si el usuario en la BD tiene el permiso adecuado
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al validar las credenciales.');
+        }
+
+        // Si la base de datos da luz verde, cerramos el cuadro flotante
+        cerrarLogin();
+        alert("¡Acceso concedido correctamente!");
+        
+        // IDENTIFICAMOS EL ROL APROBADO Y MANEJAMOS TUS VISTAS ORIGINALES
+        if (moduloDestino === 'coordinacion' || moduloDestino === 'doctor') {
+            document.getElementById('section-login').classList.remove('active-view');
+            document.getElementById('panel-coordinacion').classList.add('active-view');
+        }
+
+    } catch (error) {
+        alert(error.message);
+        console.error('Error en procesarLogin:', error);
+    }
+}
+
+
+
+    // Simular contador de folios
+    let folioActual = localStorage.getItem('folio_cambio') || 100;
+
+
+
+    function activarModulo(idModulo, boton) {
+        // Ocultar todos los módulos
+        document.querySelectorAll('.section-content').forEach(mod => {
+            mod.classList.remove('active');
+        });
+
+        // Desactivar todos los botones de navegación
+        document.querySelectorAll('.btn-nav').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Mostrar el seleccionado y activar su botón
+        document.getElementById(idModulo).classList.add('active');
+        boton.classList.add('active');
+
+        // Si se entra a la plantilla, refrescar los datos
+//        if(id === 'mod-lista') actualizarTabla();
+
+        if(idModulo === 'modulo-cambioconsultorio') generarFolio();
+
+        if(idModulo === 'modulo-cambioconsultorio') {
+            cargarListaMedicos();
+        }
+
+        if(idModulo === 'vista-coordinacion') listarTodasLasSolicitudesCoordinacion();
+
+    }
+
+
+    function generarFolio() {
+        // Genera un consecutivo automático para la solicitud
+        const folioInput = document.getElementById('sol-folio');
+        const num = parseInt(folioActual) + 1;
+        folioInput.value = "SCCCMFE-" + num;
+        // Nota: Solo se guardaría en DB al hacer clic en enviar, aquí solo mostramos el sugerido
+    }
+
+
+
+
+    // DERECHOHABIENTE: Cargar el box con los nombres de los médicos
+    function cargarListaMedicos() {
+        const selActual = document.getElementById('sel-medico-actual');
+        const selNuevo = document.getElementById('sel-medico-nuevo');
+
+        let opciones = '<option value="">-- Seleccione su Médico Actual --</option>';
+        
+        // Ordenar alfabéticamente por nombre
+        const medicosOrdenados = [...db_medicos].sort((a, b) => a.nom.localeCompare(b.nom));
+
+        medicosOrdenados.forEach((m, index) => {
+            // El valor es el nombre para buscarlo luego
+            opciones += `<option value="${m.emp}">${m.nom}</option>`;
+        });
+
+        selActual.innerHTML = opciones;
+        selNuevo.innerHTML = opciones;
+
+    }
+
+
+    // DERECHOHABIENTE: Recuperación Automática Datos de Médico Actual
+    function autoCompletarDatosMedico(tipo) {
+        const empSeleccionado = document.getElementById(`sel-medico-${tipo}`).value;
+        const txtCons = document.getElementById(`txt-cons-${tipo}`);
+        const txtTurno = document.getElementById(`txt-turno-${tipo}`);
+        const txtEmp = document.getElementById(`txt-emp-${tipo}`);
+
+        if(!empSeleccionado) {
+            txtCons.value = ""; txtTurno.value = ""; txtEmp.value = "";
+            return;
+        }
+
+        // Buscar correspondencia exacta mediante el número de empleado
+        const medicoEncontrado = db_medicos.find(m => m.emp === empSeleccionado);
+
+        if(medicoEncontrado) {
+            txtCons.value = medicoEncontrado.ubi;
+            txtTurno.value = medicoEncontrado.tur;
+            txtEmp.value = medicoEncontrado.emp;
+        }
+    }
+
+
+    // VALIDACIÓN FINAL DE TRÁMITE
+    function procesarSolicitudCambio() {
+        const actual = document.getElementById('sel-medico-actual').value;
+        const nuevoMed = document.getElementById('sel-medico-nuevo').value;
+        const apePaterno = document.getElementById('txt-app-paterno').value.trim();
+        const apeMaterno = document.getElementById('txt-app-materno').value.trim();
+        const nomPaciente = document.getElementById('txt-app-nombre').value.trim();
+        const regPaciente = document.getElementById('txt-app-registro').value.trim();
+
+
+
+        if(!actual || !nuevoMed) {
+            return alert("Por favor seleccione tanto su médico actual como el médico al que desea solicitar el cambio.");
+        }
+
+        if(actual === nuevoMed) {
+            return alert("Atención: No puede solicitar un cambio al mismo médico que ya tiene asignado actualmente.");
+        }
+
+
+        // 2. Validar que los campos de texto del paciente no estén vacíos
+        if(!apePaterno) {
+            alert("El campo 'Apellido Paterno' es obligatorio.");
+            document.getElementById('txt-app-paterno').focus();
+            return;
+        }
+        if(!apeMaterno) {
+            alert("El campo 'Apellido Materno' es obligatorio.");
+            document.getElementById('txt-app-materno').focus();
+            return;
+        }
+        if(!nomPaciente) {
+            alert("El campo 'Nombre' es obligatorio.");
+            document.getElementById('txt-app-nombre').focus();
+            return;
+        }
+        if(!regPaciente) {
+            alert("El campo 'RFC' es obligatorio.");
+            document.getElementById('txt-app-registro').focus();
+            return;
+        }
+
+
+
+
+        let medActualObj = db_medicos.find(m => m.emp === actual);
+        let medNuevoObj = db_medicos.find(m => m.emp === nuevoMed);
+
+
+
+        let solicitud = {
+            id: "FOL-" + Math.floor(Math.random() * 90000 + 10000),
+            paciente: `${nomPaciente} ${apePaterno} ${apeMaterno}`,
+            medicoActualNombre: medActualObj.nom,
+            medicoActualUbi: `${medActualObj.ubi} (${medActualObj.tur})`,
+            medicoNuevoEmp: medNuevoObj.emp,
+            medicoNuevoNombre: medNuevoObj.nom,
+            medicoNuevoUbi: `${medNuevoObj.ubi} (${medNuevoObj.tur})`,
+            estatus: "Pendiente"
+        };
+
+        dbSolicitudes.push(solicitud);
+        localStorage.setItem('erm_solicitudes_v5', JSON.stringify(dbSolicitudes));
+        alert(`Trámite Exitoso: La solicitud de cambio de consultorio ha sido enviada a revisión por el área de Coordinación Médica y se registró bajo el Folio: ${solicitud.id}`);
+
+
+
+
+
+
+
+
+        alert("Trámite Exitoso: La solicitud de cambio de consultorio ha sido enviada a revisión por el área de Coordinación Médica.");
+    }
+
+
+
+
+
+
+
+    // COORDINACIÓN MÉDICA: Historial Completo
+    function listarTodasLasSolicitudesCoordinacion() {
+        const tbody = document.querySelector('#tabla-coordinacion-general tbody');
+        tbody.innerHTML = "";
+
+        if(dbSolicitudes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: gray; padding: 20px;">Sin solicitudes registradas en la bitácora institucional.</td></tr>`;
+            return;
+        }
+
+        dbSolicitudes.forEach(s => {
+            let claseBadge = "badge-pendiente";
+            if(s.estatus === "Aprobada") claseBadge = "badge-aprobada";
+            if(s.estatus === "Rechazada") claseBadge = "badge-rechazada";
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${s.id}</strong></td>
+                    <td>${s.paciente}</td>
+                    <td>${s.medicoActualNombre}</td>
+                    <td>${s.medicoActualUbi}</td>
+                    <td>${s.medicoNuevoNombre}</td>
+                    <td>${s.medicoNuevoUbi}</td>
+                    <td><span class="badge ${claseBadge}">${s.estatus}</span></td>
+                </tr>
+            `;
+        });
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================================
+// CONTROL DE ACCESO RESTRINGIDO (FUSIONADO CON TUS VISTAS ACTIVE-VIEW)
+// =========================================================================
+let moduloDestino = ''; // Variable global para recordar a qué panel quería entrar
+
+// 1. FUNCIÓN PRINCIPAL: Controla qué paneles abren directo y cuáles piden contraseña
+function entrar(rol) {
+    // Si el rol es Coordinación o Doctor, activamos el bloqueo por contraseña de la BD
+    if (rol === 'coordinacion' || rol === 'doctor') {
+        moduloDestino = rol; // Guardamos el rol que se solicitó
+        
+        // Limpiamos los campos del cuadro de login por seguridad
+        document.getElementById('login-username').value = '';
+        document.getElementById('login-password').value = '';
+        
+        // Personalizamos los textos del cuadro según el botón presionado
+        if (rol === 'coordinacion') {
+            document.getElementById('login-title').innerText = 'Coordinación Médica';
+            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
+        } else if (rol === 'doctor') {
+            document.getElementById('login-title').innerText = 'Acceso Médico';
+            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para Personal Médico Autorizado';
+        }
+        
+        // Mostramos el cuadro flotante de inicio de sesión centrado en la pantalla
+        document.getElementById('login-modal').style.display = 'flex';
+    } 
+    
+    // PANELES DIRECTOS (No requieren contraseña, abren exactamente como los tenías)
+    else if (rol === 'archivo') {
+        document.getElementById('section-login').classList.remove('active-view');
+        document.getElementById('panel-archivo').classList.add('active-view');
+    } 
+    else if (rol === 'derechohabientes') {
+        document.getElementById('section-login').classList.remove('active-view');
+        document.getElementById('panel-derechohabientes').classList.add('active-view');
+    } 
+    else {
+        alert("Acceso al Panel de " + rol + " (Sin rol activado).");
+    }
+}
+
+// 2. FUNCIÓN: Cierra el cuadro de inicio de sesión si el usuario cancela
+function cerrarLogin() {
+    document.getElementById('login-modal').style.display = 'none';
+}
+
+// 3. FUNCIÓN ASÍNCRONA: Procesa los datos contra tu servidor en Render y Clever Cloud
+async function procesarLogin(e) {
+    e.preventDefault();
+    
+    const userVal = document.getElementById('login-username').value.trim();
+    const passVal = document.getElementById('login-password').value.trim();
+
+    try {
+        // Petición POST a la API de tu servidor en Render
+        const response = await fetch(`${BASE_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: userVal,
+                password: passVal,
+                requiredRole: moduloDestino // Valida si el usuario en la BD tiene el permiso adecuado
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al validar las credenciales.');
+        }
+
+        // Si la base de datos da luz verde, cerramos el cuadro flotante
+        cerrarLogin();
+        alert("¡Acceso concedido correctamente!");
+        
+        // EJECUTA TUS CAPAS ORIGINALES: Si pasa la validación, abre el panel correspondiente
+        if (moduloDestino === 'coordinacion' || moduloDestino === 'doctor') {
+            document.getElementById('section-login').classList.remove('active-view');
+            document.getElementById('panel-coordinacion').classList.add('active-view');
+        }
+
+    } catch (error) {
+        alert(error.message);
+        console.error('Error en procesarLogin:', error);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
