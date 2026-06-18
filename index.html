@@ -594,6 +594,173 @@
 const BASE_URL = 'https://ecosistema-cmfermita.onrender.com'; // <-- Tu URL de Render
 
 
+
+// =========================================================================
+// CONTROL DE ACCESO RESTRINGIDO (FUSIONADO CON TUS VISTAS ACTIVE-VIEW)
+// =========================================================================
+
+// =========================================================================
+// CONTROL DE ACCESOS ACTUALIZADO PARA ESTE SEGUNDO PROYECTO
+// =========================================================================
+let moduloDestino = ''; 
+
+function entrar(rol) {
+    // Registramos a qué panel quiere ir el usuario
+    if (rol === 'coordinacion' || rol === 'doctor') {
+        moduloDestino = rol; 
+        
+        // Limpiamos los cuadros de texto por seguridad
+        document.getElementById('login-username').value = '';
+        document.getElementById('login-password').value = '';
+        
+        // Cambiamos los títulos según el botón seleccionado
+        if (rol === 'coordinacion') {
+            document.getElementById('login-title').innerText = 'Coordinación Médica';
+            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
+        } else if (rol === 'doctor') {
+            document.getElementById('login-title').innerText = 'Acceso Médico';
+            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para Personal Médico Autorizado';
+        }
+        
+        // Mostramos el recuadro flotante
+        document.getElementById('login-modal').style.display = 'flex';
+    } 
+    // Paneles que abren directo sin contraseña
+    else if (rol === 'archivo') {
+        document.getElementById('section-login').classList.remove('active-view');
+        document.getElementById('panel-archivo').classList.add('active-view');
+    } 
+    else if (rol === 'derechohabientes') {
+        document.getElementById('section-login').classList.remove('active-view');
+        document.getElementById('panel-derechohabientes').classList.add('active-view');
+    } 
+    else {
+        alert("Acceso al Panel de " + rol + " (Sin rol activado).");
+    }
+}
+
+function cerrarLogin() {
+    document.getElementById('login-modal').style.display = 'none';
+}
+
+async function procesarLogin(e) {
+    e.preventDefault();
+    
+    const userVal = document.getElementById('login-username').value.trim();
+    const passVal = document.getElementById('login-password').value.trim();
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: userVal,
+                password: passVal,
+                requiredRole: moduloDestino
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al validar las credenciales.');
+        }
+
+        // Si las credenciales de Clever Cloud son válidas:
+        cerrarLogin();
+        alert("¡Acceso concedido correctamente!");
+        
+        // Activamos tu capa visual original
+        if (moduloDestino === 'coordinacion' || moduloDestino === 'doctor') {
+            document.getElementById('section-login').classList.remove('active-view');
+            document.getElementById('panel-coordinacion').classList.add('active-view');
+        }
+
+    } catch (error) {
+        alert(error.message);
+        console.error('Error en procesarLogin:', error);
+    }
+}
+
+
+
+
+
+
+// 2. FUNCIÓN: Cierra el cuadro de inicio de sesión si el usuario cancela
+function cerrarLogin() {
+    document.getElementById('login-modal').style.display = 'none';
+}
+
+// 3. FUNCIÓN ASÍNCRONA: Procesa los datos contra tu servidor en Render y Clever Cloud
+async function procesarLogin(e) {
+    e.preventDefault();
+    
+    const userVal = document.getElementById('login-username').value.trim();
+    const passVal = document.getElementById('login-password').value.trim();
+
+    try {
+        // Petición POST a la API de tu servidor en Render
+        const response = await fetch(`${BASE_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: userVal,
+                password: passVal,
+                requiredRole: moduloDestino // Valida si el usuario en la BD tiene el permiso adecuado
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al validar las credenciales.');
+        }
+
+        // Si la base de datos da luz verde, cerramos el cuadro flotante
+        cerrarLogin();
+        alert("¡Acceso concedido correctamente!");
+        
+        // EJECUTA TUS CAPAS ORIGINALES: Si pasa la validación, abre el panel correspondiente
+        if (moduloDestino === 'coordinacion' || moduloDestino === 'doctor') {
+            document.getElementById('section-login').classList.remove('active-view');
+            document.getElementById('panel-coordinacion').classList.add('active-view');
+        }
+
+    } catch (error) {
+        alert(error.message);
+        console.error('Error en procesarLogin:', error);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // --- LÓGICA DE BASE DE DATOS LOCAL ---
     
 
@@ -771,16 +938,6 @@ const BASE_URL = 'https://ecosistema-cmfermita.onrender.com'; // <-- Tu URL de R
         });
         updateTabMed();
     };
-
-
-
-
-//Entrar
-
-
-javascript// =========================================================================
-// SISTEMA DE ACCESOS Y CAPAS VISUALES
-// =========================================================================
 
 
 
@@ -1044,149 +1201,6 @@ async function procesarLogin(e) {
 
 
 
-
-
-
-
-
-
-// =========================================================================
-// CONTROL DE ACCESO RESTRINGIDO (FUSIONADO CON TUS VISTAS ACTIVE-VIEW)
-// =========================================================================
-
-// =========================================================================
-// CONTROL DE ACCESOS ACTUALIZADO PARA ESTE SEGUNDO PROYECTO
-// =========================================================================
-let moduloDestino = ''; 
-
-function entrar(rol) {
-    // Registramos a qué panel quiere ir el usuario
-    if (rol === 'coordinacion' || rol === 'doctor') {
-        moduloDestino = rol; 
-        
-        // Limpiamos los cuadros de texto por seguridad
-        document.getElementById('login-username').value = '';
-        document.getElementById('login-password').value = '';
-        
-        // Cambiamos los títulos según el botón seleccionado
-        if (rol === 'coordinacion') {
-            document.getElementById('login-title').innerText = 'Coordinación Médica';
-            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
-        } else if (rol === 'doctor') {
-            document.getElementById('login-title').innerText = 'Acceso Médico';
-            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para Personal Médico Autorizado';
-        }
-        
-        // Mostramos el recuadro flotante
-        document.getElementById('login-modal').style.display = 'flex';
-    } 
-    // Paneles que abren directo sin contraseña
-    else if (rol === 'archivo') {
-        document.getElementById('section-login').classList.remove('active-view');
-        document.getElementById('panel-archivo').classList.add('active-view');
-    } 
-    else if (rol === 'derechohabientes') {
-        document.getElementById('section-login').classList.remove('active-view');
-        document.getElementById('panel-derechohabientes').classList.add('active-view');
-    } 
-    else {
-        alert("Acceso al Panel de " + rol + " (Sin rol activado).");
-    }
-}
-
-function cerrarLogin() {
-    document.getElementById('login-modal').style.display = 'none';
-}
-
-async function procesarLogin(e) {
-    e.preventDefault();
-    
-    const userVal = document.getElementById('login-username').value.trim();
-    const passVal = document.getElementById('login-password').value.trim();
-
-    try {
-        const response = await fetch(`${BASE_URL}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: userVal,
-                password: passVal,
-                requiredRole: moduloDestino
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Error al validar las credenciales.');
-        }
-
-        // Si las credenciales de Clever Cloud son válidas:
-        cerrarLogin();
-        alert("¡Acceso concedido correctamente!");
-        
-        // Activamos tu capa visual original
-        if (moduloDestino === 'coordinacion' || moduloDestino === 'doctor') {
-            document.getElementById('section-login').classList.remove('active-view');
-            document.getElementById('panel-coordinacion').classList.add('active-view');
-        }
-
-    } catch (error) {
-        alert(error.message);
-        console.error('Error en procesarLogin:', error);
-    }
-}
-
-
-
-
-
-
-// 2. FUNCIÓN: Cierra el cuadro de inicio de sesión si el usuario cancela
-function cerrarLogin() {
-    document.getElementById('login-modal').style.display = 'none';
-}
-
-// 3. FUNCIÓN ASÍNCRONA: Procesa los datos contra tu servidor en Render y Clever Cloud
-async function procesarLogin(e) {
-    e.preventDefault();
-    
-    const userVal = document.getElementById('login-username').value.trim();
-    const passVal = document.getElementById('login-password').value.trim();
-
-    try {
-        // Petición POST a la API de tu servidor en Render
-        const response = await fetch(`${BASE_URL}/api/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                username: userVal,
-                password: passVal,
-                requiredRole: moduloDestino // Valida si el usuario en la BD tiene el permiso adecuado
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Error al validar las credenciales.');
-        }
-
-        // Si la base de datos da luz verde, cerramos el cuadro flotante
-        cerrarLogin();
-        alert("¡Acceso concedido correctamente!");
-        
-        // EJECUTA TUS CAPAS ORIGINALES: Si pasa la validación, abre el panel correspondiente
-        if (moduloDestino === 'coordinacion' || moduloDestino === 'doctor') {
-            document.getElementById('section-login').classList.remove('active-view');
-            document.getElementById('panel-coordinacion').classList.add('active-view');
-        }
-
-    } catch (error) {
-        alert(error.message);
-        console.error('Error en procesarLogin:', error);
-    }
-}
 
 
 
