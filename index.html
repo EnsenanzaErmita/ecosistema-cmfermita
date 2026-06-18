@@ -783,42 +783,10 @@ javascript// ===================================================================
 // =========================================================================
 let moduloDestino = ''; // Variable global para recordar a qué panel quería entrar
 
-// 1. FUNCIÓN PRINCIPAL: Controla qué paneles abren directo y cuáles piden contraseña
-function entrar(rol) {
-    // Si el rol es Coordinación o Doctor, activamos el bloqueo por contraseña de la BD
-    if (rol === 'coordinacion' || rol === 'doctor') {
-        moduloDestino = rol; // Guardamos el rol que se solicitó
-        
-        // Limpiamos los campos del cuadro de login por seguridad
-        document.getElementById('login-username').value = '';
-        document.getElementById('login-password').value = '';
-        
-        // Personalizamos los textos del cuadro según el botón presionado
-        if (rol === 'coordinacion') {
-            document.getElementById('login-title').innerText = 'Coordinación Médica';
-            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
-        } else if (rol === 'doctor') {
-            document.getElementById('login-title').innerText = 'Acceso Médico';
-            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para Personal Médico Autorizado';
-        }
-        
-        // Mostramos el cuadro flotante de inicio de sesión en pantalla
-        document.getElementById('login-modal').style.display = 'flex';
-    } 
-    
-    // PANELES DIRECTOS (No requieren contraseña de inicio)
-    else if (rol === 'archivo') {
-        document.getElementById('section-login').classList.remove('active-view');
-        document.getElementById('panel-archivo').classList.add('active-view');
-    } 
-    else if (rol === 'derechohabientes') {
-        document.getElementById('section-login').classList.remove('active-view');
-        document.getElementById('panel-derechohabientes').classList.add('active-view');
-    } 
-    else {
-        alert("Acceso al Panel de " + rol + " (Sin rol activado).");
-    }
-}
+
+
+
+
 
 // 2. FUNCIÓN: Cierra el cuadro de inicio de sesión si el usuario cancela
 function cerrarLogin() {
