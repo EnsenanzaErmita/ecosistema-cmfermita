@@ -241,48 +241,83 @@
         </div> 
 
 
-	<div id="modulo-medicos" class="section-content">
-            <p id="msg-error-med" class="error-msg"></p>
-            <h3 style="border-left: 5px solid var(--dorado-calidad); padding-left:10px;">Registro de Médicos</h3>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; background:#f9f9f9; padding:20px; border-radius:8px;">
-                <div class="form-group">
-                    <label>Número de Empleado:</label>
-                    <input type="text" id="reg-emp" placeholder="Ej: 110293">
-                </div>
-                <div class="form-group">
-                    <label>Nombre del Médico:</label>
-                    <input type="text" id="reg-nom" placeholder="Nombre Completo">
-                </div>
-                <div class="form-group">
-                    <label>Ubicación / Consultorio:</label>
-                    <select id="reg-ubi">
-                        <option>Consultorio 1</option><option>Consultorio 2</option><option>Consultorio 3</option><option>Consultorio 4</option>
-                        <option>Consultorio 5</option><option>Consultorio 6</option><option>Consultorio 7</option><option>Consultorio 8</option>
-                        <option>Consultorio 9</option><option>Consultorio 10</option><option>Consultorio 11</option><option>Consultorio 12</option>
-                        <option>Consultorio 13</option><option>Consultorio 14</option><option>Gerontología</option><option>Planificación Familiar</option>
-		        <option>Nutrición</option><option>Módulo MIDE</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Turno del Médico:</label>
-                    <select id="reg-tur"><option>Matutino</option><option>Vespertino</option></select>
-                </div>
-                </div>
-                    <button class="btn-action" style="grid-column: span 2; background:var(--guinda)" onclick="db_guardarMedico()">GUARDAR EN BASE DE DATOS</button>
-                </div>
-            </div>
-	</div>
 
-	<div id="mod-lista" class="section-content">
-            <h3>Médicos Registrados</h3>
-            <table id="tabla-medicos">
-                <thead>
-                    <tr><th>N° Empleado</th><th>Médico</th><th>Ubicación</th><th>Turno</th><th>Acción</th></tr>
-                </thead>
-                <tbody id="db-body"></tbody>
-            </table>
-            <button class="btn-action" style="background:#cc0000; margin-top:20px; width:auto;" onclick="db_borrarTodo()">BORRAR TODA LA BASE DE DATOS</button>
+
+
+<!-- PANTALLA: REGISTRO DE PLANTILLA DE PERSONAL -->
+<div id="modulo-medicos" class="section-content">
+    <p id="msg-error-med" class="error-msg" style="color: #e74c3c; font-weight: bold; margin-bottom: 15px;"></p>
+    <h3 style="border-left: 5px solid var(--dorado-calidad); padding-left:10px; margin-bottom: 20px;">Registro de Personal (C.M.F. Ermita)</h3>
+    
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; background:#f9f9f9; padding:20px; border-radius:8px; box-sizing: border-box;">
+        <div class="form-group">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Número de Empleado:</label>
+            <input type="text" id="reg-emp" placeholder="Ej: 110293" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing: border-box;">
         </div>
+        <div class="form-group">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Nombre Completo:</label>
+            <input type="text" id="reg-nom" placeholder="Nombre Completo" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing: border-box;">
+        </div>
+        <div class="form-group">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Ubicación / Consultorio:</label>
+            <select id="reg-ubi" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing: border-box;">
+                <option>Consultorio 1</option><option>Consultorio 2</option><option>Consultorio 3</option><option>Consultorio 4</option>
+                <option>Consultorio 5</option><option>Consultorio 6</option><option>Consultorio 7</option><option>Consultorio 8</option>
+                <option>Consultorio 9</option><option>Consultorio 10</option><option>Consultorio 11</option><option>Consultorio 12</option>
+                <option>Consultorio 13</option><option>Consultorio 14</option><option>Gerontología</option><option>Planificación Familiar</option>
+                <option>Nutrición</option><option>Módulo MIDE</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Turno:</label>
+            <select id="reg-tur" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing: border-box;">
+                <option>Matutino</option>
+                <option>Vespertino</option>
+            </select>
+        </div>
+        
+        <!-- 🆕 NUEVO CAMPO: CATEGORÍA/FUNCIÓN DEL TRABAJADOR -->
+        <div class="form-group" style="grid-column: span 2;">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Categoría / Función:</label>
+            <select id="reg-cat" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing: border-box;">
+                <option value="Médico">Médico / Especialista</option>
+                <option value="Enfermero/a">Personal de Enfermería</option>
+                <option value="Administrativo">Personal Administrativo</option>
+                <option value="Otros">Otros / Servicios Generales</option>
+            </select>
+        </div>
+
+        <button class="btn-action" style="grid-column: span 2; background:var(--guinda); color:white; border:none; padding:12px; border-radius:5px; font-weight:bold; font-size:1.1em; cursor:pointer; margin-top:10px;" onclick="db_guardarMedico()">GUARDAR EN BASE DE DATOS</button>
+    </div>
+</div>
+
+
+
+
+
+html<!-- PANTALLA: VISUALIZACIÓN DE LA PLANTILLA COMPLETA -->
+<div id="mod-lista" class="section-content">
+    <h3 style="border-left: 5px solid var(--dorado-calidad); padding-left:10px; margin-bottom: 20px;">Plantilla Activa de Personal</h3>
+    
+    <div class="table-container" style="overflow-x:auto; background:white; padding:15px; border-radius:8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <table style="width:100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px;">
+            <thead>
+                <tr style="background:#800080; color:white; text-align:left;">
+                    <th style="padding:12px;">Num. Empleado</th>
+                    <th style="padding:12px;">Nombre Completo</th>
+                    <th style="padding:12px;">Categoría</th>
+                    <th style="padding:12px;">Consultorio</th>
+                    <th style="padding:12px;">Turno</th>
+                    <th style="padding:12px; text-align:center;">Acciones</th>
+                </tr>
+            </thead>
+            <!-- El JavaScript de abajo rellenará este contenedor con los datos de Clever Cloud -->
+            <tbody id="lista-medicos-body"></tbody>
+        </table>
+    </div>
+</div>
+
+
 
 
 
@@ -646,6 +681,118 @@
 
 
 
+
+
+
+
+// FUNCIÓN: Captura el formulario de 5 campos y lo manda a Render
+async function db_guardarMedico() {
+    const empInput = document.getElementById('reg-emp');
+    const nomInput = document.getElementById('reg-nom');
+    const ubiInput = document.getElementById('reg-ubi');
+    const turInput = document.getElementById('reg-tur');
+    const catInput = document.getElementById('reg-cat');
+    const msgError = document.getElementById('msg-error-med');
+
+    if (!empInput || !nomInput) return;
+
+    const rfc = empInput.value.trim().toUpperCase();
+    const name = nomInput.value.trim();
+    const office = ubiInput ? ubiInput.value : 'No especificado';
+    const shift = turInput ? turInput.value : 'Matutino';
+    const category = catInput ? catInput.value : 'Médico';
+
+    if (msgError) msgError.innerText = '';
+
+    if (!rfc || !name) {
+        if (msgError) msgError.innerText = 'Por favor, rellene el número de empleado y el nombre.';
+        return;
+    }
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/doctors`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rfc, name, office, shift, category })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Error al registrar.');
+
+        // Limpieza de campos
+        empInput.value = '';
+        nomInput.value = '';
+        if (ubiInput) ubiInput.selectedIndex = 0;
+        if (turInput) turInput.selectedIndex = 0;
+        if (catInput) catInput.selectedIndex = 0;
+
+        alert(`¡${category} ${name} registrado con éxito en el Ecosistema!`);
+        await cargarListaMedicosNube();
+
+    } catch (error) {
+        if (msgError) msgError.innerText = error.message;
+        else alert(error.message);
+    }
+}
+
+// FUNCIÓN: Trae los 5 campos desde MySQL y dibuja la tabla ampliada
+async function cargarListaMedicosNube() {
+    const tableBody = document.getElementById('lista-medicos-body');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:15px;">Cargando plantilla desde Clever Cloud...</td></tr>';
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/doctors`);
+        if (!response.ok) throw new Error('No se pudo obtener la lista de personal.');
+
+        const employees = await response.json();
+        tableBody.innerHTML = '';
+
+        if (employees.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#777; padding:15px;">No hay personal registrado en el sistema.</td></tr>';
+            return;
+        }
+
+        // Pintamos cada una de las nuevas columnas de forma ordenada
+        employees.forEach(person => {
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid #ddd';
+            row.innerHTML = `
+                <td style="padding:12px; font-family: monospace; font-weight: bold; color:#555;">${person.rfc}</td>
+                <td style="padding:12px; font-weight: 500;">${person.name}</td>
+                <td style="padding:12px;"><span style="background:#e8f0fe; color:#1a73e8; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:bold;">${person.category}</span></td>
+                <td style="padding:12px; color:#666;">${person.office}</td>
+                <td style="padding:12px; color:#666;">${person.shift}</td>
+                <td style="padding:12px; text-align:center;">
+                    <button onclick="eliminarMedicoNube('${person.rfc}')" style="background:#e74c3c; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">Eliminar</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error(error);
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#e74c3c; padding:15px; font-weight:bold;">Error al conectar con la base de datos.</td></tr>';
+    }
+}
+
+// FUNCIÓN: Eliminar registro de la base de datos
+async function eliminarMedicoNube(rfc) {
+    if (!confirm(`¿Está seguro de que desea dar de baja al empleado con Número: ${rfc}?`)) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/doctors/${rfc}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Error al eliminar.');
+
+        alert("Registro dado de baja correctamente del catálogo.");
+        await cargarListaMedicosNube();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
 
 
 

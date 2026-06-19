@@ -10,7 +10,7 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.static(__dirname)); 
 
-// 2. CONFIGURACIÓN MEDIANTE POOL DE CONEXIONES (MÁS SEGURO Y EFICIENTE)
+// 2. CONFIGURACIÓN MEDIANTE POOL DE CONEXIONES (REUTILIZA CLEVER CLOUD)
 const pool = mysql.createPool({
     host: 'bqxquadwgh6wn3twrgyy-mysql.services.clever-cloud.com',
     user: 'usp9nsl8ipuiouao',
@@ -18,7 +18,7 @@ const pool = mysql.createPool({
     database: 'bqxquadwgh6wn3twrgyy',
     port: 3306,
     waitForConnections: true,
-    connectionLimit: 5, // Límite estricto para no saturar el plan gratuito de Clever Cloud
+    connectionLimit: 5, // Límite estricto para cuidar el plan gratuito
     queueLimit: 0
 });
 
@@ -28,8 +28,8 @@ pool.getConnection((err, connection) => {
         console.error('Error crítico al obtener conexión del Pool en Clever Cloud:', err);
         return;
     }
-    console.log('¡Pool de conexiones verificado y activo con Clever Cloud!');
-    connection.release(); // Libera la conexión de prueba inmediatamente
+    console.log('¡Pool de conexiones verificado y activo con Clever Cloud desde Ecosistema!');
+    connection.release(); 
 });
 
 // =========================================================================
@@ -46,7 +46,6 @@ app.post('/api/login', (req, res) => {
 
     const sql = 'SELECT * FROM users WHERE username = ? AND password = ?';
     
-    // Usamos pool.query en lugar de db.query
     pool.query(sql, [username, password], (err, results) => {
         if (err) {
             console.error('Error en consulta de login:', err);
@@ -57,13 +56,71 @@ app.post('/api/login', (req, res) => {
             return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos.' });
         }
 
-        const user = results[0]; // Extraemos la fila del usuario
+        const user = results[0]; // Extracción segura del objeto de usuario
 
         if (user.role !== requiredRole && user.role !== 'admin') {
             return res.status(403).json({ success: false, message: 'No tienes permisos para acceder.' });
         }
 
         res.status(200).json({ success: true, message: 'Acceso autorizado.' });
+    });
+});
+
+// RUTA API: Obtener toda la plantilla médica y administrativa (Tabla: employees)
+app.get('/api/doctors', (req, res) => {
+    const sql = 'SELECT rfc, name, office, shift, category FROM employees ORDER BY name ASC';
+    
+    pool.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error al consultar plantilla:', err);
+            return res.status(500).json({ message: 'Error al obtener los datos de la base de datos.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// RUTA API: Registrar personal nuevo (Médicos, Enfermeros, Administrativos u Otros)
+app.post('/api/doctors', (req, res) => {
+    const { rfc, name, office, shift, category } = req.body;
+    
+    if (!rfc || !name) {
+        return res.status(400).json({ message: 'El número de empleado y el nombre completo son obligatorios.' });
+    }
+
+    // Validamos duplicados de número de empleado (RFC)
+    const checkSql = 'SELECT * FROM employees WHERE rfc = ?';
+    pool.query(checkSql, [rfc], (err, results) => {
+        if (err) {
+            console.error('Error al buscar duplicado:', err);
+            return res.status(500).json({ message: 'Error interno en el servidor.' });
+        }
+        if (results && results.length > 0) {
+            return res.status(400).json({ message: 'Este número de empleado ya se encuentra registrado en el sistema.' });
+        }
+
+        // Inserción limpia de los 5 campos en la tabla employees
+        const insertSql = 'INSERT INTO employees (rfc, name, office, shift, category) VALUES (?, ?, ?, ?, ?)';
+        pool.query(insertSql, [rfc, name, office || 'No especificado', shift || 'Matutino', category || 'Médico'], (err, result) => {
+            if (err) {
+                console.error('Error al insertar registro:', err);
+                return res.status(500).json({ message: 'No se pudieron guardar los datos en el servidor.' });
+            }
+            res.status(201).json({ message: 'Personal registrado correctamente.' });
+        });
+    });
+});
+
+// RUTA API: Eliminar personal de la plantilla por su número de empleado (RFC)
+app.delete('/api/doctors/:rfc', (req, res) => {
+    const { rfc } = req.params;
+    
+    const sql = 'DELETE FROM employees WHERE rfc = ?';
+    pool.query(sql, [rfc], (err, result) => {
+        if (err) {
+            console.error('Error al eliminar registro:', err);
+            return res.status(500).json({ message: 'Error interno al intentar eliminar al empleado.' });
+        }
+        res.status(200).json({ message: 'Registro eliminado correctamente de la base de datos.' });
     });
 });
 
