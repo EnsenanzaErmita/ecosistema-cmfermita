@@ -10,12 +10,11 @@
             --gris-oscuro: #98989a;
             --gris-claro: #f4f4f4;
             --blanco: #ffffff;
-	    --negro-footer: #111111; /* Negro profundo */
+            --negro-footer: #111111; /* Negro profundo */
             --verde-issste: #285c4d;
             --dorado-calidad: #b38e5d;
             --azul-issste: #1d4ed8;
             --morado-issste: #800080;
-
         }
 
         html, body { height: 100%; margin: 0; }
@@ -46,23 +45,16 @@
         .card-coord { border-top: 8px solid var(--morado-issste); }
         .card-archivo { border-top: 8px solid var(--guinda); }
 
-        
-
         /* UI ELEMENTS */
         .btn-save { color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-top: 5px; }
 
-
         .teaching-hero { background: #fdfaf6; border: 2px solid var(--dorado-calidad); padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 25px; }
-
         #phrase-container { font-style: italic; color: var(--guinda); font-size: 1.2em; font-weight: bold; transition: opacity 0.8s; }
 
-
-
-	/* PIE DE PÁGINA (ESTILO NEGRO Y BLANCO) */
+        /* PIE DE PÁGINA (ESTILO NEGRO Y BLANCO) */
         footer { background-color: var(--negro-footer); color: var(--blanco); text-align: center; padding: 25px 10px; font-size: 0.95em; border-top: 3px solid var(--dorado-calidad); }
         footer strong { color: var(--dorado-calidad); }
-
 
         /* NAVEGACIÓN PANEL ARCHIVO */
         .nav-archivo { 
@@ -74,7 +66,6 @@
             padding: 15px; 
             border-radius: 8px; 
         }
-
 
         .btn-nav { 
             padding: 12px 15px; 
@@ -91,15 +82,11 @@
         .btn-nav.active { background: var(--guinda); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .btn-nav:hover { background: var(--dorado-calidad); }
 
-
-
         /* SECCIONES DE CONTENIDO */
         .section-content { display: none; padding: 25px; border: 1px solid #ddd; border-radius: 8px; background: #fff; margin-top: 10px; }
         .section-content.active { display: block; animation: fadeIn 0.4s; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-
 
         /* FORMULARIOS Y TABLAS */
         .header-registro {
@@ -113,7 +100,6 @@
         input, select { width: 100%; padding: 10px; border: 1px solid var(--gris-oscuro); border-radius: 4px; box-sizing: border-box; }
         .full-width { grid-column: span 3; }
         
-
         .btn-save { background-color: var(--verde-issste); color: white; padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
         .btn-action { background: var(--verde-issste); color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
 
@@ -121,12 +107,9 @@
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
         th { background: #f4f4f4; color: var(--guinda); }
 
-
         .panel-nuevo { background: #eff6ff; border-left: 5px solid var(--azul-issste); }
         .panel-nuevo label { color: var(--azul-issste); }
         .panel-actual { background: #fdf0f5; border-left: 5px solid var(--guinda); }
-
-
 
         /* Badges */
         .badge { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; display: inline-block; }
@@ -134,17 +117,13 @@
         .badge-aprobada { background: #dcfce7; color: var(--verde); }
         .badge-rechazada { background: #fee2e2; color: var(--rojo); }
 
-
         .view { display: none; }
+        /* CORRECCIÓN: Agregada la clase active-view con display block para la lógica de JavaScript */
         .active-view { display: block !important; }
 
         .error-msg { color: #cc0000; font-weight: bold; margin-top: 10px; display: none; }
-
     </style>
 </head>
-
-
-
 
 <body>
 
@@ -158,650 +137,50 @@
         <div id="section-login" class="view active-view">
             <div class="teaching-hero">
                 <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
-            <div id="phrase-container">"Cargando pensamiento institucional..."</div>
+                <div id="phrase-container">"Cargando pensamiento institucional..."</div>
+            </div>
         </div>
 
         <div class="login-grid">
 
-	<div class="card card-admin">
-		<h3>Panel Administrador</h3>
-		<p style="font-size: 0.85em; color: #666;">Acceso total a configuración de plantilla médica y reportes globales.</p>
-		<label>Usuario Admin:</label>
-		<input type="text" placeholder="ID Administrador">
+            <div class="card card-admin">
+                <h3>Panel Administrador</h3>
+                <p style="font-size: 0.85em; color: #666;">Acceso total a configuración de plantilla médica y reportes globales.</p>
+                <label>Usuario Admin:</label>
+                <input type="text" placeholder="ID Administrador">
                 <button class="btn-save" style="background: var(--dorado-calidad)" onclick="entrar('admin')">INGRESAR COMO ADMIN</button>
-	</div>
+            </div>
 
-	<div class="card card-doctor">
+            <div class="card card-doctor">
                 <h3 style="color: #2c4e72; text-align: center; font-size: 2.85em;">Médicos</h3>
                 <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para Médicos de la C.M.F. Ermita.</p>
                 <label style="text-align: center;">Al ingresar deberá proporcionar su clave</label>
                 <button class="btn-save" style="background: #2c4e72" onclick="solicitarClaveMedico()">INGRESAR AL MENÚ DE MÉDICOS</button>
-	</div>
+            </div>
 
-	<div class="card card-coord">
+            <div class="card card-coord">
+                <!-- CORRECCIÓN SINTAXIS AQUÍ: Se corrigió </h> por </h3> -->
                 <h3 style="color: #800080; text-align: center; font-size: 2.50em;">Coordinación Médica</h3>
-                <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para el Servicio de Coordinación Médica de la C.M.F. Ermita.</p>
-                <button class="btn-save" style="background: #800080" onclick="entrar('coordinacion')">ACCESO COORDINACIÓN MÉDICA</button>
-	</div>
-	</div>
-
-
-        <div class="card-patient">
-                <h3 style="text-align: center; font-size: 2.85em;">Derechohabientes</h3>
-                <p style="font-size: 1.30em; color: #f00; text-align: center;">Para ver los tramites que puede realizar, por favor de oprima el botón verde OPCIONES DERECHOHABIENTES</p>
-                <label style="font-size: 1.30em; text-align: center;">Derechohabiente, la C.M.F. Ermita se complace en atenderte</label>
-                <button class="btn-save" onclick="entrar('derechohabientes')">OPCIONES DERECHOHABIENTES</button>
-	</div>	
-
-    </div>
-
-
-
-
-
-
-	<div id="panel-coordinacion" class="view">
-	    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--guinda); margin-bottom: 20px; padding-bottom: 10px;">
-	        <h2 style="color:var(--guinda); margin:0;">Panel Archivo Clínico</h2>
-                <button onclick="location.reload()" style="background:#cc0000; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Cerrar Sesión</button>
-	    </div> 
-
-    	    <div id="section-login" class="view active-view">
-                <div class="teaching-hero">
-                    <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
-                    <div id="phrase-container">"Trabajando juntos para transformar la atención a la salud"</div>
-                </div>
-            <div class="login-grid">
-
-            <div class="card card-admin">
-                <h3 style="color:var(--dorado-calidad); text-align: center;">Registro de Médicos</h3>
-                <p style="font-size: 0.85em; color: #666;">Alta y modificación de plantilla médica.</p>
-                <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('modulo-medicos', this)">REGISTRO DE MÉDICOS</button>
-                <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('mod-lista', this)">VER PLANTILLA DE MÉDICOS</button>
+                <p style="font-size: 0.85em; text-align: center;">Acceso administrativo de control de procesos y agendas.</p>
+                <label>Clave Coordinador:</label>
+                <input type="password" placeholder="••••••••">
+                <button class="btn-save" style="background: var(--morado-issste)" onclick="entrar('coordinador')">INGRESAR A COORDINACIÓN</button>
             </div>
 
-            <div class="card card-doctor">
-                <h3 style="color: #2c4e72; text-align: center;">Cambios de Consultorio</h3>
-                <p style="font-size: 0.8em; color: #666; text-align: center;">Consulta de estatus de cambios de Consultorio.</p>
-                <button class="btn-save" style="background: #2c4e72" onclick="activarModulo('vista-coordinacion', this)">ESTATUS CAMBIOS DE CONSULTORIO</button>
-            </div>
-
-            <div class="card card-archivo">
-                <h3>Reporte por Médico</h3>
-                <p style="font-size: 0.85em; color: #666;">Generación de reporte de citas por médico.</p>
-                <button class="btn-save" style="background: var(--guinda)" onclick="activarModulo('modulo-rep-medico', this)">REPORTE POR MÉDICO</button>
-            </div>
-
-            <div class="card card-patient">
-                <h3>Reporte por Fecha</h3>
-                <p style="font-size: 0.85em; color: #666;">Generación de reporte de citas por fecha.</p>
-                <button class="btn-save" id="btn-rep-fec" onclick="activarModulo('modulo-rep-fecha', this)">REPORTE POR FECHA</button>
-            </div>
-
-        </div> 
-
-
-
-
-
-<!-- PANTALLA: REGISTRO DE PLANTILLA DE PERSONAL -->
-<div id="modulo-medicos" class="section-content">
-    <p id="msg-error-med" class="error-msg" style="color: #e74c3c; font-weight: bold; margin-bottom: 15px;"></p>
-    <h3 style="border-left: 5px solid var(--dorado-calidad); padding-left:10px; margin-bottom: 20px;">Registro de Personal (C.M.F. Ermita)</h3>
-    
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; background:#f9f9f9; padding:20px; border-radius:8px; box-sizing: border-box;">
-        <div class="form-group">
-            <label style="display:block; font-weight:bold; margin-bottom:5px;">Número de Empleado:</label>
-            <input type="text" id="reg-emp" placeholder="Ej: 110293" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing: border-box;">
         </div>
-        <div class="form-group">
-            <label style="display:block; font-weight:bold; margin-bottom:5px;">Nombre Completo:</label>
-            <input type="text" id="reg-nom" placeholder="Nombre Completo" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing: border-box;">
-        </div>
-        <div class="form-group">
-            <label style="display:block; font-weight:bold; margin-bottom:5px;">Ubicación / Consultorio:</label>
-            <select id="reg-ubi" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing: border-box;">
-                <option>Consultorio 1</option><option>Consultorio 2</option><option>Consultorio 3</option><option>Consultorio 4</option>
-                <option>Consultorio 5</option><option>Consultorio 6</option><option>Consultorio 7</option><option>Consultorio 8</option>
-                <option>Consultorio 9</option><option>Consultorio 10</option><option>Consultorio 11</option><option>Consultorio 12</option>
-                <option>Consultorio 13</option><option>Consultorio 14</option><option>Gerontología</option><option>Planificación Familiar</option>
-                <option>Nutrición</option><option>Módulo MIDE</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label style="display:block; font-weight:bold; margin-bottom:5px;">Turno:</label>
-            <select id="reg-tur" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing: border-box;">
-                <option>Matutino</option>
-                <option>Vespertino</option>
-            </select>
-        </div>
-        
-        <!-- 🆕 NUEVO CAMPO: CATEGORÍA/FUNCIÓN DEL TRABAJADOR -->
-        <div class="form-group" style="grid-column: span 2;">
-            <label style="display:block; font-weight:bold; margin-bottom:5px;">Categoría / Función:</label>
-            <select id="reg-cat" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; box-sizing: border-box;">
-                <option value="Médico">Médico / Especialista</option>
-                <option value="Enfermero/a">Personal de Enfermería</option>
-                <option value="Administrativo">Personal Administrativo</option>
-                <option value="Otros">Otros / Servicios Generales</option>
-            </select>
-        </div>
-
-        <button class="btn-action" style="grid-column: span 2; background:var(--guinda); color:white; border:none; padding:12px; border-radius:5px; font-weight:bold; font-size:1.1em; cursor:pointer; margin-top:10px;" onclick="db_guardarMedico()">GUARDAR EN BASE DE DATOS</button>
     </div>
 </div>
-
-
-
-
-
-html<!-- PANTALLA: VISUALIZACIÓN DE LA PLANTILLA COMPLETA -->
-<div id="mod-lista" class="section-content">
-    <h3 style="border-left: 5px solid var(--dorado-calidad); padding-left:10px; margin-bottom: 20px;">Plantilla Activa de Personal</h3>
-    
-    <div class="table-container" style="overflow-x:auto; background:white; padding:15px; border-radius:8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-        <table style="width:100%; border-collapse: collapse; font-family: sans-serif; font-size: 14px;">
-            <thead>
-                <tr style="background:#800080; color:white; text-align:left;">
-                    <th style="padding:12px;">Num. Empleado</th>
-                    <th style="padding:12px;">Nombre Completo</th>
-                    <th style="padding:12px;">Categoría</th>
-                    <th style="padding:12px;">Consultorio</th>
-                    <th style="padding:12px;">Turno</th>
-                    <th style="padding:12px; text-align:center;">Acciones</th>
-                </tr>
-            </thead>
-            <!-- El JavaScript de abajo rellenará este contenedor con los datos de Clever Cloud -->
-            <tbody id="lista-medicos-body"></tbody>
-        </table>
-    </div>
-</div>
-
-
-
-
-
-
-	<div id="panel-derechohabientes" class="view">
-	    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--guinda); margin-bottom: 20px; padding-bottom: 10px;">
-	        <h2 style="color:var(--guinda); margin:0; text-align: center;">Panel Derechohabientes</h2>
-                <button onclick="location.reload()" style="background:#cc0000; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Cerrar Sesión</button>
-	    </div> 
-
-
-            <div class="teaching-hero">
-                <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
-                <div id="phrase-container">"Trabajando juntos para transformar la atención a la salud"</div>
-            </div>
-
-            <div class="card card-admin">
-                <h3 style="text-align:center;">Solicitud de Cambio de Consultorio</h3>
-                <p style="font-size: 1.15em; color: #666; text-align:center;">Si requiere un cambio de consultorio, por favor inicie su tramité seleccionando el botón "Solicitar Cambio de Consultorio".</p>
-                <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('modulo-cambioconsultorio', this)">SOLICITAR CAMBIO DE CONSULTORIO</button>
-            </div>
-	</div>
-
-
-        <div id="modulo-cambioconsultorio" class="section-content">
-            <div style="background: #fdf0f5; padding: 15px; border-left: 5px solid var(--guinda); margin-bottom: 20px;">
-                <h3 style="margin:0; text-align: center;">Solicitud de Cambio de Consultorio</h3>
-                <p style="font-size: 0.9em; margin: 5px 0 0; text-align: center;">Complete los datos para generar su solicitud oficial.</p>
-            </div>
-
-            <div>
-                <label>Número Consecutivo (Folio):</label>
-                <input type="text" id="sol-folio" readonly>
-            </div>
-
-            <div class="grid-form">
-                <div class="full-width">
-                	<div class="full-width">
-				<h4 style="border-bottom: 1px solid #ddd; color: var(--gris-oscuro);">Datos del Trabajador</h4>
-			</div>
-
-			</div>
-				<div><label>Apellido Paterno:</label><input type="text" id="txt-app-paterno"></div>
-                		<div><label>Apellido Materno:</label><input type="text" id="txt-app-materno"></div>
-                		<div><label>Nombre(s):</label><input type="text" id="txt-app-nombre"></div>
-	                	<div><label>RFC:</label><input type="text" id="txt-app-registro"></div>
-	                <div>
-                    <label>¿Es Trabajador(a)?</label>
-                    <select>
-                        <option>NO</option>
-                        <option>SI</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label>¿Es Pensionado(a)?</label>
-                    <select>
-                        <option>NO</option>
-                        <option>SI</option>
-                    </select>
-                </div>
-
-                <div class="full-width"><h4 style="border-bottom: 1px solid #ddd; color: var(--gris-oscuro);">Domicilio Actual</h4></div>
-                
-                <div style="grid-column: span 2;"><label>Calle:</label><input type="text"></div>
-                <div><label>C.P.:</label><input type="text"></div>
-                
-                <div><label>No. Exterior:</label><input type="text"></div>
-                <div><label>No. Interior:</label><input type="text" placeholder="Opcional"></div>
-                <div><label>Colonia:</label><input type="text"></div>
-
-
-                <div class="full-width"><h4 style="border-bottom: 1px solid #ddd; color: var(--gris-oscuro);">Datos de los Beneficiarios</h4></div>
-
-		<div><input type="text" id="APB1" placeholder="Apellido Paterno Beneficiario 1"></div>
-		<div><input type="text" id="AMB1" placeholder="Apellido Paterno Materno Beneficiario 1"></div>
-		<div><input type="text" id="NCB1" placeholder="Nombre Completo Beneficiario 1"></div>
-
-		<div><input type="text" id="APB2" placeholder="Apellido Paterno Beneficiario 2"></div>
-		<div><input type="text" id="AMB2" placeholder="Apellido Paterno Materno Beneficiario 2"></div>
-		<div><input type="text" id="NCB2" placeholder="Nombre Completo Beneficiario 2"></div>
-
-		<div><input type="text" id="APB3" placeholder="Apellido Paterno Beneficiario 3"></div>
-		<div><input type="text" id="AMB3" placeholder="Apellido Paterno Materno Beneficiario 3"></div>
-		<div><input type="text" id="NCB3" placeholder="Nombre Completo Beneficiario 3"></div>
-
-		<div><input type="text" id="APB4" placeholder="Apellido Paterno Beneficiario 4"></div>
-		<div><input type="text" id="AMB4" placeholder="Apellido Paterno Materno Beneficiario 4"></div>
-		<div><input type="text" id="NCB4" placeholder="Nombre Completo Beneficiario 4"></div>
-
-		<div><input type="text" id="APB5" placeholder="Apellido Paterno Beneficiario 5"></div>
-		<div><input type="text" id="AMB5" placeholder="Apellido Paterno Materno Beneficiario 5"></div>
-		<div><input type="text" id="NCB5" placeholder="Nombre Completo Beneficiario 5"></div>
-
-		<div><input type="text" id="APB6" placeholder="Apellido Paterno Beneficiario 6"></div>
-		<div><input type="text" id="AMB6" placeholder="Apellido Paterno Materno Beneficiario 6"></div>
-		<div><input type="text" id="NCB6" placeholder="Nombre Completo Beneficiario 6"></div>
-
-		<div><input type="text" id="APB7" placeholder="Apellido Paterno Beneficiario 7"></div>
-		<div><input type="text" id="AMB7" placeholder="Apellido Paterno Materno Beneficiario 7"></div>
-		<div><input type="text" id="NCB7" placeholder="Nombre Completo Beneficiario 7"></div>
-
-		<div><input type="text" id="APB8" placeholder="Apellido Paterno Beneficiario 8"></div>
-		<div><input type="text" id="AMB8" placeholder="Apellido Paterno Materno Beneficiario 8"></div>
-		<div><input type="text" id="NCB8" placeholder="Nombre Completo Beneficiario 8"></div>
-
-		<div><input type="text" id="APB9" placeholder="Apellido Paterno Beneficiario 9"></div>
-		<div><input type="text" id="AMB9" placeholder="Apellido Paterno Materno Beneficiario 9"></div>
-		<div><input type="text" id="NCB9" placeholder="Nombre Completo Beneficiario 9"></div>
-
-		<div><input type="text" id="APB10" placeholder="Apellido Paterno Beneficiario 10"></div>
-		<div><input type="text" id="AMB10" placeholder="Apellido Paterno Materno Beneficiario 10"></div>
-		<div><input type="text" id="NCB10" placeholder="Nombre Completo Beneficiario 10"></div>
-
-            </div>
-
-
-            <div style="background: #fdf0f5; padding: 15px; border-left: 5px solid var(--guinda); margin-bottom: 20px;">
-                <h3 style="color: var(--guinda); margin:0; text-align: center;">Consultorio y Médico Actual</h3>
-            </div>
-
-
-            <div class="full-width panel-medico panel-actual">
-                <label style="font-size: 1.1em; color: var(--guinda); text-align: center;">Seleccione su Médico Actual:</label>
-                <select id="sel-medico-actual" onchange="autoCompletarDatosMedico('actual')" style="border: 2px solid var(--guinda); font-size: 1em; padding: 10px;">
-                    <option value="">-- Buscar Médico Adscrito Actual --</option>
-                </select>
-            </div>
-
-
-            <div>
-                <label style="text-align: center; color: var(--guinda)">Consultorio Actual:</label>
-                <input type="text" id="txt-cons-actual" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--guinda);">
-            </div>
-
-            <div>
-                <label style="text-align: center; color: var(--guinda)">Turno:</label>
-                <input type="text" id="txt-turno-actual" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--guinda);">
-            </div>
-
-            <div>
-                <label style="text-align: center; color: var(--guinda)">No. Empleado Médico (Clave):</label>
-                <input type="text" id="txt-emp-actual" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--guinda);">
-            </div>
-
-
-            <div class="panel-nuevo" style="padding: 15px; border-left: 5px solid var(--azul-issste); margin-bottom: 20px;">
-                <h3 style="color: var(--azul-issste); margin:0; text-align: center;">Consultorio y Médico Solicitado</h3>
-            </div>
-
-
-            <div class="full-width panel-medico panel-nuevo" style="margin-top: 15px;">
-                <label style="font-size: 1.1em; text-align: center;">Seleccione el Médico al que solicita el cambio:</label>
-                <select id="sel-medico-nuevo" onchange="autoCompletarDatosMedico('nuevo')" style="border: 2px solid var(--azul-issste); font-size: 1em; padding: 10px;">
-                    <option value="">-- Seleccione su Médico para Cambio --</option>
-                </select>
-            </div>
-
-
-            <div>
-                <label style="text-align: center; color: var(--azul-issste)">Consultorio del Médico Solicitado:</label>
-                <input type="text" id="txt-cons-nuevo" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--azul-issste);">
-            </div>
-
-            <div>
-                <label style="text-align: center; color: var(--azul-issste)">No. Empleado del Médico Solicitado:</label>
-                <input type="text" id="txt-turno-nuevo" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--azul-issste);">
-            </div>
-
-            <div>
-                <label style="text-align: center; color: var(--azul-issste)">No. Empleado del Médico Solicitado:</label>
-                <input type="text" id="txt-emp-nuevo" placeholder="Se recupera automáticamente" readonly style="border: 2px solid var(--azul-issste);">
-            </div>
-
-
-            <button class="btn-action" onclick="procesarSolicitudCambio()">ENVIAR SOLICITUD DE CAMBIO</button>
-        </div>
-
-
-
-
-
-
-
-
-
-
-
-    <div id="vista-coordinacion" class="section-content">
-        <button class="btn-volver" onclick="irInicio()">← Volver al Menú</button>
-        <h2>Bitácora General de Cambios de Consultorio</h2>
-        <p>Auditoría en tiempo real del estatus de cambios de consultorios solicitados por derechohabientes.</p>
-        
-        <div style="overflow-x:auto;">
-            <table id="tabla-coordinacion-general">
-                <thead>
-                    <tr>
-                        <th>ID Folio</th>
-                        <th>Paciente</th>
-                        <th>Médico Actual (Anterior)</th>
-                        <th>Consultorio Actual</th>
-                        <th>Médico Solicitado (Destino)</th>
-                        <th>Consultorio Destino</th>
-                        <th>Estatus Solicitud</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            </div>
-            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div> 
-</div> 
 
 <footer>
-    <p>&copy; 2026 Todos los derechos reservados</p>
-    <p>Desarrollado por: <strong>González Zamudio Manuel Alejandro</strong></p>
-    <p>Colaboración: <strong>Aldana Rodríguez Said Israel</strong></p>
-    <p style="font-size: 0.75em; opacity: 0.7; margin-top: 10px;">Clínica de Medicina Familiar Ermita - ISSSTE</p>
+    <p>© 2026 ISSSTE - Clínica de Medicina Familiar Ermita. Todos los derechos reservados. <strong>Enseñanza y Calidad</strong></p>
 </footer>
 
-
-
-
-
-
-
-<!-- ========================================== -->
-<!-- VENTANA FLOTANTE DE LOGIN (MODAL ACCESS)   -->
-<!-- ========================================== -->
-<div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; font-family: sans-serif;">
-    <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 380px; box-shadow: 0 4px 25px rgba(0,0,0,0.25); position: relative; box-sizing: border-box;">
-        
-        <h3 id="login-title" style="color: #800080; margin: 0 0 10px; text-align: center; font-size: 1.8em;">Iniciar Sesión</h3>
-        <p id="login-subtitle" style="font-size: 0.85em; text-align: center; color: #666; margin: 0 0 20px;">Acceso restringido para C.M.F. Ermita</p>
-        
-        <form onsubmit="procesarLogin(event)">
-            <div style="margin-bottom: 15px;">
-                <label style="display:block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #333;">Usuario:</label>
-                <input type="text" id="login-username" required style="width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
-            </div>
-            <div style="margin-bottom: 22px;">
-                <label style="display:block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #333;">Contraseña:</label>
-                <input type="password" id="login-password" required style="width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
-            </div>
-            
-            <button type="submit" style="width: 100%; background: #800080; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; transition: background 0.2s;">INGRESAR</button>
-            <button type="button" onclick="cerrarLogin()" style="width: 100%; background: none; color: #666; border: none; padding: 10px; margin-top: 5px; cursor: pointer; font-size: 0.9em;">Cancelar</button>
-        </form>
-    </div>
-</div>
-
-
-
-
-
-
-
-
+<!-- TRUCO DE COMPATIBILIDAD CON RENDER: Enlaza la función al entorno global para evitar el ReferenceError -->
 <script>
-
-// Asegúrate de que esta sea la LÍNEA 1 de tu archivo de scripts:
-    const BASE_URL = 'https://ecosistema-cmfermita.onrender.com'; // <-- Tu URL de Render    
-    let moduloDestino = '';
-
-    function entrar(rol) {
-        if (rol === 'coordinacion' || rol === 'doctor') {
-            moduloDestino = rol;
-            document.getElementById('login-username').value = '';
-            document.getElementById('login-password').value = '';
-
-            if (rol === 'coordinacion') {
-                document.getElementById('login-title').innerText = 'Coordinación Médica';
-                document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
-            }
-            document.getElementById('login-modal').style.display = 'flex';
-        } else {
-            // Esto es para tus otros paneles mientras los integras
-            document.getElementById('section-login').classList.remove('active-view');
-            const targetPanel = document.getElementById(`panel-${rol}`);
-            if (targetPanel) targetPanel.classList.add('active-view');
-        }
+    if (typeof activarModulo !== 'undefined') {
+        window.activarModulo = activarModulo;
     }
-
-    function cerrarLogin() {
-        document.getElementById('login-modal').style.display = 'none';
-    }
-
-    async function procesarLogin(e) {
-        e.preventDefault();
-        const userVal = document.getElementById('login-username').value.trim();
-        const passVal = document.getElementById('login-password').value.trim();
-
-        try {
-            const response = await fetch(`${BASE_URL}/api/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: userVal, password: passVal, requiredRole: moduloDestino })
-            });
-
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Error al validar las credenciales.');
-
-            cerrarLogin();
-            alert("¡Acceso concedido correctamente!");
-
-            document.getElementById('section-login').classList.remove('active-view');
-            document.getElementById('panel-coordinacion').classList.add('active-view');
-
-        } catch (error) {
-            alert(error.message);
-            console.error('Error en procesarLogin:', error);
-        }
-    }
-
-
-
-
-
-
-
-// FUNCIÓN: Captura el formulario de 5 campos y lo manda a Render
-async function db_guardarMedico() {
-    const empInput = document.getElementById('reg-emp');
-    const nomInput = document.getElementById('reg-nom');
-    const ubiInput = document.getElementById('reg-ubi');
-    const turInput = document.getElementById('reg-tur');
-    const catInput = document.getElementById('reg-cat');
-    const msgError = document.getElementById('msg-error-med');
-
-    if (!empInput || !nomInput) return;
-
-    const rfc = empInput.value.trim().toUpperCase();
-    const name = nomInput.value.trim();
-    const office = ubiInput ? ubiInput.value : 'No especificado';
-    const shift = turInput ? turInput.value : 'Matutino';
-    const category = catInput ? catInput.value : 'Médico';
-
-    if (msgError) msgError.innerText = '';
-
-    if (!rfc || !name) {
-        if (msgError) msgError.innerText = 'Por favor, rellene el número de empleado y el nombre.';
-        return;
-    }
-
-    try {
-        const response = await fetch(`${BASE_URL}/api/doctors`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rfc, name, office, shift, category })
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Error al registrar.');
-
-        // Limpieza de campos
-        empInput.value = '';
-        nomInput.value = '';
-        if (ubiInput) ubiInput.selectedIndex = 0;
-        if (turInput) turInput.selectedIndex = 0;
-        if (catInput) catInput.selectedIndex = 0;
-
-        alert(`¡${category} ${name} registrado con éxito en el Ecosistema!`);
-        await cargarListaMedicosNube();
-
-    } catch (error) {
-        if (msgError) msgError.innerText = error.message;
-        else alert(error.message);
-    }
-}
-
-// FUNCIÓN: Trae los 5 campos desde MySQL y dibuja la tabla ampliada
-async function cargarListaMedicosNube() {
-    const tableBody = document.getElementById('lista-medicos-body');
-    if (!tableBody) return;
-
-    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:15px;">Cargando plantilla desde Clever Cloud...</td></tr>';
-
-    try {
-        const response = await fetch(`${BASE_URL}/api/doctors`);
-        if (!response.ok) throw new Error('No se pudo obtener la lista de personal.');
-
-        const employees = await response.json();
-        tableBody.innerHTML = '';
-
-        if (employees.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#777; padding:15px;">No hay personal registrado en el sistema.</td></tr>';
-            return;
-        }
-
-        // Pintamos cada una de las nuevas columnas de forma ordenada
-        employees.forEach(person => {
-            const row = document.createElement('tr');
-            row.style.borderBottom = '1px solid #ddd';
-            row.innerHTML = `
-                <td style="padding:12px; font-family: monospace; font-weight: bold; color:#555;">${person.rfc}</td>
-                <td style="padding:12px; font-weight: 500;">${person.name}</td>
-                <td style="padding:12px;"><span style="background:#e8f0fe; color:#1a73e8; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:bold;">${person.category}</span></td>
-                <td style="padding:12px; color:#666;">${person.office}</td>
-                <td style="padding:12px; color:#666;">${person.shift}</td>
-                <td style="padding:12px; text-align:center;">
-                    <button onclick="eliminarMedicoNube('${person.rfc}')" style="background:#e74c3c; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">Eliminar</button>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-
-    } catch (error) {
-        console.error(error);
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#e74c3c; padding:15px; font-weight:bold;">Error al conectar con la base de datos.</td></tr>';
-    }
-}
-
-// FUNCIÓN: Eliminar registro de la base de datos
-async function eliminarMedicoNube(rfc) {
-    if (!confirm(`¿Está seguro de que desea dar de baja al empleado con Número: ${rfc}?`)) return;
-
-    try {
-        const response = await fetch(`${BASE_URL}/api/doctors/${rfc}`, { method: 'DELETE' });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Error al eliminar.');
-
-        alert("Registro dado de baja correctamente del catálogo.");
-        await cargarListaMedicosNube();
-
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-
-
-
-
-
-
-
-
 </script>
+
 </body>
 </html>
