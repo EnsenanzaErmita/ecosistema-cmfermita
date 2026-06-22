@@ -221,36 +221,39 @@
             </div>
         </div> 
 
+
         <!-- ========================================== -->
-        <!-- VISTA 3: NUEVA PANTALLA COMPLETA DE REGISTRO -->
+        <!-- VISTA 3: NUEVA PANTALLA COMPLETA DE REGISTRO (COLOR DORADO) -->
         <!-- ========================================== -->
         <div id="modulo-personal" class="view">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
-                <h2 style="color:var(--verde-issste); margin:0;">Módulo de Control de Personal</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--dorado-calidad); margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="color:var(--guinda); margin:0;">Módulo de Control de Personal</h2>
                 <!-- Botón para regresar al menú de coordinación principal -->
                 <button onclick="activarModulo('panel-coordinacion', this)" style="background:var(--gris-oscuro); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold;">← Volver al Panel</button>
             </div>
 
-            <div class="header-registro">
+            <!-- Encabezado con color Dorado Institucional -->
+            <div class="header-registro" style="background-color: var(--dorado-calidad); display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0;">
                 <span style="font-weight: bold; font-size: 1.2em;">Formulario de Alta de Personal</span>
                 <span>Tabla Objetivo: <strong>employees</strong></span>
                 <span style="text-align: right; font-size: 0.85em;">ID: Autoincrementable ✨</span>
             </div>
             
-            <div class="form-box panel-nuevo">
+            <!-- Contenedor con borde Dorado de Calidad -->
+            <div class="form-box" style="background: #fdfaf6; border-left: 5px solid var(--dorado-calidad); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none;">
                 <form id="form-registro-personal" onsubmit="guardarPersonalNube(event)">
                     <div class="grid-form">
                         <div>
-                            <label for="per-rfc">RFC / Número de Empleado:</label>
-                            <input type="text" id="per-rfc" required placeholder="Ej. ABCD123456XYZ">
+                            <label for="per-rfc" style="color: var(--guinda); font-weight: bold;">RFC / Número de Empleado:</label>
+                            <input type="text" id="per-rfc" required placeholder="Ej. ABCD123456XYZ" style="border: 1px solid var(--dorado-calidad);">
                         </div>
                         <div>
-                            <label for="per-name">Nombre Completo:</label>
-                            <input type="text" id="per-name" required placeholder="Nombre(s) Apellidos">
+                            <label for="per-name" style="color: var(--guinda); font-weight: bold;">Nombre Completo:</label>
+                            <input type="text" id="per-name" required placeholder="Nombre(s) Apellidos" style="border: 1px solid var(--dorado-calidad);">
                         </div>
                         <div>
-                            <label for="per-shift">Turno:</label>
-                            <select id="per-shift">
+                            <label for="per-shift" style="color: var(--guinda); font-weight: bold;">Turno:</label>
+                            <select id="per-shift" style="border: 1px solid var(--dorado-calidad);">
                                 <option value="Matutino">Matutino</option>
                                 <option value="Vespertino">Vespertino</option>
                                 <option value="Nocturno">Nocturno</option>
@@ -258,8 +261,8 @@
                             </select>
                         </div>
                         <div>
-                            <label for="per-category">Categoría / Rol:</label>
-                            <select id="per-category">
+                            <label for="per-category" style="color: var(--guinda); font-weight: bold;">Categoría / Rol:</label>
+                            <select id="per-category" style="border: 1px solid var(--dorado-calidad);">
                                 <option value="médico">Médico</option>
                                 <option value="enfermero">Enfermería</option>
                                 <option value="archivo">Archivo Clínico</option>
@@ -268,7 +271,8 @@
                             </select>
                         </div>
                         <div style="grid-column: span 2; display: flex; align-items: flex-end;">
-                            <button type="submit" class="btn-action" style="margin: 0; height: 42px;">REGISTRAR EN CLEVER CLOUD</button>
+                            <!-- Botón con color Dorado de Calidad -->
+                            <button type="submit" class="btn-action" style="margin: 0; height: 42px; background-color: var(--dorado-calidad); color: white; border: none; border-radius: 4px; font-weight: bold; width: 100%; cursor: pointer;">REGISTRAR EN CLEVER CLOUD</button>
                         </div>
                     </div>
                 </form>
@@ -278,9 +282,9 @@
             <div style="margin-top: 25px;">
                 <h4 style="color: var(--guinda); margin: 0 0 10px 0;">Personal Registrado Recientemente (employees)</h4>
                 <table id="tabla-personal-usuarios">
-                    <thead>
+                    <thead style="background: #f4f4f4; color: var(--guinda);">
                         <tr>
-                            <th>ID (Auto)</th>
+                            <th>ID</th>
                             <th>RFC</th>
                             <th>Nombre</th>
                             <th>Turno</th>
@@ -417,150 +421,107 @@
 
 
 
-// =========================================================================
-// FUNCIÓN PRINCIPAL PARA CAMBIAR ENTRE PANTALLAS (SUB-VISTAS)
-// =========================================================================
+
+
+
+
+// OBLIGATORIO: Actualiza también tu función activarModulo para que use el nuevo nombre
 function activarModulo(moduloId, boton) {
-    // 1. Buscamos TODOS los contenedores de vista de la aplicación y los ocultamos por completo
     const todasLasVistas = document.querySelectorAll('.view');
     todasLasVistas.forEach(vista => {
         vista.classList.remove('active-view');
-        vista.style.display = 'none'; // Forzado absoluto de ocultación
+        vista.style.display = 'none';
     });
 
-    // 2. Mostramos de forma exclusiva el módulo que el usuario seleccionó
     const moduloObjetivo = document.getElementById(moduloId);
     if (moduloObjetivo) {
         moduloObjetivo.classList.add('active-view');
-        moduloObjetivo.style.display = 'block'; // Forzado absoluto de visualización
+        moduloObjetivo.style.display = 'block';
     }
 
-    // 3. ENLACE CON LA NUBE: Si el usuario entra al módulo de personal, cargamos la lista al instante
+    // CORRECCIÓN: Si entra a los módulos de personal, llama al nuevo nombre de función
     if (moduloId === 'modulo-personal' || moduloId === 'mod-lista') {
-        if (typeof cargarListaMedicosNube === 'function') {
-            cargarListaMedicosNube();
+        if (typeof cargarListaPersonalNube === 'function') {
+            cargarListaPersonalNube();
         }
     }
 }
 
-// Aseguramos que el HTML tenga acceso a ella sin importar el entorno
-window.activarModulo = activarModulo;
-
-
-
-
-
-
-
-// FUNCIÓN: Captura el formulario de 5 campos y lo manda a Render
-async function db_guardarMedico() {
-    const empInput = document.getElementById('reg-emp');
-    const nomInput = document.getElementById('reg-nom');
-    const ubiInput = document.getElementById('reg-ubi');
-    const turInput = document.getElementById('reg-tur');
-    const catInput = document.getElementById('reg-cat');
-    const msgError = document.getElementById('msg-error-med');
-
-    if (!empInput || !nomInput) return;
-
-    const rfc = empInput.value.trim().toUpperCase();
-    const name = nomInput.value.trim();
-    const office = ubiInput ? ubiInput.value : 'No especificado';
-    const shift = turInput ? turInput.value : 'Matutino';
-    const category = catInput ? catInput.value : 'Médico';
-
-    if (msgError) msgError.innerText = '';
-
-    if (!rfc || !name) {
-        if (msgError) msgError.innerText = 'Por favor, rellene el número de empleado y el nombre.';
-        return;
-    }
+// NUEVO NOMBRE: Consulta la base de datos de Clever Cloud para empleados
+async function cargarListaPersonalNube() {
+    const tbody = document.querySelector('#tabla-personal-usuarios tbody');
+    if (!tbody) return;
 
     try {
-        const response = await fetch(`${BASE_URL}/api/doctors`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rfc, name, office, shift, category })
-        });
+        const response = await fetch('/api/doctors'); // Mantiene el endpoint del servidor
+        if (!response.ok) throw new Error('Error al obtener datos');
+        
+        const personal = await response.json();
+        tbody.innerHTML = ''; 
 
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Error al registrar.');
-
-        // Limpieza de campos
-        empInput.value = '';
-        nomInput.value = '';
-        if (ubiInput) ubiInput.selectedIndex = 0;
-        if (turInput) turInput.selectedIndex = 0;
-        if (catInput) catInput.selectedIndex = 0;
-
-        alert(`¡${category} ${name} registrado con éxito en el Ecosistema!`);
-        await cargarListaMedicosNube();
-
-    } catch (error) {
-        if (msgError) msgError.innerText = error.message;
-        else alert(error.message);
-    }
-}
-
-// FUNCIÓN: Trae los 5 campos desde MySQL y dibuja la tabla ampliada
-async function cargarListaMedicosNube() {
-    const tableBody = document.getElementById('lista-medicos-body');
-    if (!tableBody) return;
-
-    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:15px;">Cargando plantilla desde Clever Cloud...</td></tr>';
-
-    try {
-        const response = await fetch(`${BASE_URL}/api/doctors`);
-        if (!response.ok) throw new Error('No se pudo obtener la lista de personal.');
-
-        const employees = await response.json();
-        tableBody.innerHTML = '';
-
-        if (employees.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#777; padding:15px;">No hay personal registrado en el sistema.</td></tr>';
+        if (personal.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #888;">No hay personal registrado en la base de datos.</td></tr>`;
             return;
         }
 
-        // Pintamos cada una de las nuevas columnas de forma ordenada
-        employees.forEach(person => {
-            const row = document.createElement('tr');
-            row.style.borderBottom = '1px solid #ddd';
-            row.innerHTML = `
-                <td style="padding:12px; font-family: monospace; font-weight: bold; color:#555;">${person.rfc}</td>
-                <td style="padding:12px; font-weight: 500;">${person.name}</td>
-                <td style="padding:12px;"><span style="background:#e8f0fe; color:#1a73e8; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:bold;">${person.category}</span></td>
-                <td style="padding:12px; color:#666;">${person.office}</td>
-                <td style="padding:12px; color:#666;">${person.shift}</td>
-                <td style="padding:12px; text-align:center;">
-                    <button onclick="eliminarMedicoNube('${person.rfc}')" style="background:#e74c3c; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">Eliminar</button>
+        personal.forEach(emp => {
+            const fecha = emp.created_at ? new Date(emp.created_at).toLocaleString() : 'N/A';
+            
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td><strong>${emp.id}</strong></td>
+                <td>${emp.rfc}</td>
+                <td>${emp.name}</td>
+                <td>${emp.shift}</td>
+                <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">${emp.category}</span></td>
+                <td style="font-size: 0.85em; color: #555;">${fecha}</td>
+                <td>
+                    <button onclick="eliminarPersonalNube('${emp.rfc}')" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
                 </td>
             `;
-            tableBody.appendChild(row);
+            tbody.appendChild(fila);
         });
-
     } catch (error) {
-        console.error(error);
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#e74c3c; padding:15px; font-weight:bold;">Error al conectar con la base de datos.</td></tr>';
+        console.error('Error al cargar la plantilla de personal:', error);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #cc0000; font-weight:bold;">Error al conectar con la base de datos de Clever Cloud.</td></tr>`;
     }
 }
 
-// FUNCIÓN: Eliminar registro de la base de datos
-async function eliminarMedicoNube(rfc) {
-    if (!confirm(`¿Está seguro de que desea dar de baja al empleado con Número: ${rfc}?`)) return;
+// También actualizamos la función de guardado para que invoque al nuevo nombre tras registrar
+async function guardarPersonalNube(event) {
+    event.preventDefault();
+
+    const rfc = document.getElementById('per-rfc').value.trim();
+    const name = document.getElementById('per-name').value.trim();
+    const shift = document.getElementById('per-shift').value;
+    const category = document.getElementById('per-category').value;
 
     try {
-        const response = await fetch(`${BASE_URL}/api/doctors/${rfc}`, { method: 'DELETE' });
+        const response = await fetch('/api/doctors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rfc, name, shift, category })
+        });
+
         const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Error al eliminar.');
 
-        alert("Registro dado de baja correctamente del catálogo.");
-        await cargarListaMedicosNube();
-
+        if (response.ok) {
+            alert('¡Personal registrado exitosamente en Clever Cloud!');
+            document.getElementById('form-registro-personal').reset(); 
+            cargarListaPersonalNube(); // CORRECCIÓN: Llama al nuevo nombre de la lista
+        } else {
+            alert('Error del servidor: ' + (data.message || 'No se pudo guardar.'));
+        }
     } catch (error) {
-        alert(error.message);
+        console.error('Error de red al intentar registrar:', error);
+        alert('No se pudo conectar con el servidor.');
     }
 }
 
+// Hacemos visibles las funciones globalmente con sus nuevos nombres
+window.activarModulo = activarModulo;
+window.guardarPersonalNube = guardarPersonalNube;
+window.cargarListaPersonalNube = cargarListaPersonalNube;
 
 
 
