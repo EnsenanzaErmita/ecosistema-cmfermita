@@ -440,13 +440,54 @@ function activarModulo(moduloId, boton) {
     }
 }
 
-// NUEVO NOMBRE: Consulta la base de datos de Clever Cloud para empleados
+
+
+async function guardarPersonalNube(event) {
+    event.preventDefault(); // Evitamos que la página se recargue
+
+    // Capturamos la información de los inputs del formulario
+    const rfc = document.getElementById('per-rfc').value.trim();
+    const name = document.getElementById('per-name').value.trim();
+    const shift = document.getElementById('per-shift').value;
+    const category = document.getElementById('per-category').value;
+
+    // TRUCO PARA RENDER: Obtiene de forma automática el dominio real de tu app (ej. https://onrender.com)
+    const urlServidor = `${window.location.origin}/api/doctors`;
+
+    try {
+        // Hacemos la petición POST apuntando al servidor de Render de forma absoluta
+        const response = await fetch(urlServidor, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ rfc, name, shift, category })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('¡Personal registrado exitosamente en Clever Cloud!');
+            document.getElementById('form-registro-personal').reset(); // Limpiamos formulario
+            cargarListaPersonalNube(); // Actualizamos la tabla automáticamente
+        } else {
+            alert('Error del servidor: ' + (data.message || 'No se pudo guardar.'));
+        }
+    } catch (error) {
+        console.error('Error de red al intentar registrar:', error);
+        alert('No se pudo conectar con el servidor. Verifica tu conexión de Render.');
+    }
+}
+
+// OBLIGATORIO: Haz el mismo cambio en tu función de cargar tabla para que tampoco falle
 async function cargarListaPersonalNube() {
     const tbody = document.querySelector('#tabla-personal-usuarios tbody');
     if (!tbody) return;
 
+    const urlServidor = `${window.location.origin}/api/doctors`;
+
     try {
-        const response = await fetch('/api/doctors'); // Mantiene el endpoint del servidor
+        const response = await fetch(urlServidor);
         if (!response.ok) throw new Error('Error al obtener datos');
         
         const personal = await response.json();
@@ -459,7 +500,6 @@ async function cargarListaPersonalNube() {
 
         personal.forEach(emp => {
             const fecha = emp.created_at ? new Date(emp.created_at).toLocaleString() : 'N/A';
-            
             const fila = document.createElement('tr');
             fila.innerHTML = `
                 <td><strong>${emp.id}</strong></td>
@@ -480,39 +520,7 @@ async function cargarListaPersonalNube() {
     }
 }
 
-// También actualizamos la función de guardado para que invoque al nuevo nombre tras registrar
-async function guardarPersonalNube(event) {
-    event.preventDefault();
-
-    const rfc = document.getElementById('per-rfc').value.trim();
-    const name = document.getElementById('per-name').value.trim();
-    const shift = document.getElementById('per-shift').value;
-    const category = document.getElementById('per-category').value;
-
-    try {
-        const response = await fetch('/api/doctors', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rfc, name, shift, category })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('¡Personal registrado exitosamente en Clever Cloud!');
-            document.getElementById('form-registro-personal').reset(); 
-            cargarListaPersonalNube(); // CORRECCIÓN: Llama al nuevo nombre de la lista
-        } else {
-            alert('Error del servidor: ' + (data.message || 'No se pudo guardar.'));
-        }
-    } catch (error) {
-        console.error('Error de red al intentar registrar:', error);
-        alert('No se pudo conectar con el servidor.');
-    }
-}
-
-// Hacemos visibles las funciones globalmente con sus nuevos nombres
-window.activarModulo = activarModulo;
+// Vinculamos de nuevo al entorno global
 window.guardarPersonalNube = guardarPersonalNube;
 window.cargarListaPersonalNube = cargarListaPersonalNube;
 
