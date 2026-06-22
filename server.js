@@ -210,6 +210,80 @@ app.delete('/api/offices/:id', (req, res) => {
 
 
 
+// RUTA API: Obtener solo empleados de la categoría 'médico'
+app.get('/api/employees/doctors-only', (req, res) => {
+    // CORRECCIÓN: Se cambiaron comillas dobles por comillas simples estándar en 'médico'
+    const sql = "SELECT id, rfc, first_name, last_name_paternal, last_name_maternal, shift FROM employees WHERE LOWER(category) = 'médico' ORDER BY last_name_paternal ASC";
+    pool.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error al consultar médicos:', err);
+            return res.status(500).json({ message: 'Error al obtener los médicos.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// RUTA API: Obtener la lista de asignaciones unificando la nueva tabla independiente
+app.get('/api/assignments', (req, res) => {
+    // CORRECCIÓN: Se cambiaron comillas dobles por comillas simples estándar en 'médico'
+    const sql = `
+        SELECT da.id AS assignment_id, e.id AS employee_id, e.rfc, e.first_name, e.last_name_paternal, e.last_name_maternal, e.shift AS emp_shift,
+               o.id AS office_id, o.office_name, o.shift AS office_shift
+        FROM doctor_offices da
+        INNER JOIN employees e ON da.employee_id = e.id
+        INNER JOIN offices o ON da.office_id = o.id
+        WHERE LOWER(e.category) = 'médico'
+        ORDER BY o.office_name ASC, o.shift ASC
+    `;
+    pool.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error al consultar asignaciones independientes:', err);
+            return res.status(500).json({ message: 'Error al obtener las asignaciones de la base de datos.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// RUTA API: Vincular médico con consultorio en la tabla independiente (Inserta o reemplaza si ya existía)
+app.post('/api/assignments', (req, res) => {
+    const { employeeId, officeId } = req.body;
+
+    if (!employeeId || !officeId) {
+        return res.status(400).json({ message: 'El médico y el consultorio son obligatorios.' });
+    }
+
+    // CORRECCIÓN: Se cambiaron comillas dobles por comillas simples estándar en 'médico'
+    const sql = "INSERT INTO doctor_offices (employee_id, office_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE office_id = ?";
+    pool.query(sql, [employeeId, officeId, officeId], (err, result) => {
+        if (err) {
+            console.error('Error al registrar asignación en tabla independiente:', err);
+            return res.status(500).json({ message: 'No se pudo guardar la asignación en la base de datos.' });
+        }
+        res.status(200).json({ message: 'Asignación guardada correctamente en la tabla independiente.' });
+    });
+});
+
+
+
+
+
+// RUTA API: Eliminar una asignación (Elimina el registro de la tabla intermedia)
+app.delete('/api/assignments/:employeeId', (req, res) => {
+    const { employeeId } = req.params;
+    const sql = 'DELETE FROM doctor_offices WHERE employee_id = ?';
+    pool.query(sql, [employeeId], (err, result) => {
+        if (err) {
+            console.error('Error al eliminar asignación independiente:', err);
+            return res.status(500).json({ message: 'Error interno al intentar remover la vinculación.' });
+        }
+        res.status(200).json({ message: 'Asignación removida correctamente de la tabla independiente.' });
+    });
+});
+
+
+
+
+
 
 
 
