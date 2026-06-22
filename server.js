@@ -244,7 +244,11 @@ app.get('/api/assignments', (req, res) => {
     });
 });
 
-// RUTA API: Vincular médico con consultorio en la tabla independiente (Inserta o reemplaza si ya existía)
+
+
+
+
+// RUTA API: Vincular médico con consultorio (Con doble validación de seguridad)
 app.post('/api/assignments', (req, res) => {
     const { employeeId, officeId } = req.body;
 
@@ -252,14 +256,44 @@ app.post('/api/assignments', (req, res) => {
         return res.status(400).json({ message: 'El médico y el consultorio son obligatorios.' });
     }
 
-    // CORRECCIÓN: Se cambiaron comillas dobles por comillas simples estándar en 'médico'
-    const sql = "INSERT INTO doctor_offices (employee_id, office_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE office_id = ?";
-    pool.query(sql, [employeeId, officeId, officeId], (err, result) => {
+    // --- VALIDACIÓN 1: Verificar si el médico ya tiene un consultorio asignado ---
+    const checkDoctorSql = 'SELECT * FROM doctor_offices WHERE employee_id = ?';
+    pool.query(checkDoctorSql, [employeeId], (err, doctorResults) => {
         if (err) {
-            console.error('Error al registrar asignación en tabla independiente:', err);
-            return res.status(500).json({ message: 'No se pudo guardar la asignación en la base de datos.' });
+            console.error('Error al validar médico existente:', err);
+            return res.status(500).json({ message: 'Error interno al validar el estado del médico.' });
         }
-        res.status(200).json({ message: 'Asignación guardada correctamente en la tabla independiente.' });
+        
+        if (doctorResults && doctorResults.length > 0) {
+            return res.status(400).json({ 
+                message: 'El médico ya está vinculado a un consultorio. Debe desvincularlo primero desde la tabla de abajo antes de asignarle uno nuevo.' 
+            });
+        }
+
+        // --- VALIDACIÓN 2: Verificar si el consultorio ya está ocupado en ese turno ---
+        const checkOfficeSql = 'SELECT * FROM doctor_offices WHERE office_id = ?';
+        pool.query(checkOfficeSql, [officeId], (err, officeResults) => {
+            if (err) {
+                console.error('Error al validar consultorio ocupado:', err);
+                return res.status(500).json({ message: 'Error interno al validar la disponibilidad del consultorio.' });
+            }
+
+            if (officeResults && officeResults.length > 0) {
+                return res.status(400).json({ 
+                    message: 'Este consultorio ya se encuentra ocupado por otro médico en este mismo turno. Seleccione un espacio libre.' 
+                });
+            }
+
+            // --- INSERCIÓN LIMPIA: Si pasa ambos filtros, se guarda en la tabla independiente ---
+            const insertSql = 'INSERT INTO doctor_offices (employee_id, office_id) VALUES (?, ?)';
+            pool.query(insertSql, [employeeId, officeId], (err, result) => {
+                if (err) {
+                    console.error('Error al registrar asignación independiente:', err);
+                    return res.status(500).json({ message: 'No se pudo guardar la asignación en la base de datos.' });
+                }
+                res.status(201).json({ message: 'Asignación guardada correctamente en la tabla independiente.' });
+            });
+        });
     });
 });
 
