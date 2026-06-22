@@ -10,11 +10,12 @@
             --gris-oscuro: #98989a;
             --gris-claro: #f4f4f4;
             --blanco: #ffffff;
-            --negro-footer: #111111; /* Negro profundo */
+	    --negro-footer: #111111; /* Negro profundo */
             --verde-issste: #285c4d;
             --dorado-calidad: #b38e5d;
             --azul-issste: #1d4ed8;
             --morado-issste: #800080;
+
         }
 
         html, body { height: 100%; margin: 0; }
@@ -45,16 +46,23 @@
         .card-coord { border-top: 8px solid var(--morado-issste); }
         .card-archivo { border-top: 8px solid var(--guinda); }
 
+        
+
         /* UI ELEMENTS */
         .btn-save { color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-top: 5px; }
 
+
         .teaching-hero { background: #fdfaf6; border: 2px solid var(--dorado-calidad); padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 25px; }
+
         #phrase-container { font-style: italic; color: var(--guinda); font-size: 1.2em; font-weight: bold; transition: opacity 0.8s; }
 
-        /* PIE DE PÁGINA (ESTILO NEGRO Y BLANCO) */
+
+
+	/* PIE DE PÁGINA (ESTILO NEGRO Y BLANCO) */
         footer { background-color: var(--negro-footer); color: var(--blanco); text-align: center; padding: 25px 10px; font-size: 0.95em; border-top: 3px solid var(--dorado-calidad); }
         footer strong { color: var(--dorado-calidad); }
+
 
         /* NAVEGACIÓN PANEL ARCHIVO */
         .nav-archivo { 
@@ -66,6 +74,7 @@
             padding: 15px; 
             border-radius: 8px; 
         }
+
 
         .btn-nav { 
             padding: 12px 15px; 
@@ -82,11 +91,15 @@
         .btn-nav.active { background: var(--guinda); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .btn-nav:hover { background: var(--dorado-calidad); }
 
+
+
         /* SECCIONES DE CONTENIDO */
         .section-content { display: none; padding: 25px; border: 1px solid #ddd; border-radius: 8px; background: #fff; margin-top: 10px; }
         .section-content.active { display: block; animation: fadeIn 0.4s; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+
 
         /* FORMULARIOS Y TABLAS */
         .header-registro {
@@ -100,6 +113,7 @@
         input, select { width: 100%; padding: 10px; border: 1px solid var(--gris-oscuro); border-radius: 4px; box-sizing: border-box; }
         .full-width { grid-column: span 3; }
         
+
         .btn-save { background-color: var(--verde-issste); color: white; padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
         .btn-action { background: var(--verde-issste); color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
 
@@ -107,9 +121,12 @@
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
         th { background: #f4f4f4; color: var(--guinda); }
 
+
         .panel-nuevo { background: #eff6ff; border-left: 5px solid var(--azul-issste); }
         .panel-nuevo label { color: var(--azul-issste); }
         .panel-actual { background: #fdf0f5; border-left: 5px solid var(--guinda); }
+
+
 
         /* Badges */
         .badge { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; display: inline-block; }
@@ -117,13 +134,19 @@
         .badge-aprobada { background: #dcfce7; color: var(--verde); }
         .badge-rechazada { background: #fee2e2; color: var(--rojo); }
 
+
         .view { display: none; }
-        /* CORRECCIÓN: Agregada la clase active-view con display block para la lógica de JavaScript */
         .active-view { display: block !important; }
 
         .error-msg { color: #cc0000; font-weight: bold; margin-top: 10px; display: none; }
+
     </style>
+
 </head>
+
+
+
+
 
 <body>
 
@@ -134,53 +157,325 @@
 <div class="main-content">
     <div class="container">
 
+        <!-- VISTA DE LOGIN INICIAL -->
         <div id="section-login" class="view active-view">
             <div class="teaching-hero">
                 <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
                 <div id="phrase-container">"Cargando pensamiento institucional..."</div>
+            </div> <!-- CORRECCIÓN 1: Se cerró correctamente el teaching-hero -->
+
+            <div class="login-grid">
+                <div class="card card-coord">
+                    <h3 style="color: #800080; text-align: center; font-size: 2.50em;">Coordinación Médica</h3>
+                    <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para el Servicio de Coordinación Médica de la C.M.F. Ermita.</p>
+                    <button class="btn-save" style="background: #800080" onclick="entrar('coordinacion')">ACCESO COORDINACIÓN MÉDICA</button>
+                </div>
             </div>
         </div>
 
-        <div class="login-grid">
+        <!-- PANEL DE COORDINACIÓN (OCULTO POR DEFECTO) -->
+        <div id="panel-coordinacion" class="view">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--guinda); margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="color:var(--guinda); margin:0;">Panel Archivo Clínico</h2>
+                <button onclick="location.reload()" style="background:#cc0000; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Cerrar Sesión</button>
+            </div> 
 
-            <div class="card card-admin">
-                <h3>Panel Administrador</h3>
-                <p style="font-size: 0.85em; color: #666;">Acceso total a configuración de plantilla médica y reportes globales.</p>
-                <label>Usuario Admin:</label>
-                <input type="text" placeholder="ID Administrador">
-                <button class="btn-save" style="background: var(--dorado-calidad)" onclick="entrar('admin')">INGRESAR COMO ADMIN</button>
+            <!-- CORRECCIÓN 2: Se renombró el ID y se quitó active-view para evitar duplicados -->
+            <div id="section-panel-bienvenida">
+                <div class="teaching-hero">
+                    <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
+                    <div id="phrase-container">"Trabajando juntos para transformar la atención a la salud"</div>
+                </div>
             </div>
 
-            <div class="card card-doctor">
-                <h3 style="color: #2c4e72; text-align: center; font-size: 2.85em;">Médicos</h3>
-                <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para Médicos de la C.M.F. Ermita.</p>
-                <label style="text-align: center;">Al ingresar deberá proporcionar su clave</label>
-                <button class="btn-save" style="background: #2c4e72" onclick="solicitarClaveMedico()">INGRESAR AL MENÚ DE MÉDICOS</button>
-            </div>
+            <div class="login-grid">
+                <div class="card card-admin">
+                    <h3 style="color:var(--dorado-calidad); text-align: center;">Registro de Médicos</h3>
+                    <p style="font-size: 0.85em; color: #666;">Alta y modificación de plantilla médica.</p>
+                    <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('modulo-medicos', this)">REGISTRO DE MÉDICOS</button>
+                    <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('mod-lista', this)">VER PLANTILLA DE MÉDICOS</button>
+                </div>
 
-            <div class="card card-coord">
-                <!-- CORRECCIÓN SINTAXIS AQUÍ: Se corrigió </h> por </h3> -->
-                <h3 style="color: #800080; text-align: center; font-size: 2.50em;">Coordinación Médica</h3>
-                <p style="font-size: 0.85em; text-align: center;">Acceso administrativo de control de procesos y agendas.</p>
-                <label>Clave Coordinador:</label>
-                <input type="password" placeholder="••••••••">
-                <button class="btn-save" style="background: var(--morado-issste)" onclick="entrar('coordinador')">INGRESAR A COORDINACIÓN</button>
-            </div>
+                <div class="card card-doctor">
+                    <h3 style="color: #2c4e72; text-align: center;">Cambios de Consultorio</h3>
+                    <p style="font-size: 0.8em; color: #666; text-align: center;">Consulta de estatus de cambios de Consultorio.</p>
+                    <button class="btn-save" style="background: #2c4e72" onclick="activarModulo('vista-coordinacion', this)">ESTATUS CAMBIOS DE CONSULTORIO</button>
+                </div>
 
-        </div>
+                <div class="card card-archivo">
+                    <h3>Reporte por Médico</h3>
+                    <p style="font-size: 0.85em; color: #666;">Generación de reporte de citas por médico.</p>
+                    <button class="btn-save" style="background: var(--guinda)" onclick="activarModulo('modulo-rep-medico', this)">REPORTE POR MÉDICO</button>
+                </div>
+
+                <div class="card card-patient">
+                    <h3>Reporte por Fecha</h3>
+                    <p style="font-size: 0.85em; color: #666;">Generación de reporte de citas por fecha.</p>
+                    <button class="btn-save" id="btn-rep-fec" onclick="activarModulo('modulo-rep-fecha', this)">REPORTE POR FECHA</button>
+                </div>
+            </div> <!-- CORRECCIÓN 3: Se cerró correctamente el login-grid interno -->
+        </div> 
+
+    </div> 
+</div> 
+
+<footer>
+    <p>&copy; 2026 Todos los derechos reservados</p>
+    <p>Desarrollado por: <strong>González Zamudio Manuel Alejandro</strong></p>
+    <p>Colaboración: <strong>Aldana Rodríguez Said Israel</strong></p>
+    <p style="font-size: 0.75em; opacity: 0.7; margin-top: 10px;">Clínica de Medicina Familiar Ermita - ISSSTE</p>
+</footer>
+
+<!-- ========================================== -->
+<!-- VENTANA FLOTANTE DE LOGIN (MODAL ACCESS)   -->
+<!-- ========================================== -->
+<div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; font-family: sans-serif;">
+    <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 380px; box-shadow: 0 4px 25px rgba(0,0,0,0.25); position: relative; box-sizing: border-box;">
+        
+        <h3 id="login-title" style="color: #800080; margin: 0 0 10px; text-align: center; font-size: 1.8em;">Iniciar Sesión</h3>
+        <p id="login-subtitle" style="font-size: 0.85em; text-align: center; color: #666; margin: 0 0 20px;">Acceso restringido para C.M.F. Ermita</p>
+        
+        <form onsubmit="procesarLogin(event)">
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #333;">Usuario:</label>
+                <input type="text" id="login-username" required style="width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
+            </div>
+            <div style="margin-bottom: 22px;">
+                <label style="display:block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #333;">Contraseña:</label>
+                <input type="password" id="login-password" required style="width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
+            </div>
+            
+            <button type="submit" style="width: 100%; background: #800080; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 1em; cursor: pointer; font-weight: bold; transition: background 0.2s;">INGRESAR</button>
+            <button type="button" onclick="cerrarLogin()" style="width: 100%; background: none; color: #666; border: none; padding: 10px; margin-top: 5px; cursor: pointer; font-size: 0.9em;">Cancelar</button>
+        </form>
     </div>
 </div>
 
-<footer>
-    <p>© 2026 ISSSTE - Clínica de Medicina Familiar Ermita. Todos los derechos reservados. <strong>Enseñanza y Calidad</strong></p>
-</footer>
 
-<!-- TRUCO DE COMPATIBILIDAD CON RENDER: Enlaza la función al entorno global para evitar el ReferenceError -->
+
+
+
+
+
+
+
+
+
+
 <script>
-    if (typeof activarModulo !== 'undefined') {
-        window.activarModulo = activarModulo;
-    }
-</script>
 
+// Asegúrate de que esta sea la LÍNEA 1 de tu archivo de scripts:
+    const BASE_URL = 'https://ecosistema-cmfermita.onrender.com'; // <-- Tu URL de Render    
+    let moduloDestino = '';
+
+    function entrar(rol) {
+        if (rol === 'coordinacion' || rol === 'doctor') {
+            moduloDestino = rol;
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+
+            if (rol === 'coordinacion') {
+                document.getElementById('login-title').innerText = 'Coordinación Médica';
+                document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
+            }
+            document.getElementById('login-modal').style.display = 'flex';
+        } else {
+            // Esto es para tus otros paneles mientras los integras
+            document.getElementById('section-login').classList.remove('active-view');
+            const targetPanel = document.getElementById(`panel-${rol}`);
+            if (targetPanel) targetPanel.classList.add('active-view');
+        }
+    }
+
+    function cerrarLogin() {
+        document.getElementById('login-modal').style.display = 'none';
+    }
+
+    async function procesarLogin(e) {
+        e.preventDefault();
+        const userVal = document.getElementById('login-username').value.trim();
+        const passVal = document.getElementById('login-password').value.trim();
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: userVal, password: passVal, requiredRole: moduloDestino })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al validar las credenciales.');
+
+            cerrarLogin();
+            alert("¡Acceso concedido correctamente!");
+
+            document.getElementById('section-login').classList.remove('active-view');
+            document.getElementById('panel-coordinacion').classList.add('active-view');
+
+        } catch (error) {
+            alert(error.message);
+            console.error('Error en procesarLogin:', error);
+        }
+    }
+
+
+
+
+
+
+
+// =========================================================================
+// FUNCIÓN PRINCIPAL PARA CAMBIAR ENTRE PANTALLAS (SUB-VISTAS)
+// =========================================================================
+function activarModulo(moduloId, boton) {
+    // 1. Buscamos todas las sub-secciones del panel y las ocultamos quitando la vista activa
+    const secciones = document.querySelectorAll('.section-content');
+    secciones.forEach(sec => {
+        sec.classList.remove('active-view');
+        // Si tu diseño original usaba style.display, descomenta la siguiente línea:
+        // sec.style.display = 'none';
+    });
+
+    // 2. Mostramos el módulo que el usuario seleccionó agregando tu clase CSS
+    const moduloObjetivo = document.getElementById(moduloId);
+    if (moduloObjetivo) {
+        moduloObjetivo.classList.add('active-view');
+        // Si tu diseño original usaba style.display, descomenta la siguiente línea:
+        // moduloObjetivo.style.display = 'block';
+    }
+
+    // 3. ENLACE CON LA NUBE: Si el usuario quiere ver la lista, descargamos de Clever Cloud al instante
+    if (moduloId === 'mod-lista') {
+        if (typeof cargarListaMedicosNube === 'function') {
+            cargarListaMedicosNube();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+// FUNCIÓN: Captura el formulario de 5 campos y lo manda a Render
+async function db_guardarMedico() {
+    const empInput = document.getElementById('reg-emp');
+    const nomInput = document.getElementById('reg-nom');
+    const ubiInput = document.getElementById('reg-ubi');
+    const turInput = document.getElementById('reg-tur');
+    const catInput = document.getElementById('reg-cat');
+    const msgError = document.getElementById('msg-error-med');
+
+    if (!empInput || !nomInput) return;
+
+    const rfc = empInput.value.trim().toUpperCase();
+    const name = nomInput.value.trim();
+    const office = ubiInput ? ubiInput.value : 'No especificado';
+    const shift = turInput ? turInput.value : 'Matutino';
+    const category = catInput ? catInput.value : 'Médico';
+
+    if (msgError) msgError.innerText = '';
+
+    if (!rfc || !name) {
+        if (msgError) msgError.innerText = 'Por favor, rellene el número de empleado y el nombre.';
+        return;
+    }
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/doctors`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rfc, name, office, shift, category })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Error al registrar.');
+
+        // Limpieza de campos
+        empInput.value = '';
+        nomInput.value = '';
+        if (ubiInput) ubiInput.selectedIndex = 0;
+        if (turInput) turInput.selectedIndex = 0;
+        if (catInput) catInput.selectedIndex = 0;
+
+        alert(`¡${category} ${name} registrado con éxito en el Ecosistema!`);
+        await cargarListaMedicosNube();
+
+    } catch (error) {
+        if (msgError) msgError.innerText = error.message;
+        else alert(error.message);
+    }
+}
+
+// FUNCIÓN: Trae los 5 campos desde MySQL y dibuja la tabla ampliada
+async function cargarListaMedicosNube() {
+    const tableBody = document.getElementById('lista-medicos-body');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:15px;">Cargando plantilla desde Clever Cloud...</td></tr>';
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/doctors`);
+        if (!response.ok) throw new Error('No se pudo obtener la lista de personal.');
+
+        const employees = await response.json();
+        tableBody.innerHTML = '';
+
+        if (employees.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#777; padding:15px;">No hay personal registrado en el sistema.</td></tr>';
+            return;
+        }
+
+        // Pintamos cada una de las nuevas columnas de forma ordenada
+        employees.forEach(person => {
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid #ddd';
+            row.innerHTML = `
+                <td style="padding:12px; font-family: monospace; font-weight: bold; color:#555;">${person.rfc}</td>
+                <td style="padding:12px; font-weight: 500;">${person.name}</td>
+                <td style="padding:12px;"><span style="background:#e8f0fe; color:#1a73e8; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:bold;">${person.category}</span></td>
+                <td style="padding:12px; color:#666;">${person.office}</td>
+                <td style="padding:12px; color:#666;">${person.shift}</td>
+                <td style="padding:12px; text-align:center;">
+                    <button onclick="eliminarMedicoNube('${person.rfc}')" style="background:#e74c3c; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px;">Eliminar</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error(error);
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#e74c3c; padding:15px; font-weight:bold;">Error al conectar con la base de datos.</td></tr>';
+    }
+}
+
+// FUNCIÓN: Eliminar registro de la base de datos
+async function eliminarMedicoNube(rfc) {
+    if (!confirm(`¿Está seguro de que desea dar de baja al empleado con Número: ${rfc}?`)) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/doctors/${rfc}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Error al eliminar.');
+
+        alert("Registro dado de baja correctamente del catálogo.");
+        await cargarListaMedicosNube();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+
+
+
+
+
+
+
+
+</script>
 </body>
 </html>
