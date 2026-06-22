@@ -143,6 +143,77 @@ app.delete('/api/doctors/:rfc', (req, res) => {
     });
 });
 
+
+
+
+
+
+
+// RUTA API: Obtener todos los consultorios registrados
+app.get('/api/offices', (req, res) => {
+    const sql = 'SELECT id, office_name, shift, created_at FROM offices ORDER BY office_name ASC, shift ASC';
+    pool.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error al consultar consultorios:', err);
+            return res.status(500).json({ message: 'Error al obtener los consultorios de la base de datos.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// RUTA API: Registrar un consultorio nuevo (Valida texto y duplicados por turno)
+app.post('/api/offices', (req, res) => {
+    const { officeName, shift } = req.body;
+    
+    if (!officeName || !shift) {
+        return res.status(400).json({ message: 'El nombre del consultorio y el turno son obligatorios.' });
+    }
+
+    const officeUpper = officeName.trim().toUpperCase();
+
+    // Validamos que no exista esa combinación exacta de consultorio y turno
+    const checkSql = 'SELECT * FROM offices WHERE office_name = ? AND shift = ?';
+    pool.query(checkSql, [officeUpper, shift], (err, results) => {
+        if (err) {
+            console.error('Error al buscar consultorio duplicado:', err);
+            return res.status(500).json({ message: 'Error interno en el servidor.' });
+        }
+        if (results && results.length > 0) {
+            return res.status(400).json({ message: 'Este consultorio ya está registrado para el turno seleccionado.' });
+        }
+
+        const insertSql = 'INSERT INTO offices (office_name, shift) VALUES (?, ?)';
+        pool.query(insertSql, [officeUpper, shift], (err, result) => {
+            if (err) {
+                console.error('Error al insertar consultorio:', err);
+                return res.status(500).json({ message: 'No se pudo guardar el consultorio en el servidor.' });
+            }
+            res.status(201).json({ message: 'Consultorio registrado correctamente.' });
+        });
+    });
+});
+
+// RUTA API: Eliminar un consultorio por su ID
+app.delete('/api/offices/:id', (req, res) => {
+    const { id } = req.params;
+    const sql = 'DELETE FROM offices WHERE id = ?';
+    pool.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error al eliminar consultorio:', err);
+            return res.status(500).json({ message: 'Error interno al intentar eliminar el consultorio.' });
+        }
+        res.status(200).json({ message: 'Consultorio eliminado correctamente.' });
+    });
+});
+
+
+
+
+
+
+
+
+
 // =========================================================================
 // 4. SERVIR EL HTML
 // =========================================================================

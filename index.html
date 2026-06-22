@@ -49,6 +49,8 @@
         .card-rol { border: 2px solid #ddd; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; }
         .card-coord { border-top: 8px solid var(--morado-issste); }
         .card-archivo { border-top: 8px solid var(--guinda); }
+	.card-office { border-top: 8px solid #db2777 !important; } /* Rosa discreto elegante */
+
 
         /* UI ELEMENTS */
         .btn-save { color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
@@ -127,6 +129,19 @@
         .active-view { display: block !important; }
 
         .error-msg { color: #cc0000; font-weight: bold; margin-top: 10px; display: none; }
+
+
+
+
+
+
+
+
+
+
+
+
+
 </style>
 
 
@@ -197,18 +212,11 @@
                     <p style="font-size: 0.8em; color: #666; text-align: center;">Consulta de estatus de cambios de Consultorio.</p>
                     <button class="btn-save" style="background: #2c4e72" onclick="activarModulo('vista-coordinacion', this)">ESTATUS CAMBIOS DE CONSULTORIO</button>
                 </div>
-
-                <div class="card card-archivo">
-                    <h3>Reporte por Médico</h3>
-                    <p style="font-size: 0.85em; color: #666;">Generación de reporte de citas por médico.</p>
-                    <button class="btn-save" style="background: var(--guinda)" onclick="activarModulo('modulo-rep-medico', this)">REPORTE POR MÉDICO</button>
-                </div>
-
-                <div class="card card-patient">
-                    <h3>Reporte por Fecha</h3>
-                    <p style="font-size: 0.85em; color: #666;">Generación de reporte de citas por fecha.</p>
-                    <button class="btn-save" id="btn-rep-fec" onclick="activarModulo('modulo-rep-fecha', this)">REPORTE POR FECHA</button>
-                </div>
+		<div class="card card-office">
+		    <h3 style="color:#db2777; text-align: center;">Registro de Consultorio</h3>
+		    <p style="font-size: 0.85em; color: #666;">Alta y control de espacios físicos de atención por turno.</p>
+		    <button class="btn-save" style="background: #db2777" onclick="activarModulo('modulo-consultorios', this)">REGISTRO DE CONSULTORIO</button>
+		</div>
             </div>
         </div> 
 
@@ -265,10 +273,10 @@
                             <label for="per-category" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Categoría / Rol:</label>
                             <select id="per-category" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
                                 <option value="médico">Médico</option>
-                                <option value="enfermero">Enfermería</option>
+                                <option value="enfermería">Enfermería</option>
+                                <option value="trabajosocial">Trabajo Social</option>
                                 <option value="archivo">Archivo Clínico</option>
-                                <option value="coordinador">Coordinación Médica</option>
-                                <option value="admin">Administrador</option>
+                                <option value="administrativo">Administrativo</option>
                             </select>
                         </div>
                         <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
@@ -303,6 +311,79 @@
             </div>
         </div>
         <!-- ========================================================================= -->
+
+
+
+
+        <!-- ========================================================================= -->
+        <!-- VISTA 4: NUEVA PANTALLA COMPLETA DE CONSULTORIOS (COLOR ROSA DISCRETO)    -->
+        <!-- ========================================================================= -->
+        <div id="modulo-consultorios" class="view" style="display: none;">
+            
+            <!-- Barra superior con línea divisoria rosa -->
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #db2777; margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Módulo de Control de Consultorios</h2>
+                <button onclick="activarModulo('panel-coordinacion', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#db2777'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
+            </div>
+
+            <!-- Encabezado en Color Rosa Discreto -->
+            <div style="background-color: #db2777; display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
+                <span style="font-weight: bold; font-size: 1.2em;">Formulario de Alta de Consultorios</span>
+                <span style="font-size: 0.9em;">Tabla Objetivo: <strong style="color: #611232;">offices</strong></span>
+                <span style="text-align: right; font-size: 0.85em;">ID: Autoincrementable ✨</span>
+            </div>
+            
+            <!-- Cuerpo del Formulario con fondo rosa pastel muy tenue -->
+            <div style="background: #fdf2f8; border-left: 5px solid #db2777; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <form id="form-registro-consultorio" onsubmit="guardarConsultorioNube(event)">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
+                        <div>
+                            <label for="cons-name" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Identificador / Nombre del Consultorio:</label>
+                            <!-- Acepta texto y números de forma nativa -->
+                            <input type="text" id="cons-name" required placeholder="Ej. Consultorio 5 o Alergología A" style="width: 100%; padding: 10px; border: 1px solid #db2777; border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label for="cons-shift" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Turno de Operación:</label>
+                            <select id="cons-shift" style="width: 100%; padding: 10px; border: 1px solid #db2777; border-radius: 4px; box-sizing: border-box; background: white;">
+                                <option value="Matutino">Matutino</option>
+                                <option value="Vespertino">Vespertino</option>
+                                <option value="Nocturno">Nocturno</option>
+                                <option value="Jornada Acumulada">Jornada Acumulada</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button type="submit" style="background-color: #db2777; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#611232'" onmouseout="this.style.backgroundColor='#db2777'">REGISTRAR EN CLEVER CLOUD</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabla de visualización con cabecera Guinda institucional -->
+            <div style="margin-top: 30px;">
+                <h4 style="color: #611232; margin: 0 0 12px 0; font-family: 'Segoe UI', sans-serif; font-size: 1.1em; border-left: 4px solid #db2777; padding-left: 8px;">Consultorios Activos por Horario</h4>
+                <table id="tabla-consultorios" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: #611232; color: white;">
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">ID</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Consultorio / Área</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Turno</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Fecha Alta</th>
+                            <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #888; padding: 20px;">Esperando activación...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
+
+
 
     </div> 
 </div> 
@@ -439,6 +520,11 @@
         if (moduloId === 'modulo-personal' || moduloId === 'mod-lista') {
             cargarListaPersonalNube();
         }
+
+	// Agrega esta regla dentro de la función activarModulo:
+	if (moduloId === 'modulo-consultorios') {
+	    cargarListaConsultoriosNube();
+	}
     }
 
     // =========================================================================
@@ -553,6 +639,100 @@ async function cargarListaPersonalNube() {
         }
     }
 
+
+    // =========================================================================
+    // 5. OPERACIONES DE CONTROL DE CONSULTORIOS (TABLA OFFICES)
+    // =========================================================================
+    async function guardarConsultorioNube(event) {
+        event.preventDefault();
+
+        const officeName = document.getElementById('cons-name').value.trim().toUpperCase();
+        const shift = document.getElementById('cons-shift').value;
+        const urlServidor = `${BASE_URL}/api/offices`;
+
+        try {
+            const response = await fetch(urlServidor, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ officeName, shift })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('¡Consultorio dado de alta exitosamente en Clever Cloud!');
+                document.getElementById('form-registro-consultorio').reset();
+                cargarListaConsultoriosNube();
+            } else {
+                alert('Error del servidor: ' + (data.message || 'No se pudo guardar.'));
+            }
+        } catch (error) {
+            console.error('Error al guardar consultorio:', error);
+            alert('No se pudo conectar con el servidor.');
+        }
+    }
+
+    async function cargarListaConsultoriosNube() {
+        const tbody = document.querySelector('#tabla-consultorios tbody');
+        if (!tbody) return;
+
+        const urlServidor = `${BASE_URL}/api/offices`;
+
+        try {
+            const response = await fetch(urlServidor);
+            if (!response.ok) throw new Error('Error al obtener datos');
+            
+            const consultorios = await response.json();
+            tbody.innerHTML = '';
+
+            if (consultorios.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #888; padding: 20px;">No hay consultorios registrados en la base de datos.</td></tr>`;
+                return;
+            }
+
+            consultorios.forEach(c => {
+                const fecha = c.created_at ? new Date(c.created_at).toLocaleDateString() : 'N/A';
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>${c.id}</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase; font-weight:bold;">${c.office_name}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${c.shift}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; font-size: 0.85em; color: #555;">${fecha}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
+                        <button onclick="eliminarConsultorioNube(${c.id})" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(fila);
+            });
+        } catch (error) {
+            console.error('Error al cargar consultorios:', error);
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos de consultorios.</td></tr>`;
+        }
+    }
+
+    async function eliminarConsultorioNube(id) {
+        if (!confirm('¿Estás seguro de que deseas eliminar este consultorio?')) return;
+
+        const urlServidor = `${BASE_URL}/api/offices/${id}`;
+
+        try {
+            const response = await fetch(urlServidor, { method: 'DELETE' });
+            if (response.ok) {
+                alert('Consultorio removido correctamente de Clever Cloud.');
+                cargarListaConsultoriosNube();
+            } else {
+                alert('No se pudo eliminar el consultorio.');
+            }
+        } catch (error) {
+            console.error('Error al eliminar consultorio:', error);
+            alert('Error de conexión.');
+        }
+    }
+
+    // Vinculación global
+    window.guardarConsultorioNube = guardarConsultorioNube;
+    window.cargarListaConsultoriosNube = cargarListaConsultoriosNube;
+    window.eliminarConsultorioNube = eliminarConsultorioNube;
     // =========================================================================
     // 5. VINCULACIÓN AL CONTEXTO GLOBAL DE LA VENTANA (WINDOW BINDING)
     // =========================================================================
