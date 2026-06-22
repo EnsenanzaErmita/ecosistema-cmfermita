@@ -5,8 +5,20 @@ const path = require('path');
 
 const app = express();
 
-// 1. MIDDLEWARES
-app.use(cors({ origin: '*' }));
+// =========================================================================
+// 1. MIDDLEWARES (CONFIGURADO CON TU URL REAL DE GITHUB PAGES)
+// =========================================================================
+app.use(cors({
+    origin: [
+        'https://ensenanzaermita.github.io', // Tu dominio oficial de GitHub Pages
+        'http://localhost:3000',
+        'http://127.0.0.1:5500'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
