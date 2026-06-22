@@ -68,7 +68,8 @@ app.post('/api/login', (req, res) => {
 
 // RUTA API: Obtener toda la plantilla médica y administrativa (Tabla: employees)
 app.get('/api/doctors', (req, res) => {
-    const sql = 'SELECT rfc, name, office, shift, category FROM employees ORDER BY name ASC';
+    // CORRECCIÓN: Se eliminó 'office' y se agregaron 'id' y 'created_at'
+    const sql = 'SELECT id, rfc, name, shift, category, created_at FROM employees ORDER BY name ASC';
     
     pool.query(sql, (err, results) => {
         if (err) {
@@ -81,7 +82,8 @@ app.get('/api/doctors', (req, res) => {
 
 // RUTA API: Registrar personal nuevo (Médicos, Enfermeros, Administrativos u Otros)
 app.post('/api/doctors', (req, res) => {
-    const { rfc, name, office, shift, category } = req.body;
+    // CORRECCIÓN: Se removió la variable 'office' de la deconstrucción
+    const { rfc, name, shift, category } = req.body;
     
     if (!rfc || !name) {
         return res.status(400).json({ message: 'El número de empleado y el nombre completo son obligatorios.' });
@@ -98,9 +100,9 @@ app.post('/api/doctors', (req, res) => {
             return res.status(400).json({ message: 'Este número de empleado ya se encuentra registrado en el sistema.' });
         }
 
-        // Inserción limpia de los 5 campos en la tabla employees
-        const insertSql = 'INSERT INTO employees (rfc, name, office, shift, category) VALUES (?, ?, ?, ?, ?)';
-        pool.query(insertSql, [rfc, name, office || 'No especificado', shift || 'Matutino', category || 'Médico'], (err, result) => {
+        // CORRECCIÓN: Inserción limpia de 4 campos en la tabla employees (id es automático y created_at toma CURRENT_TIMESTAMP)
+        const insertSql = 'INSERT INTO employees (rfc, name, shift, category) VALUES (?, ?, ?, ?)';
+        pool.query(insertSql, [rfc, name, shift || 'Matutino', category || 'médico'], (err, result) => {
             if (err) {
                 console.error('Error al insertar registro:', err);
                 return res.status(500).json({ message: 'No se pudieron guardar los datos en el servidor.' });

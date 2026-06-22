@@ -162,7 +162,7 @@
             <div class="teaching-hero">
                 <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
                 <div id="phrase-container">"Cargando pensamiento institucional..."</div>
-            </div> <!-- CORRECCIÓN 1: Se cerró correctamente el teaching-hero -->
+            </div>
 
             <div class="login-grid">
                 <div class="card card-coord">
@@ -173,14 +173,13 @@
             </div>
         </div>
 
-        <!-- PANEL DE COORDINACIÓN (OCULTO POR DEFECTO) -->
+        <!-- PANEL DE COORDINACIÓN -->
         <div id="panel-coordinacion" class="view">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--guinda); margin-bottom: 20px; padding-bottom: 10px;">
                 <h2 style="color:var(--guinda); margin:0;">Panel Archivo Clínico</h2>
                 <button onclick="location.reload()" style="background:#cc0000; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Cerrar Sesión</button>
             </div> 
 
-            <!-- CORRECCIÓN 2: Se renombró el ID y se quitó active-view para evitar duplicados -->
             <div id="section-panel-bienvenida">
                 <div class="teaching-hero">
                     <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
@@ -188,12 +187,15 @@
                 </div>
             </div>
 
+            <!-- TARJETAS DEL MENÚ -->
             <div class="login-grid">
                 <div class="card card-admin">
-                    <h3 style="color:var(--dorado-calidad); text-align: center;">Registro de Médicos</h3>
-                    <p style="font-size: 0.85em; color: #666;">Alta y modificación de plantilla médica.</p>
-                    <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('modulo-medicos', this)">REGISTRO DE MÉDICOS</button>
-                    <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('mod-lista', this)">VER PLANTILLA DE MÉDICOS</button>
+                    <!-- SE RENOMBRÓ A REGISTRO DE PERSONAL -->
+                    <h3 style="color:var(--dorado-calidad); text-align: center;">Registro de Personal</h3>
+                    <p style="font-size: 0.85em; color: #666;">Alta y modificación de plantilla general del personal.</p>
+                    <!-- Apunta al nuevo módulo de captura -->
+                    <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('modulo-personal', this)">REGISTRO DE PERSONAL</button>
+                    <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('mod-lista', this)">VER PLANTILLA DE PERSONAL</button>
                 </div>
 
                 <div class="card card-doctor">
@@ -213,11 +215,94 @@
                     <p style="font-size: 0.85em; color: #666;">Generación de reporte de citas por fecha.</p>
                     <button class="btn-save" id="btn-rep-fec" onclick="activarModulo('modulo-rep-fecha', this)">REPORTE POR FECHA</button>
                 </div>
-            </div> <!-- CORRECCIÓN 3: Se cerró correctamente el login-grid interno -->
+            </div>
+
+            <!-- ========================================================== -->
+            <!-- NUEVA PANTALLA DE CAPTURA: REGISTRO DE PERSONAL (users)     -->
+            <!-- ========================================================== -->
+            <div id="modulo-personal" class="section-content view">
+                <div class="header-registro">
+                    <span style="font-weight: bold; font-size: 1.2em;">Formulario de Alta de Personal</span>
+                    <span>Tabla Objetivo: <strong>users</strong></span>
+                    <span style="text-align: right; font-size: 0.85em;">ID: Autoincrementable ✨</span>
+                </div>
+                
+                <div class="form-box panel-nuevo">
+                    <form id="form-registro-personal" onsubmit="guardarPersonalNube(event)">
+                        <div class="grid-form">
+                            <div>
+                                <label for="per-rfc">RFC / Número de Empleado:</label>
+                                <input type="text" id="per-rfc" required placeholder="Ej. ABCD123456XYZ">
+                            </div>
+                            <div>
+                                <label for="per-name">Nombre Completo:</label>
+                                <input type="text" id="per-name" required placeholder="Nombre(s) Apellidos">
+                            </div>
+                            <div>
+                                <label for="per-shift">Turno:</label>
+                                <select id="per-shift">
+                                    <option value="Matutino">Matutino</option>
+                                    <option value="Vespertino">Vespertino</option>
+                                    <option value="Nocturno">Nocturno</option>
+                                    <option value="Jornada Acumulada">Jornada Acumulada</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="per-category">Categoría / Rol:</label>
+                                <select id="per-category">
+                                    <option value="médico">Médico</option>
+                                    <option value="enfermero">Enfermería</option>
+                                    <option value="archivo">Archivo Clínico</option>
+                                    <option value="coordinador">Coordinación Médica</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </div>
+                            <div style="grid-column: span 2; display: flex; align-items: flex-end;">
+                                <button type="submit" class="btn-action" style="margin: 0; height: 42px;">REGISTRAR EN CLEVER CLOUD</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabla de previsualización local/nube -->
+                <div style="margin-top: 25px;">
+                    <h4 style="color: var(--guinda); margin: 0 0 10px 0;">Personal Registrado Recientemente</h4>
+                    <table id="tabla-personal-usuarios">
+                        <thead>
+                            <tr>
+                                <th>ID (Auto)</th>
+                                <th>RFC</th>
+                                <th>Nombre</th>
+                                <th>Turno</th>
+                                <th>Categoría</th>
+                                <th>Fecha Registro (created_at)</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Se llena dinámicamente con JavaScript -->
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: #888;">Cargando datos desde la base de datos de Clever Cloud...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- ========================================================== -->
+
         </div> 
 
     </div> 
 </div> 
+
+
+
+
+
+
+
+
+
 
 <footer>
     <p>&copy; 2026 Todos los derechos reservados</p>
