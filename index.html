@@ -1235,7 +1235,7 @@ async function cargarListaPersonalNube() {
     async function guardarSolicitudCambioNube(event) {
         event.preventDefault(); // Evitamos que la página se recargue por defecto
 
-        // Estructuramos el paquete de datos limpiando espacios y forzando mayúsculas
+        // Estructuramos el paquete de datos unificando al asegurado con sus beneficiarios temporales
         const payload = {
             paternalLastname: document.getElementById('sol-paternal').value.trim().toUpperCase(),
             maternalLastname: document.getElementById('sol-maternal').value.trim().toUpperCase(),
@@ -1252,33 +1252,36 @@ async function cargarListaPersonalNube() {
             maritalStatus: document.getElementById('sol-civil').value,
             phone: document.getElementById('sol-phone').value.trim(),
             insuredType: document.getElementById('sol-type').value,
-            totalFamilyMembers: parseInt(document.getElementById('sol-members').value)
+            totalFamilyMembers: parseInt(document.getElementById('sol-members').value),
+            beneficiaries: listaBeneficiariosTemporales // Enviamos el arreglo completo de hasta 10 personas
         };
 
-        // Endpoint exacto hacia tu servidor Express en Render
         const urlServidor = `${BASE_URL}/api/office-changes`;
 
         try {
             const response = await fetch(urlServidor, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json' 
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                alert('¡Su trámite de cambio de consultorio ha sido registrado con éxito en Clever Cloud! Estatus: PENDIENTE.');
-                document.getElementById('form-solicitud-cambio').reset(); // Limpiamos los campos
-                activarModulo('panel-derechohabientes', null); // Regresamos de forma automática al menú del paciente
+                alert('¡Su trámite de cambio de consultorio y beneficiarios ha sido registrado con éxito en Clever Cloud! Estatus: PENDIENTE.');
+                
+                // Limpieza absoluta de formularios y acumuladores locales
+                document.getElementById('form-solicitud-cambio').reset();
+                listaBeneficiariosTemporales = []; 
+                renderizarTablaBeneficiariosLocal(); // Oculta y limpia la mini tabla interna
+                
+                activarModulo('panel-derechohabientes', null); // Regresa de forma automática al menú del paciente
             } else {
                 alert('Error en el trámite: ' + (data.message || 'No se pudo procesar la solicitud.'));
             }
         } catch (error) {
             console.error('Error de red al tramitar cambio de consultorio:', error);
-            alert('No se pudo establecer conexión con el servidor de Render. Asegúrese de que el backend esté activo.');
+            alert('No se pudo establecer conexión con el servidor de Render.');
         }
     }
 

@@ -320,25 +320,29 @@ app.delete('/api/assignments/:employeeId', (req, res) => {
 
 
 
-// RUTA API: Registrar una solicitud de cambio de consultorio con todos los datos del asegurado
+// RUTA API: Registrar trámite de cambio de consultorio incluyendo beneficiarios serializados
 app.post('/api/office-changes', (req, res) => {
     const {
         paternalLastname, maternalLastname, firstNames, rfc,
         isWorker, isPensioner, street, extNum, intNum, colonia,
-        postalCode, age, maritalStatus, phone, insuredType, totalFamilyMembers
+        postalCode, age, maritalStatus, phone, insuredType, totalFamilyMembers,
+        beneficiaries // Arreglo de beneficiarios dinámicos desde el Frontend
     } = req.body;
 
-    // Validación estricta de campos obligatorios en el servidor
     if (!paternalLastname || !firstNames || !rfc || !street || !extNum || !colonia || !postalCode || !age || !phone) {
         return res.status(400).json({ message: 'Todos los datos obligatorios del asegurado deben ser requisitados.' });
     }
+
+    // Convertimos el arreglo de beneficiarios a una cadena de texto JSON para meterlo en una sola columna lineal
+    const beneficiariesJson = beneficiaries ? JSON.stringify(beneficiaries) : '[]';
 
     const insertSql = `
         INSERT INTO office_change_requests (
             paternal_lastname, maternal_lastname, first_names, rfc,
             is_worker, is_pensioner, street, ext_num, int_num, colonia,
-            postal_code, age, marital_status, phone, insured_type, total_family_members
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            postal_code, age, marital_status, phone, insured_type, total_family_members,
+            beneficiaries
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     pool.query(insertSql, [
@@ -357,10 +361,11 @@ app.post('/api/office-changes', (req, res) => {
         maritalStatus,
         phone.trim(),
         insuredType,
-        parseInt(totalFamilyMembers)
+        parseInt(totalFamilyMembers),
+        beneficiariesJson // Se guarda completo en la misma línea
     ], (err, result) => {
         if (err) {
-            console.error('Error al insertar trámite de cambio de consultorio:', err);
+            console.error('Error al insertar trámite con beneficiarios:', err);
             return res.status(500).json({ message: 'No se pudo guardar la solicitud en el servidor.' });
         }
         res.status(201).json({ message: 'Solicitud tramitada correctamente en Clever Cloud.' });
