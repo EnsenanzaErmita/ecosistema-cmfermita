@@ -222,38 +222,40 @@
         </div> 
 
 
-        <!-- ========================================== -->
-        <!-- VISTA 3: NUEVA PANTALLA COMPLETA DE REGISTRO (COLOR DORADO) -->
-        <!-- ========================================== -->
-        <div id="modulo-personal" class="view">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--dorado-calidad); margin-bottom: 20px; padding-bottom: 10px;">
-                <h2 style="color:var(--guinda); margin:0;">Módulo de Control de Personal</h2>
+        <!-- ========================================================================= -->
+        <!-- VISTA 3: NUEVA PANTALLA COMPLETA DE REGISTRO (COLOR DORADO INSTITUCIONAL) -->
+        <!-- ========================================================================= -->
+        <div id="modulo-personal" class="view" style="display: none;">
+            
+            <!-- Barra superior con línea divisoria dorada -->
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #b38e5d; margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Módulo de Control de Personal</h2>
                 <!-- Botón para regresar al menú de coordinación principal -->
-                <button onclick="activarModulo('panel-coordinacion', this)" style="background:var(--gris-oscuro); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer; font-weight:bold;">← Volver al Panel</button>
+                <button onclick="activarModulo('panel-coordinacion', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#b38e5d'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
             </div>
 
-            <!-- Encabezado con color Dorado Institucional -->
-            <div class="header-registro" style="background-color: var(--dorado-calidad); display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0;">
+            <!-- Encabezado del Bloque en Color Dorado de Calidad -->
+            <div style="background-color: #b38e5d; display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
                 <span style="font-weight: bold; font-size: 1.2em;">Formulario de Alta de Personal</span>
-                <span>Tabla Objetivo: <strong>employees</strong></span>
+                <span style="font-size: 0.9em;">Tabla Objetivo: <strong style="color: #611232;">employees</strong></span>
                 <span style="text-align: right; font-size: 0.85em;">ID: Autoincrementable ✨</span>
             </div>
             
-            <!-- Contenedor con borde Dorado de Calidad -->
-            <div class="form-box" style="background: #fdfaf6; border-left: 5px solid var(--dorado-calidad); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none;">
+            <!-- Cuerpo del Formulario con fondo arena suave y borde izquierdo Dorado -->
+            <div style="background: #fdfaf6; border-left: 5px solid #b38e5d; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                 <form id="form-registro-personal" onsubmit="guardarPersonalNube(event)">
-                    <div class="grid-form">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
                         <div>
-                            <label for="per-rfc" style="color: var(--guinda); font-weight: bold;">RFC / Número de Empleado:</label>
-                            <input type="text" id="per-rfc" required placeholder="Ej. ABCD123456XYZ" style="border: 1px solid var(--dorado-calidad);">
+                            <label for="per-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">RFC / Número de Empleado:</label>
+                            <input type="text" id="per-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
                         <div>
-                            <label for="per-name" style="color: var(--guinda); font-weight: bold;">Nombre Completo:</label>
-                            <input type="text" id="per-name" required placeholder="Nombre(s) Apellidos" style="border: 1px solid var(--dorado-calidad);">
+                            <label for="per-name" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Nombre Completo:</label>
+                            <input type="text" id="per-name" required placeholder="Nombre(s) Apellidos" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
                         <div>
-                            <label for="per-shift" style="color: var(--guinda); font-weight: bold;">Turno:</label>
-                            <select id="per-shift" style="border: 1px solid var(--dorado-calidad);">
+                            <label for="per-shift" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Turno:</label>
+                            <select id="per-shift" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
                                 <option value="Matutino">Matutino</option>
                                 <option value="Vespertino">Vespertino</option>
                                 <option value="Nocturno">Nocturno</option>
@@ -261,8 +263,8 @@
                             </select>
                         </div>
                         <div>
-                            <label for="per-category" style="color: var(--guinda); font-weight: bold;">Categoría / Rol:</label>
-                            <select id="per-category" style="border: 1px solid var(--dorado-calidad);">
+                            <label for="per-category" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Categoría / Rol:</label>
+                            <select id="per-category" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
                                 <option value="médico">Médico</option>
                                 <option value="enfermero">Enfermería</option>
                                 <option value="archivo">Archivo Clínico</option>
@@ -270,38 +272,38 @@
                                 <option value="admin">Administrador</option>
                             </select>
                         </div>
-                        <div style="grid-column: span 2; display: flex; align-items: flex-end;">
-                            <!-- Botón con color Dorado de Calidad -->
-                            <button type="submit" class="btn-action" style="margin: 0; height: 42px; background-color: var(--dorado-calidad); color: white; border: none; border-radius: 4px; font-weight: bold; width: 100%; cursor: pointer;">REGISTRAR EN CLEVER CLOUD</button>
+                        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
+                            <!-- Botón de Envío en Color Dorado de Calidad -->
+                            <button type="submit" style="background-color: #b38e5d; color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#611232'" onmouseout="this.style.backgroundColor='#b38e5d'">REGISTRAR EN CLEVER CLOUD</button>
                         </div>
                     </div>
                 </form>
             </div>
 
-            <!-- Tabla de previsualización de la base de datos -->
-            <div style="margin-top: 25px;">
-                <h4 style="color: var(--guinda); margin: 0 0 10px 0;">Personal Registrado Recientemente (employees)</h4>
-                <table id="tabla-personal-usuarios">
-                    <thead style="background: #f4f4f4; color: var(--guinda);">
-                        <tr>
-                            <th>ID</th>
-                            <th>RFC</th>
-                            <th>Nombre</th>
-                            <th>Turno</th>
-                            <th>Categoría</th>
-                            <th>Fecha Registro (created_at)</th>
-                            <th>Acciones</th>
+            <!-- Tabla de visualización de datos con cabecera Guinda institucional -->
+            <div style="margin-top: 30px;">
+                <h4 style="color: #611232; margin: 0 0 12px 0; font-family: 'Segoe UI', sans-serif; font-size: 1.1em; border-left: 4px solid #b38e5d; padding-left: 8px;">Plantilla de Personal Registrado (employees)</h4>
+                <table id="tabla-personal-usuarios" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: #611232; color: white;">
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">ID</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">RFC</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Nombre</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Turno</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Categoría</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Fecha Registro (created_at)</th>
+                            <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td colspan="7" style="text-align: center; color: #888;">Cargando datos desde la base de datos de Clever Cloud...</td>
+                            <td colspan="7" style="text-align: center; color: #888; padding: 20px;">Cargando datos desde la base de datos de Clever Cloud...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-        <!-- ========================================== -->
+        <!-- ========================================================================= -->
 
     </div> 
 </div> 
