@@ -351,13 +351,16 @@
 
 
 
-
 <script>
-
-// Asegúrate de que esta sea la LÍNEA 1 de tu archivo de scripts:
-    const BASE_URL = 'https://ecosistema-cmfermita.onrender.com'; // <-- Tu URL de Render    
+    // =========================================================================
+    // 1. CONFIGURACIÓN GLOBAL Y CONEXIÓN CON RENDER
+    // =========================================================================
+    const BASE_URL = 'https://ecosistema-cmfermita.onrender.com'; // Enlace absoluto oficial hacia tu backend
     let moduloDestino = '';
 
+    // =========================================================================
+    // 2. SISTEMA DE LOGIN Y CONTROL DE MODALES
+    // =========================================================================
     function entrar(rol) {
         if (rol === 'coordinacion' || rol === 'doctor') {
             moduloDestino = rol;
@@ -370,7 +373,6 @@
             }
             document.getElementById('login-modal').style.display = 'flex';
         } else {
-            // Esto es para tus otros paneles mientras los integras
             document.getElementById('section-login').classList.remove('active-view');
             const targetPanel = document.getElementById(`panel-${rol}`);
             if (targetPanel) targetPanel.classList.add('active-view');
@@ -401,6 +403,7 @@
 
             document.getElementById('section-login').classList.remove('active-view');
             document.getElementById('panel-coordinacion').classList.add('active-view');
+            document.getElementById('panel-coordinacion').style.display = 'block'; // Forzado visual de tu menú
 
         } catch (error) {
             alert(error.message);
@@ -408,129 +411,146 @@
         }
     }
 
+    // =========================================================================
+    // 3. CONTROL DE VISTAS INDEPENDIENTES (CONMUTADOR DE MÓDULOS)
+    // =========================================================================
+    function activarModulo(moduloId, boton) {
+        const todasLasVistas = document.querySelectorAll('.view');
+        todasLasVistas.forEach(vista => {
+            vista.classList.remove('active-view');
+            vista.style.display = 'none';
+        });
 
+        const moduloObjetivo = document.getElementById(moduloId);
+        if (moduloObjetivo) {
+            moduloObjetivo.classList.add('active-view');
+            moduloObjetivo.style.display = 'block';
+        }
 
-
-
-
-
-
-
-
-
-// OBLIGATORIO: Actualiza también tu función activarModulo para que use el nuevo nombre
-function activarModulo(moduloId, boton) {
-    const todasLasVistas = document.querySelectorAll('.view');
-    todasLasVistas.forEach(vista => {
-        vista.classList.remove('active-view');
-        vista.style.display = 'none';
-    });
-
-    const moduloObjetivo = document.getElementById(moduloId);
-    if (moduloObjetivo) {
-        moduloObjetivo.classList.add('active-view');
-        moduloObjetivo.style.display = 'block';
-    }
-
-    // CORRECCIÓN: Si entra a los módulos de personal, llama al nuevo nombre de función
-    if (moduloId === 'modulo-personal' || moduloId === 'mod-lista') {
-        if (typeof cargarListaPersonalNube === 'function') {
+        // Al ingresar al módulo de control de personal, se actualiza la tabla de manera automática
+        if (moduloId === 'modulo-personal' || moduloId === 'mod-lista') {
             cargarListaPersonalNube();
         }
     }
-}
 
+    // =========================================================================
+    // 4. OPERACIONES DE CONTROL DE PERSONAL (CONEXIÓN DIRECTA A CLEVER CLOUD VIA RENDER)
+    // =========================================================================
 
+    // ALTA: Registra un nuevo empleado en la base de datos
+    async function guardarPersonalNube(event) {
+        event.preventDefault(); // Evitamos redirecciones erróneas de GitHub Pages hacia un error 404
 
-async function guardarPersonalNube(event) {
-    event.preventDefault(); // Evitamos que la página se recargue
+        const rfc = document.getElementById('per-rfc').value.trim();
+        const name = document.getElementById('per-name').value.trim();
+        const shift = document.getElementById('per-shift').value;
+        const category = document.getElementById('per-category').value;
 
-    // Capturamos la información de los inputs del formulario
-    const rfc = document.getElementById('per-rfc').value.trim();
-    const name = document.getElementById('per-name').value.trim();
-    const shift = document.getElementById('per-shift').value;
-    const category = document.getElementById('per-category').value;
+        // CORRECCIÓN: Ahora utiliza la constante global absoluta vinculada a tu API en Render
+        const urlServidor = `${BASE_URL}/api/doctors`;
 
-    // TRUCO PARA RENDER: Obtiene de forma automática el dominio real de tu app (ej. https://onrender.com)
-    const urlServidor = 'https://ecosistema-cmfermita.onrender.com';
+        try {
+            const response = await fetch(urlServidor, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rfc, name, shift, category })
+            });
 
-    try {
-        // Hacemos la petición POST apuntando al servidor de Render de forma absoluta
-        const response = await fetch(urlServidor, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ rfc, name, shift, category })
-        });
+            const data = await response.json();
 
-        const data = await response.json();
-
-        if (response.ok) {
-            alert('¡Personal registrado exitosamente en Clever Cloud!');
-            document.getElementById('form-registro-personal').reset(); // Limpiamos formulario
-            cargarListaPersonalNube(); // Actualizamos la tabla automáticamente
-        } else {
-            alert('Error del servidor: ' + (data.message || 'No se pudo guardar.'));
+            if (response.ok) {
+                alert('¡Personal registrado exitosamente en Clever Cloud!');
+                document.getElementById('form-registro-personal').reset(); // Reseteamos inputs
+                cargarListaPersonalNube(); // Actualizamos la tabla
+            } else {
+                alert('Error del servidor: ' + (data.message || 'No se pudo guardar.'));
+            }
+        } catch (error) {
+            console.error('Error de red al intentar registrar:', error);
+            alert('No se pudo conectar con el servidor. Verifica tu conexión de Render.');
         }
-    } catch (error) {
-        console.error('Error de red al intentar registrar:', error);
-        alert('No se pudo conectar con el servidor. Verifica tu conexión de Render.');
     }
-}
 
-// OBLIGATORIO: Haz el mismo cambio en tu función de cargar tabla para que tampoco falle
-async function cargarListaPersonalNube() {
-    const tbody = document.querySelector('#tabla-personal-usuarios tbody');
-    if (!tbody) return;
+    // CONSULTA: Trae todos los registros de la tabla employees y los plasma en el HTML
+    async function cargarListaPersonalNube() {
+        const tbody = document.querySelector('#tabla-personal-usuarios tbody');
+        if (!tbody) return;
 
-    const urlServidor = `${window.location.origin}/api/doctors`;
+        // CORRECCIÓN: Se cambió window.location.origin por la constante absoluta BASE_URL
+        const urlServidor = `${BASE_URL}/api/doctors`;
 
-    try {
-        const response = await fetch(urlServidor);
-        if (!response.ok) throw new Error('Error al obtener datos');
-        
-        const personal = await response.json();
-        tbody.innerHTML = ''; 
+        try {
+            const response = await fetch(urlServidor);
+            if (!response.ok) throw new Error('Error al obtener datos');
+            
+            const personal = await response.json();
+            tbody.innerHTML = ''; // Limpiamos el texto de espera
 
-        if (personal.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #888;">No hay personal registrado en la base de datos.</td></tr>`;
-            return;
+            if (personal.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #888; padding: 20px;">No hay personal registrado en la base de datos.</td></tr>`;
+                return;
+            }
+
+            personal.forEach(emp => {
+                const fecha = emp.created_at ? new Date(emp.created_at).toLocaleString() : 'N/A';
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>${emp.id}</strong></td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${emp.rfc}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${emp.name}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${emp.shift}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;"><span class="badge" style="background:#e0f2fe; color:#0369a1; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em;">${emp.category}</span></td>
+                    <td style="padding: 12px; border: 1px solid #ddd; font-size: 0.85em; color: #555;">${fecha}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
+                        <button onclick="eliminarPersonalNube('${emp.rfc}')" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(fila);
+            });
+        } catch (error) {
+            console.error('Error al cargar la plantilla de personal:', error);
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos de Clever Cloud.</td></tr>`;
         }
-
-        personal.forEach(emp => {
-            const fecha = emp.created_at ? new Date(emp.created_at).toLocaleString() : 'N/A';
-            const fila = document.createElement('tr');
-            fila.innerHTML = `
-                <td><strong>${emp.id}</strong></td>
-                <td>${emp.rfc}</td>
-                <td>${emp.name}</td>
-                <td>${emp.shift}</td>
-                <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">${emp.category}</span></td>
-                <td style="font-size: 0.85em; color: #555;">${fecha}</td>
-                <td>
-                    <button onclick="eliminarPersonalNube('${emp.rfc}')" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
-                </td>
-            `;
-            tbody.appendChild(fila);
-        });
-    } catch (error) {
-        console.error('Error al cargar la plantilla de personal:', error);
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #cc0000; font-weight:bold;">Error al conectar con la base de datos de Clever Cloud.</td></tr>`;
     }
-}
 
-// Vinculamos de nuevo al entorno global
-window.guardarPersonalNube = guardarPersonalNube;
-window.cargarListaPersonalNube = cargarListaPersonalNube;
+    // BAJA: Remueve registros mediante su RFC
+    async function eliminarPersonalNube(rfc) {
+        if (!confirm(`¿Estás seguro de que deseas eliminar al empleado con RFC: ${rfc}?`)) return;
 
+        const urlServidor = `${BASE_URL}/api/doctors/${rfc}`;
 
+        try {
+            const response = await fetch(urlServidor, { method: 'DELETE' });
+            const data = await response.json();
 
+            if (response.ok) {
+                alert('Registro eliminado correctamente de Clever Cloud.');
+                cargarListaPersonalNube(); // Recarga la tabla de personal
+            } else {
+                alert('Error al eliminar: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error al intentar eliminar:', error);
+            alert('Error de conexión al eliminar el registro.');
+        }
+    }
 
-
-
-
-
+    // =========================================================================
+    // 5. VINCULACIÓN AL CONTEXTO GLOBAL DE LA VENTANA (WINDOW BINDING)
+    // =========================================================================
+    window.entrar = entrar;
+    window.cerrarLogin = cerrarLogin;
+    window.procesarLogin = procesarLogin;
+    window.activarModulo = activarModulo;
+    window.guardarPersonalNube = guardarPersonalNube;
+    window.cargarListaPersonalNube = cargarListaPersonalNube;
+    window.eliminarPersonalNube = eliminarPersonalNube;
 </script>
+
+
+
+
+
+
 </body>
 </html>
