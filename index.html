@@ -240,10 +240,18 @@
                             <label for="per-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">RFC / Número de Empleado:</label>
                             <input type="text" id="per-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
-                        <div>
-                            <label for="per-name" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Nombre Completo:</label>
-                            <input type="text" id="per-name" required placeholder="Nombre(s) Apellidos" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
-                        </div>
+			<div>
+			    <label for="per-firstname" style="color: var(--guinda); font-weight: bold;">Nombre(s):</label>
+			    <input type="text" id="per-firstname" required placeholder="Ej. Manuel Alejandro">
+			</div>
+			<div>
+			    <label for="per-paternal" style="color: var(--guinda); font-weight: bold;">Apellido Paterno:</label>
+			    <input type="text" id="per-paternal" required placeholder="Ej. González">
+			</div>
+			<div>
+			    <label for="per-maternal" style="color: var(--guinda); font-weight: bold;">Apellido Materno:</label>
+			    <input type="text" id="per-maternal" placeholder="Ej. Zamudio">
+			</div>
                         <div>
                             <label for="per-shift" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Turno:</label>
                             <select id="per-shift" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
@@ -438,80 +446,90 @@
     // =========================================================================
 
     // ALTA: Registra un nuevo empleado en la base de datos
-    async function guardarPersonalNube(event) {
-        event.preventDefault(); // Evitamos redirecciones erróneas de GitHub Pages hacia un error 404
 
-        const rfc = document.getElementById('per-rfc').value.trim();
-        const name = document.getElementById('per-name').value.trim();
-        const shift = document.getElementById('per-shift').value;
-        const category = document.getElementById('per-category').value;
+async function guardarPersonalNube(event) {
+    event.preventDefault();
 
-        // CORRECCIÓN: Ahora utiliza la constante global absoluta vinculada a tu API en Render
-        const urlServidor = `${BASE_URL}/api/doctors`;
+    // Captura de los 3 nuevos campos individuales
+    const rfc = document.getElementById('per-rfc').value.trim().toUpperCase();
+    const firstName = document.getElementById('per-firstname').value.trim().toUpperCase();
+    const lastNamePaternal = document.getElementById('per-paternal').value.trim().toUpperCase();
+    const lastNameMaternal = document.getElementById('per-maternal').value.trim().toUpperCase();
+    const shift = document.getElementById('per-shift').value;
+    const category = document.getElementById('per-category').value;
 
-        try {
-            const response = await fetch(urlServidor, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rfc, name, shift, category })
-            });
+    const urlServidor = `${BASE_URL}/api/doctors`;
 
-            const data = await response.json();
+    try {
+        const response = await fetch(urlServidor, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rfc, firstName, lastNamePaternal, lastNameMaternal, shift, category })
+        });
 
-            if (response.ok) {
-                alert('¡Personal registrado exitosamente en Clever Cloud!');
-                document.getElementById('form-registro-personal').reset(); // Reseteamos inputs
-                cargarListaPersonalNube(); // Actualizamos la tabla
-            } else {
-                alert('Error del servidor: ' + (data.message || 'No se pudo guardar.'));
-            }
-        } catch (error) {
-            console.error('Error de red al intentar registrar:', error);
-            alert('No se pudo conectar con el servidor. Verifica tu conexión de Render.');
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('¡Personal registrado exitosamente con desglose de nombre!');
+            document.getElementById('form-registro-personal').reset(); 
+            cargarListaPersonalNube(); 
+        } else {
+            alert('Error del servidor: ' + (data.message || 'No se pudo guardar.'));
         }
+    } catch (error) {
+        console.error('Error de red al intentar registrar:', error);
+        alert('No se pudo conectar con el servidor.');
     }
+}
 
-    // CONSULTA: Trae todos los registros de la tabla employees y los plasma en el HTML
-    async function cargarListaPersonalNube() {
-        const tbody = document.querySelector('#tabla-personal-usuarios tbody');
-        if (!tbody) return;
+async function cargarListaPersonalNube() {
+    const tbody = document.querySelector('#tabla-personal-usuarios tbody');
+    if (!tbody) return;
 
-        // CORRECCIÓN: Se cambió window.location.origin por la constante absoluta BASE_URL
-        const urlServidor = `${BASE_URL}/api/doctors`;
+    const urlServidor = `${BASE_URL}/api/doctors`;
 
-        try {
-            const response = await fetch(urlServidor);
-            if (!response.ok) throw new Error('Error al obtener datos');
+    try {
+        const response = await fetch(urlServidor);
+        if (!response.ok) throw new Error('Error al obtener datos');
+        
+        const personal = await response.json();
+        tbody.innerHTML = ''; 
+
+        if (personal.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #888; padding: 20px;">No hay personal registrado.</td></tr>`;
+            return;
+        }
+
+        personal.forEach(emp => {
+            const fecha = emp.created_at ? new Date(emp.created_at).toLocaleString() : 'N/A';
             
-            const personal = await response.json();
-            tbody.innerHTML = ''; // Limpiamos el texto de espera
+            // Presentamos el nombre ordenado de forma elegante: Apellidos, Nombres
+            const nombreMostrar = emp.last_name_paternal 
+                ? `${emp.last_name_paternal} ${emp.last_name_maternal || ''}, ${emp.first_name}` 
+                : emp.name; // Si es un registro viejo que no tiene desglose, usa el campo plano anterior
 
-            if (personal.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #888; padding: 20px;">No hay personal registrado en la base de datos.</td></tr>`;
-                return;
-            }
-
-            personal.forEach(emp => {
-                const fecha = emp.created_at ? new Date(emp.created_at).toLocaleString() : 'N/A';
-                const fila = document.createElement('tr');
-                fila.innerHTML = `
-                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>${emp.id}</strong></td>
-                    <td style="padding: 12px; border: 1px solid #ddd;">${emp.rfc}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;">${emp.name}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;">${emp.shift}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;"><span class="badge" style="background:#e0f2fe; color:#0369a1; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em;">${emp.category}</span></td>
-                    <td style="padding: 12px; border: 1px solid #ddd; font-size: 0.85em; color: #555;">${fecha}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
-                        <button onclick="eliminarPersonalNube('${emp.rfc}')" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
-                    </td>
-                `;
-                tbody.appendChild(fila);
-            });
-        } catch (error) {
-            console.error('Error al cargar la plantilla de personal:', error);
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos de Clever Cloud.</td></tr>`;
-        }
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td style="padding: 12px; border: 1px solid #ddd;"><strong>${emp.id}</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${emp.rfc}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase;">${nombreMostrar}</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${emp.shift}</td>
+                <td style="padding: 12px; border: 1px solid #ddd;"><span class="badge" style="background:#e0f2fe; color:#0369a1; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em;">${emp.category}</span></td>
+                <td style="padding: 12px; border: 1px solid #ddd; font-size: 0.85em; color: #555;">${fecha}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
+                    <button onclick="eliminarPersonalNube('${emp.rfc}')" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
+                </td>
+            `;
+            tbody.appendChild(fila);
+        });
+    } catch (error) {
+        console.error('Error al cargar la plantilla de personal:', error);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos.</td></tr>`;
     }
+}
+
+
+
 
     // BAJA: Remueve registros mediante su RFC
     async function eliminarPersonalNube(rfc) {

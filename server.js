@@ -78,10 +78,10 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// RUTA API: Obtener toda la plantilla médica y administrativa (Tabla: employees)
+// RUTA API: Obtener toda la plantilla con los nombres separados
 app.get('/api/doctors', (req, res) => {
-    // CORRECCIÓN: Se eliminó 'office' y se agregaron 'id' y 'created_at'
-    const sql = 'SELECT id, rfc, name, shift, category, created_at FROM employees ORDER BY name ASC';
+    // Traemos los campos desglosados y mantenemos 'name' por compatibilidad si se requiere
+    const sql = 'SELECT id, rfc, first_name, last_name_paternal, last_name_maternal, name, shift, category, created_at FROM employees ORDER BY last_name_paternal ASC, first_name ASC';
     
     pool.query(sql, (err, results) => {
         if (err) {
@@ -92,13 +92,14 @@ app.get('/api/doctors', (req, res) => {
     });
 });
 
-// RUTA API: Registrar personal nuevo (Médicos, Enfermeros, Administrativos u Otros)
+
+
+// RUTA API: Registrar personal con nombre desglosado
 app.post('/api/doctors', (req, res) => {
-    // CORRECCIÓN: Se removió la variable 'office' de la deconstrucción
-    const { rfc, name, shift, category } = req.body;
+    const { rfc, firstName, lastNamePaternal, lastNameMaternal, shift, category } = req.body;
     
-    if (!rfc || !name) {
-        return res.status(400).json({ message: 'El número de empleado y el nombre completo son obligatorios.' });
+    if (!rfc || !firstName || !lastNamePaternal) {
+        return res.status(400).json({ message: 'El RFC, Nombre y Apellido Paterno son obligatorios.' });
     }
 
     // Validamos duplicados de número de empleado (RFC)
@@ -109,12 +110,15 @@ app.post('/api/doctors', (req, res) => {
             return res.status(500).json({ message: 'Error interno en el servidor.' });
         }
         if (results && results.length > 0) {
-            return res.status(400).json({ message: 'Este número de empleado ya se encuentra registrado en el sistema.' });
+            return res.status(400).json({ message: 'Este número de empleado ya se encuentra registrado.' });
         }
 
-        // CORRECCIÓN: Inserción limpia de 4 campos en la tabla employees (id es automático y created_at toma CURRENT_TIMESTAMP)
-        const insertSql = 'INSERT INTO employees (rfc, name, shift, category) VALUES (?, ?, ?, ?)';
-        pool.query(insertSql, [rfc, name, shift || 'Matutino', category || 'médico'], (err, result) => {
+        // Concatenamos el nombre completo de forma automática para llenar el campo 'name' viejo y no romper vistas antiguas
+        const nameCompleto = `${lastNamePaternal} ${lastNameMaternal || ''} ${firstName}`.trim().toUpperCase();
+
+        // Inserción limpia de los nuevos campos desglosados + el nombre compuesto
+        const insertSql = 'INSERT INTO employees (rfc, first_name, last_name_paternal, last_name_maternal, name, shift, category) VALUES (?, ?, ?, ?, ?, ?, ?)';
+        pool.query(insertSql, [rfc, firstName, lastNamePaternal, lastNameMaternal || '', nameCompleto, shift || 'Matutino', category || 'médico'], (err, result) => {
             if (err) {
                 console.error('Error al insertar registro:', err);
                 return res.status(500).json({ message: 'No se pudieron guardar los datos en el servidor.' });
@@ -123,6 +127,7 @@ app.post('/api/doctors', (req, res) => {
         });
     });
 });
+
 
 // RUTA API: Eliminar personal de la plantilla por su número de empleado (RFC)
 app.delete('/api/doctors/:rfc', (req, res) => {
