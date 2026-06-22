@@ -4,18 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ISSSTE - C.M.F. ERMITA</title>
-    <style>
+
+
+
+
+
+<style>
         :root {
             --guinda: #611232;
             --gris-oscuro: #98989a;
             --gris-claro: #f4f4f4;
             --blanco: #ffffff;
-	    --negro-footer: #111111; /* Negro profundo */
+            --negro-footer: #111111; /* Negro profundo */
             --verde-issste: #285c4d;
             --dorado-calidad: #b38e5d;
             --azul-issste: #1d4ed8;
             --morado-issste: #800080;
-
         }
 
         html, body { height: 100%; margin: 0; }
@@ -46,23 +50,16 @@
         .card-coord { border-top: 8px solid var(--morado-issste); }
         .card-archivo { border-top: 8px solid var(--guinda); }
 
-        
-
         /* UI ELEMENTS */
         .btn-save { color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-top: 5px; }
 
-
         .teaching-hero { background: #fdfaf6; border: 2px solid var(--dorado-calidad); padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 25px; }
-
         #phrase-container { font-style: italic; color: var(--guinda); font-size: 1.2em; font-weight: bold; transition: opacity 0.8s; }
 
-
-
-	/* PIE DE PÁGINA (ESTILO NEGRO Y BLANCO) */
+        /* PIE DE PÁGINA (ESTILO NEGRO Y BLANCO) */
         footer { background-color: var(--negro-footer); color: var(--blanco); text-align: center; padding: 25px 10px; font-size: 0.95em; border-top: 3px solid var(--dorado-calidad); }
         footer strong { color: var(--dorado-calidad); }
-
 
         /* NAVEGACIÓN PANEL ARCHIVO */
         .nav-archivo { 
@@ -74,7 +71,6 @@
             padding: 15px; 
             border-radius: 8px; 
         }
-
 
         .btn-nav { 
             padding: 12px 15px; 
@@ -91,19 +87,15 @@
         .btn-nav.active { background: var(--guinda); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .btn-nav:hover { background: var(--dorado-calidad); }
 
-
-
         /* SECCIONES DE CONTENIDO */
         .section-content { display: none; padding: 25px; border: 1px solid #ddd; border-radius: 8px; background: #fff; margin-top: 10px; }
         .section-content.active { display: block; animation: fadeIn 0.4s; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-
-
         /* FORMULARIOS Y TABLAS */
         .header-registro {
-            background-color: var(--verde-issste); color: white; padding: 15px; border-radius: 8px 8px 0 0;
+            color: white; padding: 15px; border-radius: 8px 8px 0 0;
             display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; align-items: center;
         }
         .form-box { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border: 1px solid #eee; border-top: none; }
@@ -113,20 +105,17 @@
         input, select { width: 100%; padding: 10px; border: 1px solid var(--gris-oscuro); border-radius: 4px; box-sizing: border-box; }
         .full-width { grid-column: span 3; }
         
-
-        .btn-save { background-color: var(--verde-issste); color: white; padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-        .btn-action { background: var(--verde-issste); color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        /* CORRECCIÓN: Se removieron los colores de fondo verdes por defecto para no romper el dorado inline */
+        .btn-save { padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-action { padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
         th { background: #f4f4f4; color: var(--guinda); }
 
-
         .panel-nuevo { background: #eff6ff; border-left: 5px solid var(--azul-issste); }
         .panel-nuevo label { color: var(--azul-issste); }
         .panel-actual { background: #fdf0f5; border-left: 5px solid var(--guinda); }
-
-
 
         /* Badges */
         .badge { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; display: inline-block; }
@@ -134,13 +123,15 @@
         .badge-aprobada { background: #dcfce7; color: var(--verde); }
         .badge-rechazada { background: #fee2e2; color: var(--rojo); }
 
-
         .view { display: none; }
         .active-view { display: block !important; }
 
         .error-msg { color: #cc0000; font-weight: bold; margin-top: 10px; display: none; }
+</style>
 
-    </style>
+
+
+
 
 </head>
 
