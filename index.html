@@ -207,7 +207,7 @@
         <div id="panel-coordinacion" class="view">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--guinda); margin-bottom: 20px; padding-bottom: 10px;">
                 <h2 style="color:var(--guinda); margin:0;">Panel Archivo Clínico</h2>
-                <button onclick="location.reload()" style="background:#cc0000; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Cerrar Sesión</button>
+                <button onclick="activarModulo('section-login', this)" style="background:#cc0000; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Cerrar Sesión</button>
             </div> 
 
             <div id="section-panel-bienvenida">
@@ -651,33 +651,51 @@
         document.getElementById('login-modal').style.display = 'none';
     }
 
-    async function procesarLogin(e) {
-        e.preventDefault();
-        const userVal = document.getElementById('login-username').value.trim();
-        const passVal = document.getElementById('login-password').value.trim();
 
-        try {
-            const response = await fetch(`${BASE_URL}/api/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: userVal, password: passVal, requiredRole: moduloDestino })
+
+
+async function procesarLogin(e) {
+    e.preventDefault();
+    const userVal = document.getElementById('login-username').value.trim();
+    const passVal = document.getElementById('login-password').value.trim();
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: userVal, password: passVal, requiredRole: moduloDestino })
             });
 
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Error al validar las credenciales.');
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Error al validar las credenciales.');
 
-            cerrarLogin();
-            alert("¡Acceso concedido correctamente!");
+        cerrarLogin();
+        alert("¡Acceso concedido correctamente!");
 
-            document.getElementById('section-login').classList.remove('active-view');
-            document.getElementById('panel-coordinacion').classList.add('active-view');
-            document.getElementById('panel-coordinacion').style.display = 'block'; // Forzado visual de tu menú
-
-        } catch (error) {
-            alert(error.message);
-            console.error('Error en procesarLogin:', error);
+        // CORRECCIÓN: Oculta la raíz del login por completo borrando su visualización física
+        const sectionLogin = document.getElementById('section-login');
+        if (sectionLogin) {
+            sectionLogin.classList.remove('active-view');
+            sectionLogin.style.display = 'none'; // Desvanece el menú inicial de la raíz
         }
+
+        // Enciende el panel de coordinación de forma limpia
+        const panelCoord = document.getElementById('panel-coordinacion');
+        if (panelCoord) {
+            panelCoord.classList.add('active-view');
+            panelCoord.style.display = 'block'; // Forzado visual de tu menú
+        }
+
+    } catch (error) {
+        alert(error.message);
+        console.error('Error en procesarLogin:', error);
     }
+}
+
+
+
+
+
 
     // =========================================================================
     // 3. CONTROL DE VISTAS INDEPENDIENTES (CONMUTADOR DE MÓDULOS)
