@@ -174,13 +174,31 @@
                 <div id="phrase-container">"Cargando pensamiento institucional..."</div>
             </div>
 
+
+            <!-- GRID PRINCIPAL DE LA RAÍZ DEL PROYECTO -->
             <div class="login-grid">
+
+                <!-- TARJETA 1: COORDINACIÓN MÉDICA (ENTRADA CON LOGIN) -->
                 <div class="card card-coord">
                     <h3 style="color: #800080; text-align: center; font-size: 2.50em;">Coordinación Médica</h3>
                     <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para el Servicio de Coordinación Médica de la C.M.F. Ermita.</p>
                     <button class="btn-save" style="background: #800080" onclick="entrar('coordinacion')">ACCESO COORDINACIÓN MÉDICA</button>
                 </div>
+
+                <!-- TARJETA 2: DERECHOHABIENTES (ACCESO DIRECTO SIN LOGUEO, COLOR VERDE ISSSTE) -->
+                <div class="card card-patient" style="border-top: 8px solid var(--verde-issste) !important;">
+                    <h3 style="color: var(--verde-issste); text-align: center; font-size: 2.50em;">Derechohabientes</h3>
+                    <p style="font-size: 0.85em; text-align: center;">Área de trámites, solicitudes y gestión de servicios para pacientes de la clínica.</p>
+                    <!-- Al darle click, salta directo a su panel independiente -->
+                    <button class="btn-save" style="background: var(--verde-issste)" onclick="activarModulo('panel-derechohabientes', this)">ACCESO DERECHOHABIENTES</button>
+                </div>
+
             </div>
+
+
+
+
+
         </div>
 
         <!-- ========================================== -->
@@ -457,6 +475,90 @@
                 </table>
             </div>
         </div>
+
+
+
+
+
+        <!-- ========================================================================= -->
+        <!-- VISTA 6: PANEL DE DERECHOHABIENTES (COLOR VERDE ISSSTE)                   -->
+        <!-- ========================================================================= -->
+        <div id="panel-derechohabientes" class="view" style="display: none;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="color: var(--verde-issste); margin:0; font-family: 'Segoe UI', sans-serif;">Panel de Servicios al Derechohabiente</h2>
+                <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--guinda)'" onmouseout="this.style.background='#98989a'">← Volver al Menú Principal</button>
+            </div>
+
+            <!-- Menú de Opciones del Derechohabiente -->
+            <div class="login-grid">
+                <div class="card card-patient" style="border-top: 8px solid var(--verde-issste) !important;">
+                    <h3 style="color: var(--verde-issste); text-align: center;">Solicitar cambio de consultorio</h3>
+                    <p style="font-size: 0.85em; color: #666;">Inicia un trámite digital para solicitar la reasignación de tu consultorio médico asignado.</p>
+                    <button class="btn-save" style="background: var(--verde-issste)" onclick="activarModulo('modulo-solicitud-cambio', this)">INICIAR SOLICITUD</button>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <!-- ========================================================================= -->
+        <!-- VISTA 7: FORMULARIO DE SOLICITUD DE CAMBIO (COLOR VERDE ISSSTE)           -->
+        <!-- ========================================================================= -->
+        <div id="modulo-solicitud-cambio" class="view" style="display: none;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="color: var(--verde-issste); margin:0; font-family: 'Segoe UI', sans-serif;">Solicitud de Cambio de Consultorio</h2>
+                <!-- Regresa al nivel anterior (Panel Derechohabientes) -->
+                <button onclick="activarModulo('panel-derechohabientes', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--verde-issste)'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
+            </div>
+
+            <div style="background-color: var(--verde-issste); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
+                <span style="font-weight: bold; font-size: 1.2em;">Formatos de Reasignación de Espacio Clínico</span>
+                <span style="text-align: right; font-size: 0.85em;">Estatus Inicial: <strong>PENDIENTE</strong> ⏳</span>
+            </div>
+            
+            <div style="background: #f0fdf4; border-left: 5px solid var(--verde-issste); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <form id="form-solicitud-cambio" onsubmit="guardarSolicitudCambioNube(event)">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px;">
+                        <div>
+                            <label for="sol-carnet" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Número de Carnet / Expediente:</label>
+                            <input type="text" id="sol-carnet" required placeholder="Ej. 1234567890" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label for="sol-paciente" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Nombre Completo del Derechohabiente:</label>
+                            <input type="text" id="sol-paciente" required placeholder="Nombres Apellidos" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label for="sol-motivo" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Motivo de la Solicitud:</label>
+                            <select id="sol-motivo" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                                <option value="Cambio de Turno Laboral">Cambio de Turno Laboral</option>
+                                <option value="Cambio de Domicilio">Cambio de Domicilio</option>
+                                <option value="Preferencia de Especialidad">Preferencia de Médico / Especialidad</option>
+                                <option value="Inconformidad Horaria">Inconformidad Horaria</option>
+                            </select>
+                        </div>
+                        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
+                            <button type="submit" style="background-color: var(--verde-issste); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='var(--guinda)'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">ENVIAR SOLICITUD DE CAMBIO</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -942,6 +1044,25 @@ async function cargarListaPersonalNube() {
 
 
 
+
+    // Pega esto justo antes del cierre de tu etiqueta </script>
+    async function guardarSolicitudCambioNube(event) {
+        event.preventDefault();
+        
+        const carnet = document.getElementById('sol-carnet').value.trim();
+        const paciente = document.getElementById('sol-paciente').value.trim().toUpperCase();
+        const motivo = document.getElementById('sol-motivo').value;
+
+        // Marcamos la captura localmente de momento
+        alert(`Solicitud recibida para el expediente ${carnet}. Próximamente se conectará con Clever Cloud.`);
+        document.getElementById('form-solicitud-cambio').reset();
+    }
+
+
+
+
+    // Recuerda vincularla globalmente
+    window.guardarSolicitudCambioNube = guardarSolicitudCambioNube;
     // Vinculación global
     window.prepararModuloAsociaciones = prepararModuloAsociaciones;
     window.guardarAsociacionNube = guardarAsociacionNube;
