@@ -206,7 +206,7 @@
         <!-- ========================================== -->
         <div id="panel-coordinacion" class="view">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--guinda); margin-bottom: 20px; padding-bottom: 10px;">
-                <h2 style="color:var(--guinda); margin:0;">Panel Archivo Clínico</h2>
+                <h2 style="color:var(--guinda); margin:0;">Panel Coordinación Médica</h2>
                 <button onclick="activarModulo('section-login', this)" style="background:#cc0000; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Cerrar Sesión</button>
             </div> 
 
@@ -503,45 +503,141 @@
 
 
 
+
         <!-- ========================================================================= -->
-        <!-- VISTA 7: FORMULARIO DE SOLICITUD DE CAMBIO (COLOR VERDE ISSSTE)           -->
+        <!-- VISTA 7: FORMULARIO DE SOLICITUD DE CAMBIO (PARTE 1 DE 2)                 -->
         <!-- ========================================================================= -->
         <div id="modulo-solicitud-cambio" class="view" style="display: none;">
             
+            <!-- Barra superior con botones de navegación -->
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
                 <h2 style="color: var(--verde-issste); margin:0; font-family: 'Segoe UI', sans-serif;">Solicitud de Cambio de Consultorio</h2>
-                <!-- Regresa al nivel anterior (Panel Derechohabientes) -->
                 <button onclick="activarModulo('panel-derechohabientes', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--verde-issste)'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
             </div>
 
+            <!-- Encabezado con el Estatus del Trámite -->
             <div style="background-color: var(--verde-issste); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
-                <span style="font-weight: bold; font-size: 1.2em;">Formatos de Reasignación de Espacio Clínico</span>
-                <span style="text-align: right; font-size: 0.85em;">Estatus Inicial: <strong>PENDIENTE</strong> ⏳</span>
+                <span style="font-weight: bold; font-size: 1.2em;">Trámite de Reasignación de Espacio Clínico</span>
+                <span style="text-align: right; font-size: 0.85em;">Estatus de Ingreso: <strong style="color: #611232; background: white; padding: 2px 6px; border-radius: 4px;">PENDIENTE</strong> ⏳</span>
             </div>
             
-            <div style="background: #f0fdf4; border-left: 5px solid var(--verde-issste); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <!-- Cuerpo del Formulario con fondo verde menta tenue -->
+            <div style="background: #f0fdf4; border-left: 5px solid var(--verde-issste); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-family: 'Segoe UI', sans-serif;">
                 <form id="form-solicitud-cambio" onsubmit="guardarSolicitudCambioNube(event)">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px;">
+                    
+                    <!-- ================================================================= -->
+                    <!-- SUBSECCIÓN: DATOS DEL ASEGURADO                                   -->
+                    <!-- ================================================================= -->
+                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-top: 0; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS DEL ASEGURADO</h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
                         <div>
-                            <label for="sol-carnet" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Número de Carnet / Expediente:</label>
-                            <input type="text" id="sol-carnet" required placeholder="Ej. 1234567890" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                            <label for="sol-paternal" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Apellido Paterno:</label>
+                            <input type="text" id="sol-paternal" required placeholder="Ej. GONZÁLEZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
                         <div>
-                            <label for="sol-paciente" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Nombre Completo del Derechohabiente:</label>
-                            <input type="text" id="sol-paciente" required placeholder="Nombres Apellidos" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                            <label for="sol-maternal" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Apellido Materno:</label>
+                            <input type="text" id="sol-maternal" required placeholder="Ej. ZAMUDIO" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
                         <div>
-                            <label for="sol-motivo" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Motivo de la Solicitud:</label>
-                            <select id="sol-motivo" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
-                                <option value="Cambio de Turno Laboral">Cambio de Turno Laboral</option>
-                                <option value="Cambio de Domicilio">Cambio de Domicilio</option>
-                                <option value="Preferencia de Especialidad">Preferencia de Médico / Especialidad</option>
-                                <option value="Inconformidad Horaria">Inconformidad Horaria</option>
+                            <label for="sol-names" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Nombre(s):</label>
+                            <input type="text" id="sol-names" required placeholder="Ej. MANUEL ALEJANDRO" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label for="sol-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">RFC:</label>
+                            <input type="text" id="sol-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label for="sol-worker" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">¿Es Trabajador(a)?:</label>
+                            <select id="sol-worker" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                                <option value="SÍ">Sí</option>
+                                <option value="NO">No</option>
                             </select>
                         </div>
-                        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
-                            <button type="submit" style="background-color: var(--verde-issste); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='var(--guinda)'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">ENVIAR SOLICITUD DE CAMBIO</button>
+                        <div>
+                            <label for="sol-pensioner" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">¿Es Pensionado(a)?:</label>
+                            <select id="sol-pensioner" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                                <option value="SÍ">Sí</option>
+                                <option value="NO">No</option>
+                            </select>
                         </div>
+                    </div>
+
+
+
+
+
+
+                    <!-- ================================================================= -->
+                    <!-- SUBSECCIÓN: DOMICILIO Y CONTACTO                                  -->
+                    <!-- ================================================================= -->
+                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 0.5px;">DOMICILIO Y CONTACTO</h3>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <div style="grid-column: span 2;">
+                            <label for="sol-street" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Calle:</label>
+                            <input type="text" id="sol-street" required placeholder="Ej. AV. REFORMA" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label for="sol-ext" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">No. Ext:</label>
+                            <input type="text" id="sol-ext" required placeholder="Ej. 123" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label for="sol-int" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">No. Int:</label>
+                            <input type="text" id="sol-int" placeholder="Opcional" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <label for="sol-colonia" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Colonia:</label>
+                            <input type="text" id="sol-colonia" required placeholder="Ej. CENTRO" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label for="sol-cp" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">C.P.:</label>
+                            <input type="text" id="sol-cp" required placeholder="Ej. 06000" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                    </div>
+
+                    <!-- ================================================================= -->
+                    <!-- SUBSECCIÓN: DATOS DE CONTROL Y SEGUIMIENTO                       -->
+                    <!-- ================================================================= -->
+                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS DE CONTROL Y SEGUIMIENTO</h3>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 10px;">
+                        <div>
+                            <label for="sol-age" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Edad:</label>
+                            <input type="number" id="sol-age" required min="0" max="120" placeholder="Años cumplidos" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label for="sol-civil" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Estado Civil:</label>
+                            <select id="sol-civil" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                                <option value="Soltero(a)">Soltero(a)</option>
+                                <option value="Casado(a)">Casado(a)</option>
+                                <option value="Divorciado(a)">Divorciado(a)</option>
+                                <option value="Viudo(a)">Viudo(a)</option>
+                                <option value="Unión Libre">Unión Libre</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="sol-phone" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Teléfono:</label>
+                            <input type="tel" id="sol-phone" required placeholder="Ej. 5512345678" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label for="sol-type" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Tipo de Asegurado:</label>
+                            <select id="sol-type" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                                <option value="01. Trabajador">01. Trabajador</option>
+                                <option value="02. Trabajadora">02. Trabajadora</option>
+                                <option value="03. Esposo">03. Esposo</option>
+                                <option value="04. Esposa">04. Esposa</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="sol-members" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Total de Integrantes:</label>
+                            <input type="number" id="sol-members" required min="1" value="1" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                    </div>
+
+                    <!-- Botón de Envío Verde ISSSTE -->
+                    <div style="display: flex; justify-content: flex-end; margin-top: 25px;">
+                        <button type="submit" style="background-color: var(--verde-issste); color: white; border: none; padding: 14px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='var(--guinda)'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">ENVIAR SOLICITUD DE CAMBIO</button>
                     </div>
                 </form>
             </div>
@@ -1063,18 +1159,63 @@ async function cargarListaPersonalNube() {
 
 
 
-    // Pega esto justo antes del cierre de tu etiqueta
-    async function guardarSolicitudCambioNube(event) {
-        event.preventDefault();
-        
-        const carnet = document.getElementById('sol-carnet').value.trim();
-        const paciente = document.getElementById('sol-paciente').value.trim().toUpperCase();
-        const motivo = document.getElementById('sol-motivo').value;
 
-        // Marcamos la captura localmente de momento
-        alert(`Solicitud recibida para el expediente ${carnet}. Próximamente se conectará con Clever Cloud.`);
-        document.getElementById('form-solicitud-cambio').reset();
+
+    // =========================================================================
+    // 7. OPERACIONES DE TRÁMITES DE DERECHOHABIENTES (TABLA OFFICE_CHANGE_REQUESTS)
+    // =========================================================================
+    async function guardarSolicitudCambioNube(event) {
+        event.preventDefault(); // Evitamos que la página se recargue por defecto
+
+        // Estructuramos el paquete de datos limpiando espacios y forzando mayúsculas
+        const payload = {
+            paternalLastname: document.getElementById('sol-paternal').value.trim().toUpperCase(),
+            maternalLastname: document.getElementById('sol-maternal').value.trim().toUpperCase(),
+            firstNames: document.getElementById('sol-names').value.trim().toUpperCase(),
+            rfc: document.getElementById('sol-rfc').value.trim().toUpperCase(),
+            isWorker: document.getElementById('sol-worker').value,
+            isPensioner: document.getElementById('sol-pensioner').value,
+            street: document.getElementById('sol-street').value.trim().toUpperCase(),
+            extNum: document.getElementById('sol-ext').value.trim().toUpperCase(),
+            intNum: document.getElementById('sol-int').value.trim().toUpperCase(),
+            colonia: document.getElementById('sol-colonia').value.trim().toUpperCase(),
+            postalCode: document.getElementById('sol-cp').value.trim(),
+            age: parseInt(document.getElementById('sol-age').value),
+            maritalStatus: document.getElementById('sol-civil').value,
+            phone: document.getElementById('sol-phone').value.trim(),
+            insuredType: document.getElementById('sol-type').value,
+            totalFamilyMembers: parseInt(document.getElementById('sol-members').value)
+        };
+
+        // Endpoint exacto hacia tu servidor Express en Render
+        const urlServidor = `${BASE_URL}/api/office-changes`;
+
+        try {
+            const response = await fetch(urlServidor, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json' 
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('¡Su trámite de cambio de consultorio ha sido registrado con éxito en Clever Cloud! Estatus: PENDIENTE.');
+                document.getElementById('form-solicitud-cambio').reset(); // Limpiamos los campos
+                activarModulo('panel-derechohabientes', null); // Regresamos de forma automática al menú del paciente
+            } else {
+                alert('Error en el trámite: ' + (data.message || 'No se pudo procesar la solicitud.'));
+            }
+        } catch (error) {
+            console.error('Error de red al tramitar cambio de consultorio:', error);
+            alert('No se pudo establecer conexión con el servidor de Render. Asegúrese de que el backend esté activo.');
+        }
     }
+
+
+
 
 
 

@@ -320,6 +320,59 @@ app.delete('/api/assignments/:employeeId', (req, res) => {
 
 
 
+// RUTA API: Registrar una solicitud de cambio de consultorio con todos los datos del asegurado
+app.post('/api/office-changes', (req, res) => {
+    const {
+        paternalLastname, maternalLastname, firstNames, rfc,
+        isWorker, isPensioner, street, extNum, intNum, colonia,
+        postalCode, age, maritalStatus, phone, insuredType, totalFamilyMembers
+    } = req.body;
+
+    // Validación estricta de campos obligatorios en el servidor
+    if (!paternalLastname || !firstNames || !rfc || !street || !extNum || !colonia || !postalCode || !age || !phone) {
+        return res.status(400).json({ message: 'Todos los datos obligatorios del asegurado deben ser requisitados.' });
+    }
+
+    const insertSql = `
+        INSERT INTO office_change_requests (
+            paternal_lastname, maternal_lastname, first_names, rfc,
+            is_worker, is_pensioner, street, ext_num, int_num, colonia,
+            postal_code, age, marital_status, phone, insured_type, total_family_members
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    pool.query(insertSql, [
+        paternalLastname.trim().toUpperCase(),
+        maternalLastname ? maternalLastname.trim().toUpperCase() : '',
+        firstNames.trim().toUpperCase(),
+        rfc.trim().toUpperCase(),
+        isWorker,
+        isPensioner,
+        street.trim().toUpperCase(),
+        extNum.trim().toUpperCase(),
+        intNum ? intNum.trim().toUpperCase() : '',
+        colonia.trim().toUpperCase(),
+        postalCode.trim(),
+        parseInt(age),
+        maritalStatus,
+        phone.trim(),
+        insuredType,
+        parseInt(totalFamilyMembers)
+    ], (err, result) => {
+        if (err) {
+            console.error('Error al insertar trámite de cambio de consultorio:', err);
+            return res.status(500).json({ message: 'No se pudo guardar la solicitud en el servidor.' });
+        }
+        res.status(201).json({ message: 'Solicitud tramitada correctamente en Clever Cloud.' });
+    });
+});
+
+
+
+
+
+
+
 
 
 // =========================================================================
