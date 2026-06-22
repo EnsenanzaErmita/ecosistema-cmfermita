@@ -421,30 +421,30 @@
 // FUNCIÓN PRINCIPAL PARA CAMBIAR ENTRE PANTALLAS (SUB-VISTAS)
 // =========================================================================
 function activarModulo(moduloId, boton) {
-    // 1. Buscamos todas las sub-secciones del panel y las ocultamos quitando la vista activa
-    const secciones = document.querySelectorAll('.section-content');
-    secciones.forEach(sec => {
-        sec.classList.remove('active-view');
-        // Si tu diseño original usaba style.display, descomenta la siguiente línea:
-        // sec.style.display = 'none';
+    // 1. Buscamos TODOS los contenedores de vista de la aplicación y los ocultamos por completo
+    const todasLasVistas = document.querySelectorAll('.view');
+    todasLasVistas.forEach(vista => {
+        vista.classList.remove('active-view');
+        vista.style.display = 'none'; // Forzado absoluto de ocultación
     });
 
-    // 2. Mostramos el módulo que el usuario seleccionó agregando tu clase CSS
+    // 2. Mostramos de forma exclusiva el módulo que el usuario seleccionó
     const moduloObjetivo = document.getElementById(moduloId);
     if (moduloObjetivo) {
         moduloObjetivo.classList.add('active-view');
-        // Si tu diseño original usaba style.display, descomenta la siguiente línea:
-        // moduloObjetivo.style.display = 'block';
+        moduloObjetivo.style.display = 'block'; // Forzado absoluto de visualización
     }
 
-    // 3. ENLACE CON LA NUBE: Si el usuario quiere ver la lista, descargamos de Clever Cloud al instante
-    if (moduloId === 'mod-lista') {
+    // 3. ENLACE CON LA NUBE: Si el usuario entra al módulo de personal, cargamos la lista al instante
+    if (moduloId === 'modulo-personal' || moduloId === 'mod-lista') {
         if (typeof cargarListaMedicosNube === 'function') {
             cargarListaMedicosNube();
         }
     }
 }
 
+// Aseguramos que el HTML tenga acceso a ella sin importar el entorno
+window.activarModulo = activarModulo;
 
 
 
