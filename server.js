@@ -8,7 +8,7 @@ const app = express();
 // 1. MIDDLEWARES
 app.use(cors({ origin: '*' }));
 app.use(express.json());
-app.use(express.static(__dirname)); 
+app.use(express.static(path.join(__dirname)));
 
 // 2. CONFIGURACIÓN MEDIANTE POOL DE CONEXIONES (REUTILIZA CLEVER CLOUD)
 const pool = mysql.createPool({
