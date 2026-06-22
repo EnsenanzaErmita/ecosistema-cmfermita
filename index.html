@@ -635,6 +635,74 @@
                         </div>
                     </div>
 
+
+
+
+
+                    <!-- ================================================================= -->
+                    <!-- SUBSECCIÓN: DATOS DE LOS BENEFICIARIOS                            -->
+                    <!-- ================================================================= -->
+                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-top: 25px; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS DE LOS BENEFICIARIOS (Anotar todos los integrantes)</h3>
+                    
+                    <!-- Formulario local para capturar un beneficiario a la vez -->
+                    <div style="background: #ffffff; border: 1px solid #bbf7d0; padding: 15px; border-radius: 6px; margin-bottom: 15px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: flex-end;">
+                            <div>
+                                <label style="display: block; font-size: 0.8em; font-weight: bold; color: var(--verde-issste); margin-bottom: 3px;">Apellido Paterno:</label>
+                                <input type="text" id="ben-paternal" placeholder="Paterno" style="width: 100%; padding: 8px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.8em; font-weight: bold; color: var(--verde-issste); margin-bottom: 3px;">Apellido Materno:</label>
+                                <input type="text" id="ben-maternal" placeholder="Materno" style="width: 100%; padding: 8px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.8em; font-weight: bold; color: var(--verde-issste); margin-bottom: 3px;">Nombre(s):</label>
+                                <input type="text" id="ben-names" placeholder="Nombre completo" style="width: 100%; padding: 8px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            <div style="max-width: 100px;">
+                                <label style="display: block; font-size: 0.8em; font-weight: bold; color: var(--verde-issste); margin-bottom: 3px;">Edad:</label>
+                                <input type="number" id="ben-age" min="0" max="120" placeholder="Años" style="width: 100%; padding: 8px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <!-- Botón secundario para acumular en la lista -->
+                                <button type="button" onclick="agregarBeneficiarioALista()" style="background-color: #22c55e; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 0.9em; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#16a34a'" onmouseout="this.style.backgroundColor='#22c55e'">+ Agregar Integrante</button>
+                            </div>
+                        </div>
+                        <div id="ben-contador" style="font-size: 0.8em; color: #666; margin-top: 8px; font-weight: bold;">Beneficiarios agregados: 0 / 10</div>
+                    </div>
+
+                    <!-- Contenedor visual dinámico (Oculto si no hay beneficiarios) -->
+                    <div id="contenedor-tabla-beneficiarios" style="display: none; margin-bottom: 20px; background: white; border: 1px solid #ddd; border-radius: 6px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <table id="tabla-beneficiarios-local" style="width: 100%; border-collapse: collapse; margin-top: 0; font-size: 0.9em;">
+                            <thead>
+                                <tr style="background: #f4f4f4; color: var(--guinda);">
+                                    <th style="padding: 8px; border: 1px solid #ddd;">#</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Apellido Paterno</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Apellido Materno</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Nombre(s)</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Edad</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: center;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Las filas se inyectan dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     <!-- Botón de Envío Verde ISSSTE -->
                     <div style="display: flex; justify-content: flex-end; margin-top: 25px;">
                         <button type="submit" style="background-color: var(--verde-issste); color: white; border: none; padding: 14px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='var(--guinda)'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">ENVIAR SOLICITUD DE CAMBIO</button>
@@ -1213,6 +1281,121 @@ async function cargarListaPersonalNube() {
             alert('No se pudo establecer conexión con el servidor de Render. Asegúrese de que el backend esté activo.');
         }
     }
+
+
+
+
+
+    // =========================================================================
+    // 8. CONTROL DINÁMICO DE BENEFICIARIOS (HASTA 10 INTEGRANTES)
+    // =========================================================================
+    let listaBeneficiariosTemporales = []; // Almacén en memoria por cada formulario abierto
+
+    function agregarBeneficiarioALista() {
+        // 1. Validar el límite estricto de 10 personas
+        if (listaBeneficiariosTemporales.length >= 10) {
+            alert("Límite alcanzado: El sistema permite registrar un máximo de 10 beneficiarios por trámite.");
+            return;
+        }
+
+        // 2. Capturar los elementos locales
+        const paternalInput = document.getElementById('ben-paternal');
+        const maternalInput = document.getElementById('ben-maternal');
+        const namesInput = document.getElementById('ben-names');
+        const ageInput = document.getElementById('ben-age');
+
+        const paternal = paternalInput.value.trim().toUpperCase();
+        const maternal = maternalInput.value.trim().toUpperCase();
+        const names = namesInput.value.trim().toUpperCase();
+        const age = ageInput.value.trim();
+
+        // 3. Validar que los campos mínimos obligatorios no estén vacíos
+        if (!paternal || !names || !age) {
+            alert("Por favor, complemente el Apellido Paterno, Nombre(s) y Edad del beneficiario.");
+            return;
+        }
+
+        // 4. Crear el objeto beneficiario y acumularlo en el arreglo
+        const nuevoBeneficiario = {
+            paternal,
+            maternal: maternal || '',
+            names,
+            age: parseInt(age)
+        };
+
+        listaBeneficiariosTemporales.push(nuevoBeneficiario);
+
+        // 5. Limpiar exclusivamente los cuadros de texto de la subsección
+        paternalInput.value = '';
+        maternalInput.value = '';
+        namesInput.value = '';
+        ageInput.value = '';
+
+        // 6. Refrescar la visualización en la interfaz
+        renderizarTablaBeneficiariosLocal();
+    }
+
+    function removerBeneficiarioDeLista(index) {
+        // Permite eliminar en caso de error de dedo antes de enviar la solicitud
+        listaBeneficiariosTemporales.splice(index, 1);
+        renderizarTablaBeneficiariosLocal();
+    }
+
+    function renderizarTablaBeneficiariosLocal() {
+        const contenedor = document.getElementById('contenedor-tabla-beneficiarios');
+        const tbody = document.querySelector('#tabla-beneficiarios-local tbody');
+        const contador = document.getElementById('ben-contador');
+
+        if (!tbody || !contador || !contenedor) return;
+
+        // Actualizar el acumulador visual
+        contador.innerText = `Beneficiarios agregados: ${listaBeneficiariosTemporales.length} / 10`;
+
+        // Si la lista está vacía, ocultamos la tabla completa
+        if (listaBeneficiariosTemporales.length === 0) {
+            tbody.innerHTML = '';
+            contenedor.style.display = 'none';
+            return;
+        }
+
+        // Mostrar el bloque visual
+        contenedor.style.display = 'block';
+        tbody.innerHTML = '';
+
+        // Dibujar cada fila acumulada
+        listaBeneficiariosTemporales.forEach((ben, index) => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td style="padding: 8px; border: 1px solid #ddd; text-align:center;"><strong>${index + 1}</strong></td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${ben.paternal}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${ben.maternal}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${ben.names}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${ben.age}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                    <button type="button" onclick="removerBeneficiarioDeLista(${index})" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:3px 8px; border-radius:4px; cursor:pointer; font-size:0.8em; font-weight:bold;">Quitar</button>
+                </td>
+            `;
+            tbody.appendChild(fila);
+        });
+    }
+
+    // Modificamos el reseteo de la lista al cambiar de módulo o enviar formulario
+    // Asegúrate de agregar esta línea al final de un envío exitoso dentro de guardarSolicitudCambioNube:
+    // listaBeneficiariosTemporales = []; renderizarTablaBeneficiariosLocal();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
