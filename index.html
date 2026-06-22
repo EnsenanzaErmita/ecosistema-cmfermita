@@ -50,6 +50,8 @@
         .card-coord { border-top: 8px solid var(--morado-issste); }
         .card-archivo { border-top: 8px solid var(--guinda); }
 	.card-office { border-top: 8px solid #db2777 !important; } /* Rosa discreto elegante */
+	.card-assign { border-top: 8px solid #ea580c !important; } /* Naranja discreto elegante */
+
 
 
         /* UI ELEMENTS */
@@ -217,6 +219,11 @@
 		    <p style="font-size: 0.85em; color: #666;">Alta y control de espacios físicos de atención por turno.</p>
 		    <button class="btn-save" style="background: #db2777" onclick="activarModulo('modulo-consultorios', this)">REGISTRO DE CONSULTORIO</button>
 		</div>
+		<div class="card card-assign">
+		    <h3 style="color:#ea580c; text-align: center;">Asociar Médico a Consultorio</h3>
+		    <p style="font-size: 0.85em; color: #666;">Vinculación oficial y única de médicos con sus espacios de consulta.</p>
+		    <button class="btn-save" style="background: #ea580c" onclick="activarModulo('modulo-asociaciones', this)">ASOCIAR MÉDICO</button>
+		</div>
             </div>
         </div> 
 
@@ -310,6 +317,9 @@
                 </table>
             </div>
         </div>
+
+
+
         <!-- ========================================================================= -->
 
 
@@ -380,6 +390,73 @@
             </div>
         </div>
 
+        <!-- ========================================================================= -->
+
+
+
+
+        <!-- ========================================================================= -->
+        <!-- VISTA 5: NUEVA PANTALLA COMPLETA DE ASOCIACIONES (COLOR NARANJA DISCRETO) -->
+        <!-- ========================================================================= -->
+        <div id="modulo-asociaciones" class="view" style="display: none;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #ea580c; margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Asociación de Médicos a Consultorios</h2>
+                <button onclick="activarModulo('panel-coordinacion', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#ea580c'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
+            </div>
+
+            <!-- Encabezado en Color Naranja Discreto -->
+            <div style="background-color: #ea580c; display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
+                <span style="font-weight: bold; font-size: 1.2em;">Formulario de Vinculación de Espacios</span>
+                <span style="font-size: 0.9em;">Filtro Automático: <strong style="color: #611232;">Sólo Médicos</strong></span>
+                <span style="text-align: right; font-size: 0.85em;">Regla: 1 Consultorio Máximo por Médico 📑</span>
+            </div>
+            
+            <!-- Cuerpo del Formulario con fondo naranja suave -->
+            <div style="background: #fff7ed; border-left: 5px solid #ea580c; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <form id="form-registro-asociacion" onsubmit="guardarAsociacionNube(event)">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
+                        <div>
+                            <label for="asoc-doctor" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Seleccionar Médico (Personal Activo):</label>
+                            <select id="asoc-doctor" required style="width: 100%; padding: 10px; border: 1px solid #ea580c; border-radius: 4px; box-sizing: border-box; background: white;">
+                                <option value="">Cargando médicos disponibles...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="asoc-office" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Asignar Consultorio / Turno Disp:</label>
+                            <select id="asoc-office" required style="width: 100%; padding: 10px; border: 1px solid #ea580c; border-radius: 4px; box-sizing: border-box; background: white;">
+                                <option value="">Cargando catálogo de consultorios...</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button type="submit" style="background-color: #ea580c; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#611232'" onmouseout="this.style.backgroundColor='#ea580c'">ESTABLECER VINCULACIÓN</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabla de visualización -->
+            <div style="margin-top: 30px;">
+                <h4 style="color: #611232; margin: 0 0 12px 0; font-family: 'Segoe UI', sans-serif; font-size: 1.1em; border-left: 4px solid #ea580c; padding-left: 8px;">Relación Actual de Médicos con Consultorio</h4>
+                <table id="tabla-asociaciones" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: #611232; color: white;">
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">RFC</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Médico Asignado</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Turno Médico</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Consultorio / Espacio</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Turno Consultorio</th>
+                            <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #888; padding: 20px;">Cargando relaciones de Clever Cloud...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
 
 
@@ -525,6 +602,12 @@
 	if (moduloId === 'modulo-consultorios') {
 	    cargarListaConsultoriosNube();
 	}
+
+	if (moduloId === 'modulo-asociaciones') {
+	    prepararModuloAsociaciones();
+	}
+
+
     }
 
     // =========================================================================
@@ -729,6 +812,141 @@ async function cargarListaPersonalNube() {
         }
     }
 
+
+    // =========================================================================
+    // 6. OPERACIONES DE ASOCIACIÓN DE MÉDICOS (TABLAS EMPLOYEES + OFFICES)
+    // =========================================================================
+    async function prepararModuloAsociaciones() {
+        await cargarMedicosSelect();
+        await cargarConsultoriosSelect();
+        await cargarListaAsociacionesNube();
+    }
+
+    async function cargarMedicosSelect() {
+        const select = document.getElementById('asoc-doctor');
+        if (!select) return;
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/employees/doctors-only`);
+            const medicos = await response.json();
+            
+            select.innerHTML = '<option value="">-- Seleccionar Médico --</option>';
+            medicos.forEach(m => {
+                select.innerHTML += `<option value="${m.id}">${m.last_name_paternal} ${m.last_name_maternal || ''} ${m.first_name} (${m.shift})</option>`;
+            });
+        } catch (error) {
+            console.error('Error al cargar select de médicos:', error);
+        }
+    }
+
+    async function cargarConsultoriosSelect() {
+        const select = document.getElementById('asoc-office');
+        if (!select) return;
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/offices`);
+            const consultorios = await response.json();
+            
+            select.innerHTML = '<option value="">-- Seleccionar Consultorio --</option>';
+            consultorios.forEach(c => {
+                select.innerHTML += `<option value="${c.id}">${c.office_name} - Turno ${c.shift}</option>`;
+            });
+        } catch (error) {
+            console.error('Error al cargar select de consultorios:', error);
+        }
+    }
+
+    async function guardarAsociacionNube(event) {
+        event.preventDefault();
+
+        const employeeId = document.getElementById('asoc-doctor').value;
+        const officeId = document.getElementById('asoc-office').value;
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/assignments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employeeId, officeId })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('¡Médico asociado al consultorio con éxito en Clever Cloud!');
+                document.getElementById('form-registro-asociacion').reset();
+                cargarListaAsociacionesNube();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error al guardar vinculación:', error);
+            alert('No se pudo conectar con el servidor.');
+        }
+    }
+
+
+
+    async function cargarListaAsociacionesNube() {
+        const tbody = document.querySelector('#tabla-asociaciones tbody');
+        if (!tbody) return;
+
+        try {
+            // Consulta el nuevo endpoint que unifica las tablas mediante doctor_offices
+            const response = await fetch(`${BASE_URL}/api/assignments`);
+            const datos = await response.json();
+            tbody.innerHTML = '';
+
+            if (datos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #888; padding: 20px;">No hay médicos asociados a ningún consultorio actualmente.</td></tr>`;
+                return;
+            }
+
+            datos.forEach(asoc => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td style="padding: 12px; border: 1px solid #ddd;">${asoc.rfc}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase; font-weight:bold;">${asoc.last_name_paternal} ${asoc.last_name_maternal || ''}, ${asoc.first_name}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${asoc.emp_shift}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase; color: #ea580c; font-weight:bold;">${asoc.office_name}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${asoc.office_shift}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
+                        <!-- Envía correctamente el ID del médico para remover el renglón de doctor_offices -->
+                        <button onclick="eliminarAsociacionNube(${asoc.employee_id})" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Desvincular</button>
+                    </td>
+                `;
+                tbody.appendChild(fila);
+            });
+        } catch (error) {
+            console.error('Error al cargar vinculaciones:', error);
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos.</td></tr>`;
+        }
+    }
+
+
+
+    async function eliminarAsociacionNube(employeeId) {
+        if (!confirm('¿Deseas desvincular a este médico de su consultorio actual?')) return;
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/assignments/${employeeId}`, { method: 'DELETE' });
+            if (response.ok) {
+                alert('Médico liberado del consultorio correctamente.');
+                cargarListaAsociacionesNube();
+            } else {
+                alert('No se pudo remover la asignación.');
+            }
+        } catch (error) {
+            console.error('Error al eliminar asignación:', error);
+        }
+    }
+
+
+
+    // Vinculación global
+    window.prepararModuloAsociaciones = prepararModuloAsociaciones;
+    window.guardarAsociacionNube = guardarAsociacionNube;
+    window.cargarListaAsociacionesNube = cargarListaAsociacionesNube;
+    window.eliminarAsociacionNube = eliminarAsociacionNube;
     // Vinculación global
     window.guardarConsultorioNube = guardarConsultorioNube;
     window.cargarListaConsultoriosNube = cargarListaConsultoriosNube;
