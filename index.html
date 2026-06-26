@@ -133,7 +133,11 @@
         .error-msg { color: #cc0000; font-weight: bold; margin-top: 10px; display: none; }
 
 
-
+	@keyframes pulse {
+	    0% { transform: scale(1); }
+	    50% { transform: scale(1.05); box-shadow: 0 2px 10px rgba(220,38,38,0.5); }
+	    100% { transform: scale(1); }
+	}
 
 
 
@@ -157,7 +161,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v5.0.0
+        v6.0.0
     </div>
 
 
@@ -228,11 +232,15 @@
                     <button class="btn-save" style="background: var(--dorado-calidad)" onclick="activarModulo('mod-lista', this)">VER PLANTILLA DE PERSONAL</button>
                 </div>
 
-                <div class="card card-doctor">
-                    <h3 style="color: #2c4e72; text-align: center;">Cambios de Consultorio</h3>
-                    <p style="font-size: 0.8em; color: #666; text-align: center;">Consulta de estatus de cambios de Consultorio.</p>
-                    <button class="btn-save" style="background: #2c4e72" onclick="activarModulo('vista-coordinacion', this)">ESTATUS CAMBIOS DE CONSULTORIO</button>
-                </div>
+
+		<div class="card card-doctor" style="position: relative;">
+		    <!-- NUEVA BURBUJA DE NOTIFICACIÓN: Inicia oculta (display: none) -->
+		    <span id="badge-notificacion-pendientes" style="display: none; position: absolute; top: -10px; right: -10px; background: #dc2626; color: white; font-weight: bold; font-size: 0.85em; padding: 5px 10px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: pulse 2s infinite;">0 PENDIENTES</span>    
+		    <h3 style="color: #2c4e72; text-align: center;">Cambios de Consultorio</h3>
+		    <p style="font-size: 0.8em; color: #666; text-align: center;">Consulta de estatus de cambios de Consultorio.</p>
+		    <button class="btn-save" style="background: #2c4e72" onclick="activarModulo('vista-coordinacion', this)">ESTATUS CAMBIOS DE CONSULTORIO</button>
+		</div>
+
 		<div class="card card-office">
 		    <h3 style="color:#db2777; text-align: center;">Registro de Consultorio</h3>
 		    <p style="font-size: 0.85em; color: #666;">Alta y control de espacios físicos de atención por turno.</p>
@@ -495,7 +503,7 @@
             <div class="login-grid">
                 <div class="card card-patient" style="border-top: 8px solid var(--verde-issste) !important;">
                     <h3 style="color: var(--verde-issste); text-align: center;">Solicitar cambio de consultorio</h3>
-                    <p style="font-size: 0.85em; color: #666;">Inicia un trámite digital para solicitar la reasignación de tu consultorio médico asignado.</p>
+                    <p style="font-size: 0.85em; color: #666;">Inicia un trámite para solicitar cambio de consultorio.</p>
                     <button class="btn-save" style="background: var(--verde-issste); color: white !important;" onclick="activarModulo('modulo-solicitud-cambio', this)">INICIAR SOLICITUD</button>
                 </div>
             </div>
@@ -517,7 +525,7 @@
 
             <!-- Encabezado con el Estatus del Trámite -->
             <div style="background-color: var(--verde-issste); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
-                <span style="font-weight: bold; font-size: 1.2em;">Trámite de Reasignación de Espacio Clínico</span>
+                <span style="font-weight: bold; font-size: 1.2em;">Trámite de Cambio de Consultorio</span>
                 <span style="text-align: right; font-size: 0.85em;">Estatus de Ingreso: <strong style="color: #611232; background: white; padding: 2px 6px; border-radius: 4px;">PENDIENTE</strong> ⏳</span>
             </div>
             
@@ -528,7 +536,7 @@
                     <!-- ================================================================= -->
                     <!-- SUBSECCIÓN: DATOS DEL ASEGURADO                                   -->
                     <!-- ================================================================= -->
-                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-top: 0; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS DEL ASEGURADO</h3>
+                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-top: 0; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS DEL DERECHOHABIENTE</h3>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
                         <div>
@@ -571,7 +579,7 @@
                     <!-- ================================================================= -->
                     <!-- SUBSECCIÓN: DOMICILIO Y CONTACTO                                  -->
                     <!-- ================================================================= -->
-                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 0.5px;">DOMICILIO Y CONTACTO</h3>
+                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 0.5px;">DOMICILIO</h3>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 20px;">
                         <div style="grid-column: span 2;">
@@ -599,7 +607,7 @@
                     <!-- ================================================================= -->
                     <!-- SUBSECCIÓN: DATOS DE CONTROL Y SEGUIMIENTO                       -->
                     <!-- ================================================================= -->
-                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS DE CONTROL Y SEGUIMIENTO</h3>
+                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS ADICIONALES</h3>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 10px;">
                         <div>
@@ -620,6 +628,15 @@
                             <label for="sol-phone" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Teléfono:</label>
                             <input type="tel" id="sol-phone" required placeholder="Ej. 5512345678" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
+
+
+			<div>
+			    <label for="sol-email" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Correo Electrónico:</label>
+			    <input type="email" id="sol-email" required placeholder="Ej. paciente@correo.com" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+			</div>
+
+
+
                         <div>
                             <label for="sol-type" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Tipo de Asegurado:</label>
                             <select id="sol-type" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
@@ -1568,6 +1585,7 @@ async function guardarSolicitudCambioNube(event) {
         age: parseInt(document.getElementById('sol-age').value),
         maritalStatus: document.getElementById('sol-civil').value,
         phone: document.getElementById('sol-phone').value.trim(),
+	email: document.getElementById('sol-email').value.trim(),
         insuredType: document.getElementById('sol-type').value,
         totalFamilyMembers: parseInt(document.getElementById('sol-members').value),
         beneficiaries: beneficiariosTextoPlano, 
@@ -1584,7 +1602,7 @@ async function guardarSolicitudCambioNube(event) {
         });
 
         if (response.ok) {
-            alert('¡Su trámite con motivos y desglose de consultorios se ha guardado con éxito en Clever Cloud!');
+            alert('¡Su trámite ha iniciado con éxito!');
             document.getElementById('form-solicitud-cambio').reset();
             listaBeneficiariosTemporales = [];
             renderizarTablaBeneficiariosLocal();
@@ -1663,19 +1681,38 @@ async function cargarSolicitudesCoordinacionNube() {
     }
 }
 
+
+
+
+
 async function dictaminarSolicitud(idTramite, nuevoEstatus) {
-    if (!confirm(`¿Confirmas cambiar el estatus del trámite Folio ${idTramite} a: ${nuevoEstatus}?`)) return;
+    // 1. Solicitar el motivo de la decisión obligatoria
+    const accion = nuevoEstatus === 'APROBADA' ? 'ACEPTACIÓN' : 'RECHAZO';
+    const notasDictamen = prompt(`Escriba el motivo de ${accion} para el trámite Folio ${idTramite}:`);
+    
+    if (notasDictamen === null) return; // Si presiona cancelar en el prompt, aborta
+    
+    if (notasDictamen.trim() === "") {
+        alert("Validación: Es obligatorio ingresar un motivo para dictaminar la solicitud.");
+        return;
+    }
+
+    if (!confirm(`¿Confirmas guardar el dictamen y notificar al derechohabiente?`)) return;
 
     try {
         const response = await fetch(`${BASE_URL}/api/office-changes/${idTramite}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: nuevoEstatus })
+            body: JSON.stringify({ 
+                status: nuevoEstatus,
+                statusNotes: notasDictamen.trim().toUpperCase() // Guardamos la justificación en mayúsculas
+            })
         });
 
         if (response.ok) {
-            alert(`¡El trámite ha sido ${nuevoEstatus.toLowerCase()} con éxito en Clever Cloud!`);
-            cargarSolicitudesCoordinacionNube(); // Refresca la tabla automáticamente
+            alert(`¡El trámite ha sido ${nuevoEstatus.toLowerCase()} con éxito y se ha enviado la notificación por correo electrónico!`);
+            cargarSolicitudesCoordinacionNube(); // Refresca la tabla
+            actualizarBurbujaNotificaciones();   // Resta 1 a la burbuja de alertas en el menú
         } else {
             const data = await response.json();
             alert('Error al actualizar: ' + data.message);
@@ -1692,10 +1729,44 @@ async function dictaminarSolicitud(idTramite, nuevoEstatus) {
 
 
 
+async function actualizarBurbujaNotificaciones() {
+    const badge = document.getElementById('badge-notificacion-pendientes');
+    if (!badge) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/office-changes`);
+        if (!response.ok) return;
+        const solicitudes = await response.json();
+        
+        // Filtrar del arreglo descargado únicamente las que están esperando revisión
+        const pendientes = solicitudes.filter(sol => sol.status === 'PENDIENTE');
+        
+        if (pendientes.length > 0) {
+            badge.innerText = `${pendientes.length} PENDIENTE${pendientes.length > 1 ? 'S' : ''}`;
+            badge.style.display = 'block';
+        } else {
+            badge.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error al actualizar contador de notificaciones:', error);
+    }
+}
 
 
 
 
+
+
+
+
+
+
+
+    // VINCULACIÓN: Haz que se ejecute de inmediato cuando el login sea exitoso.
+    // Busca tu función 'procesarLogin(e)' y justo debajo de la línea donde enciendes el panel:
+    // panelCoord.style.display = 'block';
+    // INYECTA ESTA LLAMADA:
+    actualizarBurbujaNotificaciones();
     // Vinculación global obligatoria al final de tu script
     window.cargarSolicitudesCoordinacionNube = cargarSolicitudesCoordinacionNube;
     window.dictaminarSolicitud = dictaminarSolicitud;

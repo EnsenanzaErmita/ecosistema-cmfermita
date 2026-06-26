@@ -323,30 +323,26 @@ app.delete('/api/assignments/:employeeId', (req, res) => {
 
 // RUTA API: Registrar trámite incluyendo el motivo del cambio y consultorios cruzados
 // RUTA API ACTUALIZADA: Registrar trámite con motivo único y beneficiarios en texto plano
+// 1. RUTA API POST: Recibir trámite incluyendo el nuevo campo 'email'
 app.post('/api/office-changes', (req, res) => {
     const {
         paternalLastname, maternalLastname, firstNames, rfc,
         isWorker, isPensioner, street, extNum, intNum, colonia,
-        postalCode, age, maritalStatus, phone, insuredType, totalFamilyMembers,
+        postalCode, age, maritalStatus, phone, email, insuredType, totalFamilyMembers,
         beneficiaries, currentOfficeId, requestedOfficeId, changeReason
     } = req.body;
 
-    if (!paternalLastname || !firstNames || !rfc || !currentOfficeId || !requestedOfficeId || !changeReason) {
-        return res.status(400).json({ message: 'Todos los datos obligatorios, la selección de consultorios y el motivo de cambio deben ser requisitados.' });
+    if (!paternalLastname || !firstNames || !rfc || !email || !currentOfficeId || !requestedOfficeId || !changeReason) {
+        return res.status(400).json({ message: 'Todos los datos obligatorios, incluyendo el correo y el motivo de cambio, deben ser requisitados.' });
     }
 
-    if (parseInt(currentOfficeId) === parseInt(requestedOfficeId)) {
-        return res.status(400).json({ message: 'El consultorio solicitado debe ser diferente al consultorio actual.' });
-    }
-
-    // Tu columna 'beneficiaries' en MySQL ahora recibirá directamente el texto plano formateado desde el cliente
     const insertSql = `
         INSERT INTO office_change_requests (
             paternal_lastname, maternal_lastname, first_names, rfc,
             is_worker, is_pensioner, street, ext_num, int_num, colonia,
-            postal_code, age, marital_status, phone, insured_type, total_family_members,
+            postal_code, age, marital_status, phone, email, insured_type, total_family_members,
             beneficiaries, current_office_id, requested_office_id, change_reason
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     pool.query(insertSql, [
@@ -364,18 +360,19 @@ app.post('/api/office-changes', (req, res) => {
         parseInt(age),
         maritalStatus,
         phone.trim(),
+        email.trim(), // Guarda el correo en la nueva columna
         insuredType,
         parseInt(totalFamilyMembers),
-        beneficiaries, // Almacena directamente la cadena: "PATERNO MATERNO NOMBRES EDAD, PATERNO..."
+        beneficiaries,
         parseInt(currentOfficeId),
         parseInt(requestedOfficeId),
-        changeReason.trim().toUpperCase() // Guarda el motivo unificado en mayúsculas
+        changeReason.trim().toUpperCase()
     ], (err, result) => {
         if (err) {
-            console.error('Error al insertar trámite unificado en Clever Cloud:', err);
-            return res.status(500).json({ message: 'No se pudo guardar la solicitud en la base de datos.' });
+            console.error('Error al insertar trámite en Clever Cloud:', err);
+            return res.status(500).json({ message: 'No se pudo guardar la solicitud.' });
         }
-        res.status(201).json({ message: 'Solicitud tramitada correctamente con formato legible.' });
+        res.status(201).json({ message: 'Solicitud tramitada correctamente.' });
     });
 });
 
@@ -385,8 +382,8 @@ app.post('/api/office-changes', (req, res) => {
 
 
 
-
 // RUTA API: Obtener todas las solicitudes cruzando nombres de consultorios (JOIN)
+// 2. RUTA API GET: Descargar solicitudes incluyendo correos y motivos de dictamen
 app.get('/api/office-changes', (req, res) => {
     const sql = `
         SELECT r.*, 
@@ -397,39 +394,102 @@ app.get('/api/office-changes', (req, res) => {
         LEFT JOIN offices o2 ON r.requested_office_id = o2.id
         ORDER BY r.id DESC
     `;
-    
     pool.query(sql, (err, results) => {
         if (err) {
-            console.error('Error al consultar solicitudes desde Coordinación:', err);
-            return res.status(500).json({ message: 'Error interno al consultar las solicitudes en Clever Cloud.' });
+            console.error('Error al consultar solicitudes:', err);
+            return res.status(500).json({ message: 'Error interno en Clever Cloud.' });
         }
         res.status(200).json(results);
     });
 });
 
+
+
+
+
+
 // RUTA API: Actualizar estatus de dictaminación (Aprobar o Rechazar)
+// 3. RUTA API PUT: Procesar dictamen (Actualiza estatus, guarda notas y dispara el correo)
 app.put('/api/office-changes/:id', (req, res) => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, statusNotes } = req.body;
 
-    if (!status || !['APROBADA', 'RECHAZADA'].includes(status)) {
-        return res.status(400).json({ message: 'Estatus de dictaminación inválido.' });
+    if (!status || !['APROBADA', 'RECHAZADA'].includes(status) || !statusNotes) {
+        return res.status(400).json({ message: 'Estatus o notas de justificación inválidas.' });
     }
 
-    const sql = 'UPDATE office_change_requests SET status = ? WHERE id = ?';
-    pool.query(sql, [status, id], (err, result) => {
-        if (err) {
-            console.error('Error al actualizar dictamen en Clever Cloud:', err);
-            return res.status(500).json({ message: 'No se pudo actualizar el estatus en el servidor.' });
+    // Primero localizamos el correo electrónico y nombre del derechohabiente antes de actualizar
+    const findUserSql = 'SELECT first_names, paternal_lastname, email FROM office_change_requests WHERE id = ?';
+    pool.query(findUserSql, [id], (err, userResult) => {
+        if (err || !userResult || userResult.length === 0) {
+            console.error('Error al buscar correo del derechohabiente:', err);
+            return res.status(500).json({ message: 'No se pudo localizar el correo para la notificación.' });
         }
-        res.status(200).json({ message: 'Estatus del trámite actualizado correctamente.' });
+
+        const paciente = userResult[0];
+
+        // Guardamos el estatus y el motivo unificado en la base de datos
+        const updateSql = 'UPDATE office_change_requests SET status = ?, status_notes = ? WHERE id = ?';
+        pool.query(updateSql, [status, statusNotes, id], (err, result) => {
+            if (err) {
+                console.error('Error al actualizar dictamen:', err);
+                return res.status(500).json({ message: 'Error al escribir el dictamen en el servidor.' });
+            }
+
+            // REDACCIÓN DEL CORREO INSTITUCIONAL AUTOMÁTICO
+            const opcionesEmail = {
+                from: '"C.M.F. ERMITA - ISSSTE" <tu_correo_de_soporte_issste@gmail.com>',
+                to: paciente.email, // Correo capturado dinámicamente
+                subject: `Estatus de Trámite: Solicitud de Cambio de Consultorio - Folio ${id}`,
+                text: `Estimado(a) ${paciente.first_names} ${paciente.paternal_lastname},\n\nLe informamos que la Coordinación Médica de la Clínica de Medicina Familiar Ermita ha revisado su solicitud de reasignación de espacio clínico.\n\nDictamen del trámite: ${status}\nMotivo expuesto por la autoridad: ${statusNotes}\n\nAtentamente,\nCoordinación de Enseñanza y Calidad\nISSSTE - C.M.F. ERMITA`,
+                html: `
+                    <div style="font-family: sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 550px;">
+                        <h2 style="color: #611232; border-bottom: 3px solid #b38e5d; padding-bottom: 10px; margin-top:0;">C.M.F. ERMITA - NOTIFICACIÓN OFICIAL</h2>
+                        <p>Estimado(a) <strong>${paciente.first_names} ${paciente.paternal_lastname}</strong>,</p>
+                        <p>Le informamos que la Coordinación Médica ha dictaminado su solicitud de reasignación de espacio clínico:</p>
+                        <div style="background: ${status === 'APROBADA' ? '#dcfce7' : '#fee2e2'}; color: ${status === 'APROBADA' ? '#15803d' : '#b91c1c'}; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; font-size: 1.2em; margin: 15px 0;">
+                            ESTATUS: ${status}
+                        </div>
+                        <p><strong>Fundamento / Motivo institucional:</strong></p>
+                        <blockquote style="background: #f3f4f6; padding: 10px 15px; border-left: 4px solid #98989a; font-style: italic; margin: 10px 0;">
+                            "${statusNotes}"
+                        </blockquote>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                        <p style="font-size: 0.85em; color: #666; text-align: center; margin-bottom:0;">
+                            Este es un correo automático. Por favor no responda a este mensaje.<br>
+                            <strong>Coordinación de Enseñanza y Calidad - ISSSTE</strong>
+                        </p>
+                    </div>
+                `
+            };
+
+            // Disparar el envío asíncrono del correo
+            transportadorCorreo.sendMail(opcionesEmail, (errorMail, info) => {
+                if (errorMail) {
+                    console.error('Aviso: El dictamen se guardó pero falló el envío de correo de Nodemailer:', errorMail);
+                    // No cortamos la respuesta para que el front no piense que falló la inserción en la base de datos
+                } else {
+                    console.log('¡Correo de dictaminación enviado exitosamente hacia:', paciente.email);
+                }
+            });
+
+            res.status(200).json({ success: true, message: 'Trámite dictaminado y notificado correctamente.' });
+        });
     });
 });
 
 
 
+const nodemailer = require('nodemailer');
 
-
+// CONFIGURACIÓN DEL EMISOR DE CORREOS (Sugerido usar una cuenta de Gmail de soporte)
+const transportadorCorreo = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'tu_correo_de_soporte_issste@gmail.com', // Reemplaza por tu correo real de pruebas
+        pass: 'abcd efgh ijkl mnop' // Tu contraseña de aplicación de 16 dígitos generada desde Google
+    }
+});
 
 
 
