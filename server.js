@@ -408,6 +408,28 @@ app.get('/api/office-changes', (req, res) => {
 
 
 
+
+
+
+
+
+const nodemailer = require('nodemailer');
+
+// CONFIGURACIÓN DEL EMISOR DE CORREOS (Sugerido usar una cuenta de Gmail de soporte)
+const transportadorCorreo = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'cmfermitacalidad@gmail.com', // Reemplaza por tu correo real de pruebas
+        pass: 'uwnp qjdz kzxd olnh' // Tu contraseña de aplicación de 16 dígitos generada desde Google
+    }
+});
+
+
+
+
+
+
+
 // RUTA API: Actualizar estatus de dictaminación (Aprobar o Rechazar)
 // 3. RUTA API PUT: Procesar dictamen (Actualiza estatus, guarda notas y dispara el correo)
 app.put('/api/office-changes/:id', (req, res) => {
@@ -420,76 +442,66 @@ app.put('/api/office-changes/:id', (req, res) => {
 
     // Primero localizamos el correo electrónico y nombre del derechohabiente antes de actualizar
     const findUserSql = 'SELECT first_names, paternal_lastname, email FROM office_change_requests WHERE id = ?';
-    pool.query(findUserSql, [id], (err, userResult) => {
-        if (err || !userResult || userResult.length === 0) {
-            console.error('Error al buscar correo del derechohabiente:', err);
-            return res.status(500).json({ message: 'No se pudo localizar el correo para la notificación.' });
+// Busca tu app.put('/api/office-changes/:id', ...) y actualiza esta sub-sección interna:
+pool.query(findUserSql, [id], (err, userResult) => {
+    // Validación de error o respuesta vacía
+    if (err || !userResult || userResult.length === 0) {
+        console.error('Error crítico: No se encontró el trámite o falló la consulta en Clever Cloud:', err);
+        return res.status(500).json({ message: 'No se pudo localizar el correo para la notificación.' });
+    }
+
+    // EXTRACCIÓN CORRECTA DE LA FILA 0
+    const paciente = userResult[0];
+    console.log(`[NOTIFICACIÓN] Datos recuperados con éxito. Destinatario: ${paciente.email}, Nombre: ${paciente.first_names}`);
+
+    // Procedemos a guardar el estatus en la base de datos
+    const updateSql = 'UPDATE office_change_requests SET status = ?, status_notes = ? WHERE id = ?';
+    pool.query(updateSql, [status, statusNotes, id], (err, result) => {
+        if (err) {
+            console.error('Error al actualizar dictamen:', err);
+            return res.status(500).json({ message: 'Error al escribir el dictamen en el servidor.' });
         }
 
-        const paciente = userResult[0];
-
-        // Guardamos el estatus y el motivo unificado en la base de datos
-        const updateSql = 'UPDATE office_change_requests SET status = ?, status_notes = ? WHERE id = ?';
-        pool.query(updateSql, [status, statusNotes, id], (err, result) => {
-            if (err) {
-                console.error('Error al actualizar dictamen:', err);
-                return res.status(500).json({ message: 'Error al escribir el dictamen en el servidor.' });
-            }
-
-            // REDACCIÓN DEL CORREO INSTITUCIONAL AUTOMÁTICO
-            const opcionesEmail = {
-                from: '"C.M.F. ERMITA - ISSSTE" <tu_correo_de_soporte_issste@gmail.com>',
-                to: paciente.email, // Correo capturado dinámicamente
-                subject: `Estatus de Trámite: Solicitud de Cambio de Consultorio - Folio ${id}`,
-                text: `Estimado(a) ${paciente.first_names} ${paciente.paternal_lastname},\n\nLe informamos que la Coordinación Médica de la Clínica de Medicina Familiar Ermita ha revisado su solicitud de reasignación de espacio clínico.\n\nDictamen del trámite: ${status}\nMotivo expuesto por la autoridad: ${statusNotes}\n\nAtentamente,\nCoordinación de Enseñanza y Calidad\nISSSTE - C.M.F. ERMITA`,
-                html: `
-                    <div style="font-family: sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 550px;">
-                        <h2 style="color: #611232; border-bottom: 3px solid #b38e5d; padding-bottom: 10px; margin-top:0;">C.M.F. ERMITA - NOTIFICACIÓN OFICIAL</h2>
-                        <p>Estimado(a) <strong>${paciente.first_names} ${paciente.paternal_lastname}</strong>,</p>
-                        <p>Le informamos que la Coordinación Médica ha dictaminado su solicitud de reasignación de espacio clínico:</p>
-                        <div style="background: ${status === 'APROBADA' ? '#dcfce7' : '#fee2e2'}; color: ${status === 'APROBADA' ? '#15803d' : '#b91c1c'}; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; font-size: 1.2em; margin: 15px 0;">
-                            ESTATUS: ${status}
-                        </div>
-                        <p><strong>Fundamento / Motivo institucional:</strong></p>
-                        <blockquote style="background: #f3f4f6; padding: 10px 15px; border-left: 4px solid #98989a; font-style: italic; margin: 10px 0;">
-                            "${statusNotes}"
-                        </blockquote>
-                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-                        <p style="font-size: 0.85em; color: #666; text-align: center; margin-bottom:0;">
-                            Este es un correo automático. Por favor no responda a este mensaje.<br>
-                            <strong>Coordinación de Enseñanza y Calidad - ISSSTE</strong>
-                        </p>
+        // REDACCIÓN DEL CORREO INSTITUCIONAL
+        const opcionesEmail = {
+            from: '"C.M.F. ERMITA - ISSSTE" <cmfermitacalidad@gmail.com>', // DEBE SER IGUAL A TU USER
+            to: paciente.email, 
+            subject: `Estatus de Trámite: Solicitud de Cambio de Consultorio - Folio ${id}`,
+            text: `Estimado(a) ${paciente.first_names} ${paciente.paternal_lastname},\n\nLe informamos que la Coordinación Médica de la Clínica de Medicina Familiar Ermita ha revisado su solicitud de reasignación de espacio clínico.\n\nDictamen del trámite: ${status}\nMotivo expuesto por la autoridad: ${statusNotes}\n\nAtentamente,\nCoordinación de Enseñanza y Calidad\nISSSTE - C.M.F. ERMITA`,
+            html: `
+                <div style="font-family: sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 550px;">
+                    <h2 style="color: #611232; border-bottom: 3px solid #b38e5d; padding-bottom: 10px; margin-top:0;">C.M.F. ERMITA - NOTIFICACIÓN OFICIAL</h2>
+                    <p>Estimado(a) <strong>${paciente.first_names} ${paciente.paternal_lastname}</strong>,</p>
+                    <p>Le informamos que la Coordinación Médica ha dictaminado su solicitud de reasignación de espacio clínico:</p>
+                    <div style="background: ${status === 'APROBADA' ? '#dcfce7' : '#fee2e2'}; color: ${status === 'APROBADA' ? '#15803d' : '#b91c1c'}; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; font-size: 1.2em; margin: 15px 0;">
+                        ESTATUS: ${status}
                     </div>
-                `
-            };
+                    <p><strong>Fundamento / Motivo institucional:</strong></p>
+                    <blockquote style="background: #f3f4f6; padding: 10px 15px; border-left: 4px solid #98989a; font-style: italic; margin: 10px 0;">
+                        "${statusNotes}"
+                    </blockquote>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                    <p style="font-size: 0.85em; color: #666; text-align: center; margin-bottom:0;">
+                        Este es un correo automático. Por favor no responda a este mensaje.<br>
+                        <strong>Coordinación de Enseñanza y Calidad - ISSSTE</strong>
+                    </p>
+                </div>
+            `
+        };
 
-            // Disparar el envío asíncrono del correo
-            transportadorCorreo.sendMail(opcionesEmail, (errorMail, info) => {
-                if (errorMail) {
-                    console.error('Aviso: El dictamen se guardó pero falló el envío de correo de Nodemailer:', errorMail);
-                    // No cortamos la respuesta para que el front no piense que falló la inserción en la base de datos
-                } else {
-                    console.log('¡Correo de dictaminación enviado exitosamente hacia:', paciente.email);
-                }
-            });
-
-            res.status(200).json({ success: true, message: 'Trámite dictaminado y notificado correctamente.' });
+        // Disparar el envío
+        transportadorCorreo.sendMail(opcionesEmail, (errorMail, info) => {
+            if (errorMail) {
+                console.error('❌ ERROR CRÍTICO EN NODEMAILER:', errorMail);
+            } else {
+                console.log('--- ¡CORREO ENVIADO CON ÉXITO DESDE RENDER! ---', info.response);
+            }
         });
+
+        res.status(200).json({ success: true, message: 'Trámite dictaminado y notificado correctamente.' });
     });
 });
 
-
-
-const nodemailer = require('nodemailer');
-
-// CONFIGURACIÓN DEL EMISOR DE CORREOS (Sugerido usar una cuenta de Gmail de soporte)
-const transportadorCorreo = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'tu_correo_de_soporte_issste@gmail.com', // Reemplaza por tu correo real de pruebas
-        pass: 'abcd efgh ijkl mnop' // Tu contraseña de aplicación de 16 dígitos generada desde Google
-    }
-});
 
 
 
