@@ -6,20 +6,23 @@
     <title>ISSSTE - C.M.F. ERMITA</title>
 
 
-
-
-
 <style>
+
+
         :root {
             --guinda: #611232;
             --gris-oscuro: #98989a;
             --gris-claro: #f4f4f4;
             --blanco: #ffffff;
-            --negro-footer: #111111; /* Negro profundo */
+            --negro-footer: #111111;
             --verde-issste: #285c4d;
             --dorado-calidad: #b38e5d;
             --azul-issste: #1d4ed8;
             --morado-issste: #800080;
+            /* Variables faltantes agregadas para los estatus */
+            --amarillo: #b45309;
+            --verde: #15803d;
+            --rojo: #b91c1c;
         }
 
         html, body { height: 100%; margin: 0; }
@@ -43,25 +46,19 @@
         
         /* Colores por Rol */
         .card-admin { border-top: 8px solid var(--dorado-calidad); }
-        .card-doctor { border-top: 8px solid #5d8ab3; } /* Azul suave para médicos */
+        .card-doctor { border-top: 8px solid #5d8ab3; } 
         .card-staff { border-top: 8px solid var(--guinda); }
         .card-patient { border-top: 8px solid var(--verde-issste); }
         .card-rol { border: 2px solid #ddd; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; }
         .card-coord { border-top: 8px solid var(--morado-issste); }
         .card-archivo { border-top: 8px solid var(--guinda); }
-	.card-office { border-top: 8px solid #db2777 !important; } /* Rosa discreto elegante */
-	.card-assign { border-top: 8px solid #ea580c !important; } /* Naranja discreto elegante */
-
-
-
-        /* UI ELEMENTS */
-        .btn-save { color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-top: 5px; }
+        .card-office { border-top: 8px solid #db2777 !important; } 
+        .card-assign { border-top: 8px solid #ea580c !important; } 
 
         .teaching-hero { background: #fdfaf6; border: 2px solid var(--dorado-calidad); padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 25px; }
         #phrase-container { font-style: italic; color: var(--guinda); font-size: 1.2em; font-weight: bold; transition: opacity 0.8s; }
 
-        /* PIE DE PÁGINA (ESTILO NEGRO Y BLANCO) */
+        /* PIE DE PÁGINA */
         footer { background-color: var(--negro-footer); color: var(--blanco); text-align: center; padding: 25px 10px; font-size: 0.95em; border-top: 3px solid var(--dorado-calidad); }
         footer strong { color: var(--dorado-calidad); }
 
@@ -100,16 +97,19 @@
         /* FORMULARIOS Y TABLAS */
         .header-registro {
             color: white; padding: 15px; border-radius: 8px 8px 0 0;
-            display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; align-items: center;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: center;
         }
         .form-box { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border: 1px solid #eee; border-top: none; }
-        .grid-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        
+        /* CORRECCIÓN RESPONSIVA: Cambiado de columnas fijas a adaptables con auto-fit */
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
         .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
         label { display: block; font-size: 0.8em; font-weight: bold; color: #555; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid var(--gris-oscuro); border-radius: 4px; box-sizing: border-box; }
+        
+        /* UNIFICACIÓN: Removido el duplicado inferior y mantenido una sola regla limpia */
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--gris-oscuro); border-radius: 4px; box-sizing: border-box; margin-top: 5px; }
         .full-width { grid-column: span 3; }
         
-        /* CORRECCIÓN: Se removieron los colores de fondo verdes por defecto para no romper el dorado inline */
         .btn-save { padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
         .btn-action { padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
 
@@ -121,7 +121,7 @@
         .panel-nuevo label { color: var(--azul-issste); }
         .panel-actual { background: #fdf0f5; border-left: 5px solid var(--guinda); }
 
-        /* Badges */
+        /* Badges corregidos con las nuevas variables del root */
         .badge { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; display: inline-block; }
         .badge-pendiente { background: #fef3c7; color: var(--amarillo); }
         .badge-aprobada { background: #dcfce7; color: var(--verde); }
@@ -131,13 +131,6 @@
         .active-view { display: block !important; }
 
         .error-msg { color: #cc0000; font-weight: bold; margin-top: 10px; display: none; }
-
-
-
-
-
-
-
 
 
 
@@ -164,7 +157,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.0.0
+        v2.0.0
     </div>
 
 
@@ -723,10 +716,6 @@
                                 <label style="font-size: 0.8em; font-weight: bold; color: #666;">Médico Asignado Actual (Solo Lectura):</label>
                                 <input type="text" id="sol-current-doctor" readonly placeholder="Médico no asignado" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background: #f3f4f6; color: #4b5563; font-weight: bold;">
                             </div>
-                            <div>
-                                <label for="sol-current-reason" style="font-size: 0.8em; font-weight: bold; color: var(--verde-issste);">Escribir texto corto / Motivo de salida:</label>
-                                <input type="text" id="sol-current-reason" required placeholder="Ej. Inconformidad horaria o lejanía" style="width: 100%; padding: 8px; border: 1px solid var(--verde-issste); border-radius: 4px;">
-                            </div>
                         </div>
 
                         <!-- COLUMNA DERECHA: CONSULTORIO SOLICITADO -->
@@ -742,12 +731,17 @@
                                 <label style="font-size: 0.8em; font-weight: bold; color: #666;">Médico Asignado Solicitado (Solo Lectura):</label>
                                 <input type="text" id="sol-requested-doctor" readonly placeholder="Médico no asignado" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background: #f3f4f6; color: #4b5563; font-weight: bold;">
                             </div>
-                            <div>
-                                <label for="sol-requested-reason" style="font-size: 0.8em; font-weight: bold; color: var(--verde-issste);">Escribir texto corto / Motivo de ingreso:</label>
-                                <input type="text" id="sol-requested-reason" required placeholder="Ej. Facilidad de acceso o recomendación" style="width: 100%; padding: 8px; border: 1px solid var(--verde-issste); border-radius: 4px;">
-                            </div>
                         </div>
                     </div>
+
+
+
+<!-- NUEVA SUBSECCIÓN: MOTIVO UNIFICADO -->
+<div style="background: #ffffff; border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin-bottom: 15px; font-family: 'Segoe UI', sans-serif;">
+    <label for="sol-change-reason" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Escribir el Motivo del Cambio de Consultorio:</label>
+    <input type="text" id="sol-change-reason" required placeholder="Ej. Por conveniencia de horario, cercanía a domicilio o preferencia de médico" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
+</div>
+
 
                     <!-- BLOQUE FINAL: CUADROS DE RESUMEN AUTOMÁTICO -->
                     <div style="background: #e6f4ea; border: 1px solid var(--verde-issste); padding: 12px; border-radius: 6px; margin-bottom: 15px;">
@@ -1492,65 +1486,74 @@ async function cargarListaPersonalNube() {
     }
 
     // REEMPLAZAR FUNCIÓN ANTERIOR: Envío final con las validaciones de negocio cruzadas
-    async function guardarSolicitudCambioNube(event) {
-        event.preventDefault();
+async function guardarSolicitudCambioNube(event) {
+    event.preventDefault();
 
-        const currentOfficeId = document.getElementById('sol-current-office').value;
-        const requestedOfficeId = document.getElementById('sol-requested-office').value;
+    const currentOfficeId = document.getElementById('sol-current-office').value;
+    const requestedOfficeId = document.getElementById('sol-requested-office').value;
 
-        // VALIDACIÓN DE NEGOCIO: El consultorio solicitado debe ser diferente al actual
-        if (parseInt(currentOfficeId) === parseInt(requestedOfficeId)) {
-            alert('Validación del Sistema:\nEl Consultorio Solicitado no puede ser igual al Consultorio Actual. Seleccione una opción de cambio válida.');
-            return;
-        }
-
-        const payload = {
-            paternalLastname: document.getElementById('sol-paternal').value.trim().toUpperCase(),
-            maternalLastname: document.getElementById('sol-maternal').value.trim().toUpperCase(),
-            firstNames: document.getElementById('sol-names').value.trim().toUpperCase(),
-            rfc: document.getElementById('sol-rfc').value.trim().toUpperCase(),
-            isWorker: document.getElementById('sol-worker').value,
-            isPensioner: document.getElementById('sol-pensioner').value,
-            street: document.getElementById('sol-street').value.trim().toUpperCase(),
-            extNum: document.getElementById('sol-ext').value.trim().toUpperCase(),
-            intNum: document.getElementById('sol-int').value.trim().toUpperCase(),
-            colonia: document.getElementById('sol-colonia').value.trim().toUpperCase(),
-            postalCode: document.getElementById('sol-cp').value.trim(),
-            age: parseInt(document.getElementById('sol-age').value),
-            maritalStatus: document.getElementById('sol-civil').value,
-            phone: document.getElementById('sol-phone').value.trim(),
-            insuredType: document.getElementById('sol-type').value,
-            totalFamilyMembers: parseInt(document.getElementById('sol-members').value),
-            beneficiaries: listaBeneficiariosTemporales,
-            currentOfficeId: parseInt(currentOfficeId),
-            currentOfficeReason: document.getElementById('sol-current-reason').value,
-            requestedOfficeId: parseInt(requestedOfficeId),
-            requestedOfficeReason: document.getElementById('sol-requested-reason').value
-        };
-
-        try {
-            const response = await fetch(`${BASE_URL}/api/office-changes`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (response.ok) {
-                alert('¡Su trámite con motivos y desglose de consultorios se ha guardado con éxito en Clever Cloud!');
-                document.getElementById('form-solicitud-cambio').reset();
-                listaBeneficiariosTemporales = [];
-                renderizarTablaBeneficiariosLocal();
-                activarModulo('panel-derechohabientes', null);
-            } else {
-                const data = await response.json();
-                alert('Error: ' + data.message);
-            }
-        } catch (error) {
-            console.error('Error de conexión:', error);
-            alert('No se pudo conectar con el servidor de Render.');
-        }
+    // VALIDACIÓN DE NEGOCIO: El consultorio solicitado debe ser diferente al actual
+    if (parseInt(currentOfficeId) === parseInt(requestedOfficeId)) {
+        alert('Validación del Sistema:\nEl Consultorio Solicitado no puede ser igual al Consultorio Actual. Seleccione una opción de cambio válida.');
+        return;
     }
 
+    // CONVERSIÓN A TEXTO PLANO: Transforma el JSON en la cadena formateada por comas y espacios
+    let beneficiariosTextoPlano = "";
+    if (listaBeneficiariosTemporales && listaBeneficiariosTemporales.length > 0) {
+        beneficiariosTextoPlano = listaBeneficiariosTemporales.map(ben => {
+            const materno = ben.maternal ? ` ${ben.maternal}` : '';
+            return `${ben.paternal}${materno} ${ben.names} ${ben.age}`;
+        }).join(', ');
+    } else {
+        beneficiariosTextoPlano = "SIN BENEFICIARIOS REGISTRADOS";
+    }
+
+    const payload = {
+        paternalLastname: document.getElementById('sol-paternal').value.trim().toUpperCase(),
+        maternalLastname: document.getElementById('sol-maternal').value.trim().toUpperCase(),
+        firstNames: document.getElementById('sol-names').value.trim().toUpperCase(),
+        rfc: document.getElementById('sol-rfc').value.trim().toUpperCase(),
+        isWorker: document.getElementById('sol-worker').value,
+        isPensioner: document.getElementById('sol-pensioner').value,
+        street: document.getElementById('sol-street').value.trim().toUpperCase(),
+        extNum: document.getElementById('sol-ext').value.trim().toUpperCase(),
+        intNum: document.getElementById('sol-int').value.trim().toUpperCase(),
+        colonia: document.getElementById('sol-colonia').value.trim().toUpperCase(),
+        postalCode: document.getElementById('sol-cp').value.trim(),
+        age: parseInt(document.getElementById('sol-age').value),
+        maritalStatus: document.getElementById('sol-civil').value,
+        phone: document.getElementById('sol-phone').value.trim(),
+        insuredType: document.getElementById('sol-type').value,
+        totalFamilyMembers: parseInt(document.getElementById('sol-members').value),
+        beneficiaries: beneficiariosTextoPlano, // Envia el texto plano estructurado
+        currentOfficeId: parseInt(currentOfficeId),
+        requestedOfficeId: parseInt(requestedOfficeId),
+        changeReason: document.getElementById('sol-change-reason').value.trim().toUpperCase()
+    };
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/office-changes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            alert('¡Su trámite con motivos y desglose de consultorios se ha guardado con éxito en Clever Cloud!');
+            document.getElementById('form-solicitud-cambio').reset();
+            listaBeneficiariosTemporales = [];
+            renderizarTablaBeneficiariosLocal();
+            activarModulo('panel-derechohabientes', null);
+        } else {
+            const data = await response.json();
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error de conexión:', error);
+        alert('No se pudo conectar con el servidor de Render.');
+    }
+}
 
 
 
