@@ -320,20 +320,24 @@ app.delete('/api/assignments/:employeeId', (req, res) => {
 
 
 
-// RUTA API: Registrar trámite de cambio de consultorio incluyendo beneficiarios serializados
+
+// RUTA API: Registrar trámite incluyendo el motivo del cambio y consultorios cruzados
 app.post('/api/office-changes', (req, res) => {
     const {
         paternalLastname, maternalLastname, firstNames, rfc,
         isWorker, isPensioner, street, extNum, intNum, colonia,
         postalCode, age, maritalStatus, phone, insuredType, totalFamilyMembers,
-        beneficiaries // Arreglo de beneficiarios dinámicos desde el Frontend
+        beneficiaries, currentOfficeId, currentOfficeReason, requestedOfficeId, requestedOfficeReason
     } = req.body;
 
-    if (!paternalLastname || !firstNames || !rfc || !street || !extNum || !colonia || !postalCode || !age || !phone) {
-        return res.status(400).json({ message: 'Todos los datos obligatorios del asegurado deben ser requisitados.' });
+    if (!paternalLastname || !firstNames || !rfc || !currentOfficeId || !requestedOfficeId) {
+        return res.status(400).json({ message: 'Todos los datos obligatorios y la selección de consultorios deben ser requisitados.' });
     }
 
-    // Convertimos el arreglo de beneficiarios a una cadena de texto JSON para meterlo en una sola columna lineal
+    if (parseInt(currentOfficeId) === parseInt(requestedOfficeId)) {
+        return res.status(400).json({ message: 'El consultorio solicitado debe ser diferente al consultorio actual.' });
+    }
+
     const beneficiariesJson = beneficiaries ? JSON.stringify(beneficiaries) : '[]';
 
     const insertSql = `
@@ -341,8 +345,8 @@ app.post('/api/office-changes', (req, res) => {
             paternal_lastname, maternal_lastname, first_names, rfc,
             is_worker, is_pensioner, street, ext_num, int_num, colonia,
             postal_code, age, marital_status, phone, insured_type, total_family_members,
-            beneficiaries
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            beneficiaries, current_office_id, current_office_reason, requested_office_id, requested_office_reason
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     pool.query(insertSql, [
@@ -362,15 +366,24 @@ app.post('/api/office-changes', (req, res) => {
         phone.trim(),
         insuredType,
         parseInt(totalFamilyMembers),
-        beneficiariesJson // Se guarda completo en la misma línea
+        beneficiariesJson,
+        parseInt(currentOfficeId),
+        currentOfficeReason.trim().toUpperCase(),
+        parseInt(requestedOfficeId),
+        requestedOfficeReason.trim().toUpperCase()
     ], (err, result) => {
         if (err) {
-            console.error('Error al insertar trámite con beneficiarios:', err);
-            return res.status(500).json({ message: 'No se pudo guardar la solicitud en el servidor.' });
+            console.error('Error al insertar trámite con motivos:', err);
+            return res.status(500).json({ message: 'No se pudo guardar la solicitud.' });
         }
-        res.status(201).json({ message: 'Solicitud tramitada correctamente en Clever Cloud.' });
+        res.status(201).json({ message: 'Solicitud tramitada correctamente.' });
     });
 });
+
+
+
+
+
 
 
 
