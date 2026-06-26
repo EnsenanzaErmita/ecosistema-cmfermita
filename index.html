@@ -161,7 +161,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v9.0.0
+        v10.0.0
     </div>
 
 
@@ -1688,19 +1688,34 @@ async function cargarSolicitudesCoordinacionNube() {
 
 
 
+
 async function dictaminarSolicitud(idTramite, nuevoEstatus) {
-    // 1. Solicitar el motivo de la decisión obligatoria
+    // ALERTA 1: Verificar que el botón envíe los datos correctos
+    alert(`Rastreo 1: Entrando a la función.\nFolio recibido: ${idTramite}\nEstatus recibido: ${nuevoEstatus}`);
+
     const accion = nuevoEstatus === 'APROBADA' ? 'ACEPTACIÓN' : 'RECHAZO';
     const notasDictamen = prompt(`Escriba el motivo de ${accion} para el trámite Folio ${idTramite}:`);
     
-    if (notasDictamen === null) return; // Si presiona cancelar en el prompt, aborta
+    if (notasDictamen === null) {
+        alert("Rastreo: Presionaste Cancelar en el cuadro de texto.");
+        return; 
+    }
     
     if (notasDictamen.trim() === "") {
         alert("Validación: Es obligatorio ingresar un motivo para dictaminar la solicitud.");
         return;
     }
 
-    if (!confirm(`¿Confirmas guardar el dictamen y notificar al derechohabiente?`)) return;
+    // ALERTA 2: Verificar el texto capturado
+    alert(`Rastreo 2: Texto capturado correctamente:\n"${notasDictamen}"`);
+
+    if (!confirm(`¿Confirmas guardar el dictamen y notificar al derechohabiente?`)) {
+        alert("Rastreo: Cancelaste la confirmación final.");
+        return;
+    }
+
+    // ALERTA 3: Justo antes de disparar el Fetch hacia Render
+    alert(`Rastreo 3: Disparando petición a la URL:\n${BASE_URL}/api/office-changes/${idTramite}`);
 
     try {
         const response = await fetch(`${BASE_URL}/api/office-changes/${idTramite}`, {
@@ -1708,24 +1723,25 @@ async function dictaminarSolicitud(idTramite, nuevoEstatus) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 status: nuevoEstatus,
-                statusNotes: notasDictamen.trim().toUpperCase() // Guardamos la justificación en mayúsculas
+                statusNotes: notasDictamen.trim().toUpperCase()
             })
         });
 
         if (response.ok) {
-            alert(`¡El trámite ha sido ${nuevoEstatus.toLowerCase()} con éxito y se ha enviado la notificación por correo electrónico!`);
-            cargarSolicitudesCoordinacionNube(); // Refresca la tabla
-            actualizarBurbujaNotificaciones();   // Resta 1 a la burbuja de alertas en el menú
+            alert(`¡El trámite ha sido ${nuevoEstatus.toLowerCase()} con éxito!`);
+            cargarSolicitudesCoordinacionNube(); 
+            if (typeof actualizarBurbujaNotificaciones === 'function') {
+                actualizarBurbujaNotificaciones();
+            }
         } else {
             const data = await response.json();
-            alert('Error al actualizar: ' + data.message);
+            alert('Error del servidor al actualizar: ' + data.message);
         }
     } catch (error) {
         console.error('Error de red al dictaminar:', error);
-        alert('Error de conexión con el servidor.');
+        alert('Error de conexión con el servidor de Render.');
     }
 }
-
 
 
 
