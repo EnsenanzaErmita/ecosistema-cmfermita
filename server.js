@@ -301,19 +301,18 @@ app.post('/api/assignments', (req, res) => {
 
 
 
-// RUTA API: Eliminar una asignación (Elimina el registro de la tabla intermedia)
-app.delete('/api/assignments/:employeeId', (req, res) => {
-    const { employeeId } = req.params;
-    const sql = 'DELETE FROM doctor_offices WHERE employee_id = ?';
-    pool.query(sql, [employeeId], (err, result) => {
+// RUTA API: Eliminar un consultorio por su ID (FUNCIÓN CORREGIDA Y CERRADA)
+app.delete('/api/offices/:id', (req, res) => {
+    const { id } = req.params;
+    const sql = 'DELETE FROM offices WHERE id = ?';
+    pool.query(sql, [id], (err, result) => {
         if (err) {
-            console.error('Error al eliminar asignación independiente:', err);
-            return res.status(500).json({ message: 'Error interno al intentar remover la vinculación.' });
+            console.error('Error al eliminar consultorio:', err);
+            return res.status(500).json({ message: 'Error interno al intentar eliminar el consultorio.' });
         }
-        res.status(200).json({ message: 'Asignación removida correctamente de la tabla independiente.' });
+        res.status(200).json({ message: 'Consultorio eliminado correctamente.' });
     });
 });
-
 
 
 
