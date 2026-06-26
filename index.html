@@ -161,7 +161,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v6.0.0
+        v7.0.0
     </div>
 
 
@@ -970,19 +970,22 @@ async function procesarLogin(e) {
         cerrarLogin();
         alert("¡Acceso concedido correctamente!");
 
-        // CORRECCIÓN: Oculta la raíz del login por completo borrando su visualización física
+        // Oculta la raíz del login por completo
         const sectionLogin = document.getElementById('section-login');
         if (sectionLogin) {
             sectionLogin.classList.remove('active-view');
-            sectionLogin.style.display = 'none'; // Desvanece el menú inicial de la raíz
+            sectionLogin.style.display = 'none';
         }
 
         // Enciende el panel de coordinación de forma limpia
         const panelCoord = document.getElementById('panel-coordinacion');
         if (panelCoord) {
             panelCoord.classList.add('active-view');
-            panelCoord.style.display = 'block'; // Forzado visual de tu menú
+            panelCoord.style.display = 'block';
         }
+
+        // LLAMADA CLAVE: Lanza la consulta en segundo plano al entrar al panel
+        actualizarBurbujaNotificaciones();
 
     } catch (error) {
         alert(error.message);
@@ -1766,7 +1769,7 @@ async function actualizarBurbujaNotificaciones() {
     // Busca tu función 'procesarLogin(e)' y justo debajo de la línea donde enciendes el panel:
     // panelCoord.style.display = 'block';
     // INYECTA ESTA LLAMADA:
-    actualizarBurbujaNotificaciones();
+    window.actualizarBurbujaNotificaciones = actualizarBurbujaNotificaciones;
     // Vinculación global obligatoria al final de tu script
     window.cargarSolicitudesCoordinacionNube = cargarSolicitudesCoordinacionNube;
     window.dictaminarSolicitud = dictaminarSolicitud;
