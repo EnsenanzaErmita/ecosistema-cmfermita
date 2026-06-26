@@ -439,21 +439,21 @@ app.put('/api/office-changes/:id', (req, res) => {
     }
 
     // Primero localizamos el correo electrónico y nombre del derechohabiente antes de actualizar
-        const findUserSql = 'SELECT first_names, paternal_lastname, email FROM office_change_requests WHERE id = ?';
-	pool.query(findUserSql, [id], (err, userResult) => {
-	    if (err || !userResult || userResult.length === 0) {
-        	console.error('Error crítico: No se encontró el trámite o falló la consulta en Clever Cloud:', err);
-	        return res.status(500).json({ message: 'No se pudo localizar el correo para la notificación.' });
-	    }
+            const findUserSql = 'SELECT first_names, paternal_lastname, email FROM office_change_requests WHERE id = ?';
+    pool.query(findUserSql, [id], (err, userResult) => {
+        if (err || !userResult || userResult.length === 0) {
+            console.error('Error crítico: No se encontró el trámite o falló la consulta en Clever Cloud:', err);
+            return res.status(500).json({ message: 'No se pudo localizar el correo para la notificación.' });
+        }
 
-
-        // CORRECCIÓN FINAL: Extraemos la primera fila real del arreglo de respuestas
+        // CORRECCIÓN MANDATORIA: Extraemos la primera fila real agregando el [0]
         const paciente = userResult[0]; 
         console.log(`[NOTIFICACIÓN] Destinatario real: ${paciente.email}, Nombre: ${paciente.first_names}`);
-        // ... todo el resto de tu código de actualización y opcionesEmail continúa exactamente igual ...
 
         // Procedemos a guardar el estatus en la base de datos
         const updateSql = 'UPDATE office_change_requests SET status = ?, status_notes = ? WHERE id = ?';
+        // ... todo el resto de tu código de UPDATE, opcionesEmail y sendMail continúa igual ...
+
         pool.query(updateSql, [status, statusNotes, id], (err, result) => {
             if (err) {
                 console.error('Error al actualizar dictamen:', err);
