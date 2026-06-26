@@ -157,7 +157,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v4.0.0
+        v5.0.0
     </div>
 
 
@@ -504,7 +504,6 @@
 
 
 
-
         <!-- ========================================================================= -->
         <!-- VISTA 7: FORMULARIO DE SOLICITUD DE CAMBIO (PARTE 1 DE 2)                 -->
         <!-- ========================================================================= -->
@@ -795,6 +794,47 @@
 
 
 
+<!-- ========================================================================= -->
+<!-- VISTA 8: PANEL DE DICTAMINACIÓN DE SOLICITUDES (COLOR AZUL ISSSTE)       -->
+<!-- ========================================================================= -->
+<div id="vista-coordinacion" class="view" style="display: none;">
+    
+    <!-- Barra superior con botones de navegación -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--azul-issste); margin-bottom: 20px; padding-bottom: 10px;">
+        <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Dictaminación de Cambios de Consultorio</h2>
+        <button onclick="activarModulo('panel-coordinacion', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-issste)'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
+    </div>
+
+    <!-- Encabezado Operativo -->
+    <div style="background-color: var(--azul-issste); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
+        <span style="font-weight: bold; font-size: 1.2em;">Solicitudes de Reasignación Recibidas</span>
+        <span style="text-align: right; font-size: 0.85em;">Conexión en Tiempo Real: <strong>Clever Cloud</strong> ⚡</span>
+    </div>
+    
+    <!-- Tabla de visualización de trámites -->
+    <div style="background: white; border: 1px solid #ddd; border-top: none; padding: 20px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow-x: auto;">
+        <table id="tabla-solicitudes-coordinacion" style="width: 100%; border-collapse: collapse; font-family: 'Segoe UI', sans-serif; font-size: 0.9em;">
+            <thead>
+                <tr style="background: #611232; color: white;">
+                    <th style="padding: 10px; border: 1px solid #ddd;">Folio / Fecha</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Datos del Asegurado (RFC)</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Ruta de Cambio</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Motivo expuesto</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Integrantes / Beneficiarios</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Estatus</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Acción Administrativa</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #888; padding: 25px;">Sincronizando trámites desde la nube...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
 
 
 
@@ -971,6 +1011,10 @@ async function procesarLogin(e) {
 
 	if (moduloId === 'modulo-solicitud-cambio') {
 	    cargarConsultoriosFormularioPacientes();
+	}
+
+	if (moduloId === 'vista-coordinacion') {
+	    cargarSolicitudesCoordinacionNube();
 	}
 
 
@@ -1562,6 +1606,85 @@ async function guardarSolicitudCambioNube(event) {
 
 
 
+async function cargarSolicitudesCoordinacionNube() {
+    const tbody = document.querySelector('#tabla-solicitudes-coordinacion tbody');
+    if (!tbody) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/office-changes`);
+        if (!response.ok) throw new Error('Error al descargar solicitudes');
+        
+        const solicitudes = await response.json();
+        tbody.innerHTML = '';
+
+        if (solicitudes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #888; padding: 25px;">No se registran solicitudes de cambio en el sistema.</td></tr>`;
+            return;
+        }
+
+        solicitudes.forEach(sol => {
+            const fecha = sol.created_at ? new Date(sol.created_at).toLocaleDateString() : 'N/A';
+            
+            // Determinar la clase CSS de la badge según el estatus real en MySQL
+            let claseBadge = "badge-pendiente";
+            if (sol.status === "APROBADA") claseBadge = "badge-aprobada";
+            if (sol.status === "RECHAZADA") claseBadge = "badge-rechazada";
+
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td style="padding: 12px; border: 1px solid #ddd;"><strong>Folio: ${sol.id}</strong><br><span style="font-size:0.8em; color:#666;">${fecha}</span></td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase;"><strong>${sol.paternal_lastname} ${sol.maternal_lastname}, ${sol.first_names}</strong><br><span style="font-size:0.85em; color:#0369a1; font-weight:bold;">RFC: ${sol.rfc}</span></td>
+                <td style="padding: 12px; border: 1px solid #ddd; font-size:0.9em;">
+                    <span style="color:#b91c1c; font-weight:bold;">De:</span> ${sol.current_office_name || 'ID: ' + sol.current_office_id}<br>
+                    <span style="color:#15803d; font-weight:bold;">A:</span> ${sol.requested_office_name || 'ID: ' + sol.requested_office_id}
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd; font-style:italic; font-size:0.85em; color:#333; max-width:200px;">"${sol.change_reason}"</td>
+                <td style="padding: 12px; border: 1px solid #ddd; font-size:0.85em; color:#555; max-width:250px;">
+                    <strong>Total: ${sol.total_family_members}</strong><br>
+                    <span style="display:block; max-height:60px; overflow-y:auto; color:#4b5563;">${sol.beneficiaries}</span>
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
+                    <span class="badge ${claseBadge}">${sol.status}</span>
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
+                    ${sol.status === 'PENDIENTE' ? `
+                        <div style="display:flex; gap:5px; justify-content:center;">
+                            <button onclick="dictaminarSolicitud(${sol.id}, 'APROBADA')" style="background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.8em;">Aprobar</button>
+                            <button onclick="dictaminarSolicitud(${sol.id}, 'RECHAZADA')" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.8em;">Rechazar</button>
+                        </div>
+                    ` : `<span style="font-size:0.85em; color:#888; font-weight:bold;">Trámite Concluido</span>`}
+                </td>
+            `;
+            tbody.appendChild(fila);
+        });
+    } catch (error) {
+        console.error('Error al cargar tabla de dictaminación:', error);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #cc0000; font-weight:bold; padding: 25px;">Error de comunicación con Render al descargar trámites.</td></tr>`;
+    }
+}
+
+async function dictaminarSolicitud(idTramite, nuevoEstatus) {
+    if (!confirm(`¿Confirmas cambiar el estatus del trámite Folio ${idTramite} a: ${nuevoEstatus}?`)) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/office-changes/${idTramite}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: nuevoEstatus })
+        });
+
+        if (response.ok) {
+            alert(`¡El trámite ha sido ${nuevoEstatus.toLowerCase()} con éxito en Clever Cloud!`);
+            cargarSolicitudesCoordinacionNube(); // Refresca la tabla automáticamente
+        } else {
+            const data = await response.json();
+            alert('Error al actualizar: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error de red al dictaminar:', error);
+        alert('Error de conexión con el servidor.');
+    }
+}
 
 
 
@@ -1573,6 +1696,9 @@ async function guardarSolicitudCambioNube(event) {
 
 
 
+    // Vinculación global obligatoria al final de tu script
+    window.cargarSolicitudesCoordinacionNube = cargarSolicitudesCoordinacionNube;
+    window.dictaminarSolicitud = dictaminarSolicitud;
     // Vinculación global
     window.detectarMedicoActual = detectarMedicoActual;
     window.detectarMedicoSolicitado = detectarMedicoSolicitado;

@@ -386,6 +386,54 @@ app.post('/api/office-changes', (req, res) => {
 
 
 
+// RUTA API: Obtener todas las solicitudes cruzando nombres de consultorios (JOIN)
+app.get('/api/office-changes', (req, res) => {
+    const sql = `
+        SELECT r.*, 
+               o1.office_name AS current_office_name, 
+               o2.office_name AS requested_office_name
+        FROM office_change_requests r
+        LEFT JOIN offices o1 ON r.current_office_id = o1.id
+        LEFT JOIN offices o2 ON r.requested_office_id = o2.id
+        ORDER BY r.id DESC
+    `;
+    
+    pool.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error al consultar solicitudes desde Coordinación:', err);
+            return res.status(500).json({ message: 'Error interno al consultar las solicitudes en Clever Cloud.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// RUTA API: Actualizar estatus de dictaminación (Aprobar o Rechazar)
+app.put('/api/office-changes/:id', (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status || !['APROBADA', 'RECHAZADA'].includes(status)) {
+        return res.status(400).json({ message: 'Estatus de dictaminación inválido.' });
+    }
+
+    const sql = 'UPDATE office_change_requests SET status = ? WHERE id = ?';
+    pool.query(sql, [status, id], (err, result) => {
+        if (err) {
+            console.error('Error al actualizar dictamen en Clever Cloud:', err);
+            return res.status(500).json({ message: 'No se pudo actualizar el estatus en el servidor.' });
+        }
+        res.status(200).json({ message: 'Estatus del trámite actualizado correctamente.' });
+    });
+});
+
+
+
+
+
+
+
+
+
 
 
 
