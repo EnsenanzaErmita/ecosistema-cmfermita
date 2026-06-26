@@ -157,7 +157,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.0.0
+        v3.0.0
     </div>
 
 
@@ -183,7 +183,7 @@
                 <div class="card card-coord">
                     <h3 style="color: #800080; text-align: center; font-size: 2.50em;">Coordinación Médica</h3>
                     <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para el Servicio de Coordinación Médica de la C.M.F. Ermita.</p>
-                    <button class="btn-save" style="background: #800080" onclick="entrar('coordinacion')">ACCESO COORDINACIÓN MÉDICA</button>
+                    <button class="btn-save" style="background: #800080; color: white !important;" onclick="entrar('coordinacion')">ACCESO COORDINACIÓN MÉDICA</button>
                 </div>
 
                 <!-- TARJETA 2: DERECHOHABIENTES (ACCESO DIRECTO SIN LOGUEO, COLOR VERDE ISSSTE) -->
@@ -191,7 +191,7 @@
                     <h3 style="color: var(--verde-issste); text-align: center; font-size: 2.50em;">Derechohabientes</h3>
                     <p style="font-size: 0.85em; text-align: center;">Área de trámites, solicitudes y gestión de servicios para pacientes de la clínica.</p>
                     <!-- Al darle click, salta directo a su panel independiente -->
-                    <button class="btn-save" style="background: var(--verde-issste)" onclick="activarModulo('panel-derechohabientes', this)">ACCESO DERECHOHABIENTES</button>
+                    <button class="btn-save" style="background: var(--verde-issste); color: white !important;" onclick="activarModulo('panel-derechohabientes', this)">ACCESO DERECHOHABIENTES</button>
                 </div>
 
             </div>
@@ -488,7 +488,7 @@
             
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
                 <h2 style="color: var(--verde-issste); margin:0; font-family: 'Segoe UI', sans-serif;">Panel de Servicios al Derechohabiente</h2>
-                <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--guinda)'" onmouseout="this.style.background='#98989a'">← Volver al Menú Principal</button>
+                <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--verde-issste)'" onmouseout="this.style.background='#98989a'">← Volver al Menú Principal</button>
             </div>
 
             <!-- Menú de Opciones del Derechohabiente -->
@@ -1486,19 +1486,18 @@ async function cargarListaPersonalNube() {
     }
 
     // REEMPLAZAR FUNCIÓN ANTERIOR: Envío final con las validaciones de negocio cruzadas
+
 async function guardarSolicitudCambioNube(event) {
     event.preventDefault();
 
     const currentOfficeId = document.getElementById('sol-current-office').value;
     const requestedOfficeId = document.getElementById('sol-requested-office').value;
 
-    // VALIDACIÓN DE NEGOCIO: El consultorio solicitado debe ser diferente al actual
     if (parseInt(currentOfficeId) === parseInt(requestedOfficeId)) {
         alert('Validación del Sistema:\nEl Consultorio Solicitado no puede ser igual al Consultorio Actual. Seleccione una opción de cambio válida.');
         return;
     }
 
-    // CONVERSIÓN A TEXTO PLANO: Transforma el JSON en la cadena formateada por comas y espacios
     let beneficiariosTextoPlano = "";
     if (listaBeneficiariosTemporales && listaBeneficiariosTemporales.length > 0) {
         beneficiariosTextoPlano = listaBeneficiariosTemporales.map(ben => {
@@ -1509,6 +1508,7 @@ async function guardarSolicitudCambioNube(event) {
         beneficiariosTextoPlano = "SIN BENEFICIARIOS REGISTRADOS";
     }
 
+    // CORRECCIÓN DE LLAVES: Coincidencia exacta con el desestructurado de tu server.js
     const payload = {
         paternalLastname: document.getElementById('sol-paternal').value.trim().toUpperCase(),
         maternalLastname: document.getElementById('sol-maternal').value.trim().toUpperCase(),
@@ -1526,7 +1526,7 @@ async function guardarSolicitudCambioNube(event) {
         phone: document.getElementById('sol-phone').value.trim(),
         insuredType: document.getElementById('sol-type').value,
         totalFamilyMembers: parseInt(document.getElementById('sol-members').value),
-        beneficiaries: beneficiariosTextoPlano, // Envia el texto plano estructurado
+        beneficiaries: beneficiariosTextoPlano, 
         currentOfficeId: parseInt(currentOfficeId),
         requestedOfficeId: parseInt(requestedOfficeId),
         changeReason: document.getElementById('sol-change-reason').value.trim().toUpperCase()
@@ -1554,7 +1554,6 @@ async function guardarSolicitudCambioNube(event) {
         alert('No se pudo conectar con el servidor de Render.');
     }
 }
-
 
 
 
