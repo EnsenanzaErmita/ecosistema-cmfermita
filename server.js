@@ -1,4 +1,4 @@
-console.log('--- ¡ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO! ---');
+console.log('--- ¡ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 19! ---');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
