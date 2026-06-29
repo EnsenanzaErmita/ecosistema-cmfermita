@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 27.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 28.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -8,11 +8,12 @@ const path = require('path');
 const SibApiV3Sdk = require('@getbrevo/brevo');
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-// CONFIGURACIÓN DE LA LLAVE DE ACCESO
+// CONFIGURACIÓN DE LA LLAVE DE ACCESO SEGURA (VERSIÓN FINAL DE PRODUCCIÓN)
 const apiKey = apiInstance.authentications['apiKey'];
-apiKey.apiKey = 'AQUÍ_PEGA_TU_API_KEY_DE_BREVO'; // Tu llave larga de Brevo
+apiKey.apiKey = process.env.BREVO_API_KEY; // ← CORREGIDO: Lee la llave secreta directamente desde Render sin exponerla
 
 const app = express();
+
 
 // =========================================================================
 // 1. MIDDLEWARES (CONFIGURADO CON TU URL REAL DE GITHUB PAGES)
