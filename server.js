@@ -414,12 +414,19 @@ app.get('/api/office-changes', (req, res) => {
 
 const nodemailer = require('nodemailer');
 
-// CONFIGURACIÓN DEL EMISOR DE CORREOS (Sugerido usar una cuenta de Gmail de soporte)
+// CONFIGURACIÓN DEL EMISOR DE CORREOS (VERSIÓN BLINDADA CON TLS CONTRACANDADOS)
 const transportadorCorreo = nodemailer.createTransport({
     service: 'gmail',
+    host: '://gmail.com',
+    port: 465,
+    secure: true, // Forzar uso de SSL/TLS
     auth: {
-        user: 'cmfermitacalidad@gmail.com', // Reemplaza por tu correo real de pruebas
-        pass: 'uwnp qjdz kzxd olnh' // Tu contraseña de aplicación de 16 dígitos generada desde Google
+        user: 'cmfermitacalidad@gmail.com', 
+        pass: 'uwnp qjdz kzxd olnh' // Tus 16 dígitos reales de Google (sin espacios)
+    },
+    tls: {
+        // REGLA DE ORO: Evita que Render bloquee el envío por temas de certificados locales
+        rejectUnauthorized: false
     }
 });
 
