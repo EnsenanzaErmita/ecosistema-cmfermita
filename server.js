@@ -63,14 +63,21 @@ const transportadorCorreo = nodemailer.createTransport({
     }
 });
 
-// CÓDIGO NATAL DE PRUEBA: Verifica el inicio de sesión con Google al arrancar el servidor
-transportadorCorreo.verify((error, success) => {
-    if (error) {
-        console.error('❌ [ERROR GOOGLE NODEMAILER]:', error.message);
-    } else {
+// NUEVO BLOQUE DE VERIFICACIÓN ASÍNCRONO FORZADO
+(async () => {
+    console.log('[SISTEMA] Iniciando intento de conexión con los servidores de Google...');
+    try {
+        await new Promise((resolve, reject) => {
+            transportadorCorreo.verify((error, success) => {
+                if (error) reject(error);
+                else resolve(success);
+            });
+        });
         console.log('🚀 [ÉXITO NODEMAILER]: ¡Autenticado correctamente con Google y listo para enviar correos desde Render!');
+    } catch (error) {
+        console.error('❌ [ERROR GOOGLE NODEMAILER DETECTADO]:', error.message);
     }
-});
+})();
 
 
 
