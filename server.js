@@ -1,9 +1,16 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 26.3');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 27.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const path = require('path'); 
-const nodemailer = require('nodemailer');
+
+// IMPORTACIÓN OFICIAL DE LA API DE BREVO
+const SibApiV3Sdk = require('@getbrevo/brevo');
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+// CONFIGURACIÓN DE LA LLAVE DE ACCESO
+const apiKey = apiInstance.authentications['apiKey'];
+apiKey.apiKey = 'AQUÍ_PEGA_TU_API_KEY_DE_BREVO'; // Tu llave larga de Brevo
 
 const app = express();
 
@@ -49,24 +56,14 @@ pool.getConnection((err, connection) => {
 
 
 // =========================================================================
-// CONFIGURACIÓN GLOBAL DE NOTIFICACIONES (NODEMAILER EN LA CABECERA)
+// CONFIGURACIÓN GLOBAL DE NOTIFICACIONES VÍA API HTTP (BREVO - LIBRE DE BLOQUEOS)
 // =========================================================================
-const transportadorCorreo = nodemailer.createTransport({
-    host: 'smtp.gmail.com', 
-    port: 587,              
-    secure: false, // Debe ser false para iniciar con STARTTLS de forma lineal
-    auth: {
-        user: 'cmfermitacalidad@gmail.com', 
-        pass: process.env.GMAIL_APP_PASSWORD // Tu contraseña de aplicación de Google de 16 caracteres
-    },
-    tls: {
-        rejectUnauthorized: false,
-        requireTLS: true // Le exige a Google cifrar la transmisión inmediatamente
-    },
-    connectionTimeout: 15000, // Extendemos a 15 segundos para dar margen en planes gratuitos
-    logger: true,
-    debug: true
-});
+const SibApiV3Sdk = require('@getbrevo/brevo');
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+// Configura tu llave de acceso de Brevo (Oculta en entorno)
+const apiKey = apiInstance.authentications['apiKey'];
+apiKey.apiKey = process.env.BREVO_API_KEY || 'TU_API_KEY_DE_BREVO';
 
 
 
@@ -387,7 +384,7 @@ app.get('/api/office-changes', (req, res) => {
 
 
 
-// RUTA API PUT: Procesar dictamen (ORDEN SECUENCIAL GARANTIZADO DE CORREO)
+// RUTA API PUT: Procesar dictamen (ORDEN SECUENCIAL VÍA API HTTP DE BREVO)
 app.put('/api/office-changes/:id', (req, res) => {
     const { id } = req.params;
     const { status, statusNotes } = req.body;
@@ -413,7 +410,6 @@ app.put('/api/office-changes/:id', (req, res) => {
         pool.query(findUserSql, [id], (errFind, userResult) => {
             if (errFind || !userResult || userResult.length === 0) {
                 console.error('Error al recuperar correo del derechohabiente tras UPDATE:', errFind);
-                // Si la BD falló, le avisamos al front pero cerramos la petición de forma segura
                 return res.status(200).json({ 
                     success: true, 
                     message: 'Trámite dictaminado en BD, pero falló la extracción del correo.',
@@ -423,53 +419,51 @@ app.put('/api/office-changes/:id', (req, res) => {
 
             // Extracción segura del renglón cero
             const paciente = userResult[0];
-            console.log(`[SISTEMA-PUT] Preparando disparo de correo SMTP hacia: ${paciente.email}`);
+            console.log(`[SISTEMA-PUT] Preparando disparo de correo HTTP hacia: ${paciente.email}`);
 
-            const opcionesEmail = {
-                from: '"C.M.F. ERMITA - ISSSTE" <cmfermitacalidad@gmail.com>', 
-                to: paciente.email, 
-                subject: `Estatus de Trámite: Solicitud de Cambio de Consultorio - Folio ${id}`,
-                text: `Estimado(a) ${paciente.first_names} ${paciente.paternal_lastname},\n\nLe informamos que la Coordinación Médica de la Clínica de Medicina Familiar Ermita ha revisado su solicitud de reasignación de espacio clínico.\n\nDictamen del trámite: ${status}\nMotivo expuesto por la autoridad: ${statusNotes}\n\nAtentamente,\nCoordinación de Enseñanza y Calidad\nISSSTE - C.M.F. ERMITA`,
-                html: `
-                    <div style="font-family: sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 550px;">
-                        <h2 style="color: #611232; border-bottom: 3px solid #b38e5d; padding-bottom: 10px; margin-top:0;">C.M.F. ERMITA - NOTIFICACIÓN OFICIAL</h2>
-                        <p>Estimado(a) <strong>${paciente.first_names} ${paciente.paternal_lastname}</strong>,</p>
-                        <p>Le informamos que la Coordinación Médica ha dictaminado su solicitud de reasignación de espacio clínico:</p>
-                        <div style="background: ${status === 'APROBADA' ? '#dcfce7' : '#fee2e2'}; color: ${status === 'APROBADA' ? '#15803d' : '#b91c1c'}; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; font-size: 1.2em; margin: 15px 0;">
-                            ESTATUS: ${status}
-                        </div>
-                        <p><strong>Fundamento / Motivo institucional:</strong></p>
-                        <blockquote style="background: #f3f4f6; padding: 10px 15px; border-left: 4px solid #98989a; font-style: italic; margin: 10px 0;">
-                            "${statusNotes}"
-                        </blockquote>
-                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-                        <p style="font-size: 0.85em; color: #666; text-align: center; margin-bottom:0;">
-                            Este es un correo automático. Por favor no responda a este mensaje.<br>
-                            <strong>Coordinación de Enseñanza y Calidad - ISSSTE</strong>
-                        </p>
+            // PASO 3: Redacción del correo mediante la API HTTP de Brevo
+            const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+            sendSmtpEmail.subject = `Estatus de Trámite: Solicitud de Cambio de Consultorio - Folio ${id}`;
+            sendSmtpEmail.htmlContent = `
+                <div style="font-family: sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 550px;">
+                    <h2 style="color: #611232; border-bottom: 3px solid #b38e5d; padding-bottom: 10px; margin-top:0;">C.M.F. ERMITA - NOTIFICACIÓN OFICIAL</h2>
+                    <p>Estimado(a) <strong>${paciente.first_names} ${paciente.paternal_lastname}</strong>,</p>
+                    <p>Le informamos que la Coordinación Médica ha dictaminado su solicitud de reasignación de espacio clínico:</p>
+                    <div style="background: ${status === 'APROBADA' ? '#dcfce7' : '#fee2e2'}; color: ${status === 'APROBADA' ? '#15803d' : '#b91c1c'}; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; font-size: 1.2em; margin: 15px 0;">
+                        ESTATUS: ${status}
                     </div>
-                `
-            };
+                    <p><strong>Fundamento / Motivo institucional:</strong></p>
+                    <blockquote style="background: #f3f4f6; padding: 10px 15px; border-left: 4px solid #98989a; font-style: italic; margin: 10px 0;">
+                        "${statusNotes}"
+                    </blockquote>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                    <p style="font-size: 0.85em; color: #666; text-align: center; margin-bottom:0;">
+                        Este es un correo automático. Por favor no responda a este mensaje.<br>
+                        <strong>Coordinación de Enseñanza y Calidad - ISSSTE</strong>
+                    </p>
+                </div>
+            `;
+            sendSmtpEmail.sender = { "name": "C.M.F. ERMITA - ISSSTE", "email": "cmfermitacalidad@gmail.com" };
+            sendSmtpEmail.to = [{ "email": paciente.email, "name": paciente.first_names }];
 
-            // PASO 3: Disparar el envío de Nodemailer
-            transportadorCorreo.sendMail(opcionesEmail, (errorMail, info) => {
-                if (errorMail) {
-                    console.error('❌ ERROR CRÍTICO EN EXCLUSIVO DE NODEMAILER:', errorMail.message);
-                } else {
-                    console.log('--- ¡CORREO ENVIADO CON ÉXITO DESDE RENDER! ---', info.response);
-                }
+            // Disparar envío HTTP saltando el Firewall de Render
+            apiInstance.sendTransacEmail(sendSmtpEmail).then((data) => {
+                console.log('--- ¡CORREO ENVIADO CON ÉXITO VÍA API HTTP DESDE RENDER! ---', data.messageId);
+            }, (error) => {
+                console.error('❌ ERROR CRÍTICO EN API DE CORREO (BREVO):', error.message || error);
             });
 
             // PASO 4: Responder al frontend de forma limpia devolviendo los datos reales
             res.status(200).json({ 
                 success: true, 
-                message: 'Trámite dictaminado y procesado de forma secuencial.',
+                message: 'Trámite dictaminado y procesado de forma secuencial por API.',
                 correoDestino: paciente.email,
                 nombreDestino: paciente.first_names
             });
         }); // Fin de pool.query (SELECT)
     }); // Fin de pool.query (UPDATE)
 }); // Fin de app.put
+
 
 
 
