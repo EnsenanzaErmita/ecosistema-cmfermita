@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const path = require('path'); 
+const nodemailer = require('nodemailer');
 
 const app = express();
 
@@ -10,7 +11,7 @@ const app = express();
 // =========================================================================
 app.use(cors({
     origin: [
-        'https://ensenanzaermita.github.io', // Tu dominio oficial de GitHub Pages
+        'https://github.io', 
         'http://localhost:3000',
         'http://127.0.0.1:5500'
     ],
@@ -21,6 +22,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
+
 
 // 2. CONFIGURACIÓN MEDIANTE POOL DE CONEXIONES (REUTILIZA CLEVER CLOUD)
 const pool = mysql.createPool({
@@ -44,8 +46,39 @@ pool.getConnection((err, connection) => {
     connection.release(); 
 });
 
+
 // =========================================================================
-// 3. RUTAS DE LA API (EXCLUSIVAS DE ESTE SEGUNDO PROYECTO)
+// CONFIGURACIÓN GLOBAL DE NOTIFICACIONES (NODEMAILER EN LA CABECERA)
+// =========================================================================
+const transportadorCorreo = nodemailer.createTransport({
+    host: '://gmail.com', 
+    port: 465,              
+    secure: true,           
+    auth: {
+        user: 'cmfermitacalidad@gmail.com', 
+        pass: 'hqqrjjthpffohxra' 
+    },
+    tls: {
+        rejectUnauthorized: false
+    }
+});
+
+// CÓDIGO NATAL DE PRUEBA: Verifica el inicio de sesión con Google al arrancar el servidor
+transportadorCorreo.verify((error, success) => {
+    if (error) {
+        console.error('❌ [ERROR GOOGLE NODEMAILER]:', error.message);
+    } else {
+        console.log('🚀 [ÉXITO NODEMAILER]: ¡Autenticado correctamente con Google y listo para enviar correos desde Render!');
+    }
+});
+
+
+
+
+
+
+// =========================================================================
+// 3. RUTAS DE LA API - PARTE A (AUTENTICACIÓN, PERSONAL Y CONSULTORIOS)
 // =========================================================================
 
 // RUTA API: Validación de usuarios y roles para el login
@@ -68,7 +101,7 @@ app.post('/api/login', (req, res) => {
             return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos.' });
         }
 
-        const user = results[0]; // Extracción segura del objeto de usuario
+        const user = results[0]; 
 
         if (user.role !== requiredRole && user.role !== 'admin') {
             return res.status(403).json({ success: false, message: 'No tienes permisos para acceder.' });
@@ -80,7 +113,6 @@ app.post('/api/login', (req, res) => {
 
 // RUTA API: Obtener toda la plantilla con los nombres separados
 app.get('/api/doctors', (req, res) => {
-    // Traemos los campos desglosados y mantenemos 'name' por compatibilidad si se requiere
     const sql = 'SELECT id, rfc, first_name, last_name_paternal, last_name_maternal, name, shift, category, created_at FROM employees ORDER BY last_name_paternal ASC, first_name ASC';
     
     pool.query(sql, (err, results) => {
@@ -92,8 +124,6 @@ app.get('/api/doctors', (req, res) => {
     });
 });
 
-
-
 // RUTA API: Registrar personal con nombre desglosado
 app.post('/api/doctors', (req, res) => {
     const { rfc, firstName, lastNamePaternal, lastNameMaternal, shift, category } = req.body;
@@ -102,7 +132,6 @@ app.post('/api/doctors', (req, res) => {
         return res.status(400).json({ message: 'El RFC, Nombre y Apellido Paterno son obligatorios.' });
     }
 
-    // Validamos duplicados de número de empleado (RFC)
     const checkSql = 'SELECT * FROM employees WHERE rfc = ?';
     pool.query(checkSql, [rfc], (err, results) => {
         if (err) {
@@ -113,10 +142,8 @@ app.post('/api/doctors', (req, res) => {
             return res.status(400).json({ message: 'Este número de empleado ya se encuentra registrado.' });
         }
 
-        // Concatenamos el nombre completo de forma automática para llenar el campo 'name' viejo y no romper vistas antiguas
         const nameCompleto = `${lastNamePaternal} ${lastNameMaternal || ''} ${firstName}`.trim().toUpperCase();
 
-        // Inserción limpia de los nuevos campos desglosados + el nombre compuesto
         const insertSql = 'INSERT INTO employees (rfc, first_name, last_name_paternal, last_name_maternal, name, shift, category) VALUES (?, ?, ?, ?, ?, ?, ?)';
         pool.query(insertSql, [rfc, firstName, lastNamePaternal, lastNameMaternal || '', nameCompleto, shift || 'Matutino', category || 'médico'], (err, result) => {
             if (err) {
@@ -127,7 +154,6 @@ app.post('/api/doctors', (req, res) => {
         });
     });
 });
-
 
 // RUTA API: Eliminar personal de la plantilla por su número de empleado (RFC)
 app.delete('/api/doctors/:rfc', (req, res) => {
@@ -142,12 +168,6 @@ app.delete('/api/doctors/:rfc', (req, res) => {
         res.status(200).json({ message: 'Registro eliminado correctamente de la base de datos.' });
     });
 });
-
-
-
-
-
-
 
 // RUTA API: Obtener todos los consultorios registrados
 app.get('/api/offices', (req, res) => {
@@ -171,7 +191,6 @@ app.post('/api/offices', (req, res) => {
 
     const officeUpper = officeName.trim().toUpperCase();
 
-    // Validamos que no exista esa combinación exacta de consultorio y turno
     const checkSql = 'SELECT * FROM offices WHERE office_name = ? AND shift = ?';
     pool.query(checkSql, [officeUpper, shift], (err, results) => {
         if (err) {
@@ -193,6 +212,13 @@ app.post('/api/offices', (req, res) => {
     });
 });
 
+
+
+
+// =========================================================================
+// 3. RUTAS DE LA API - PARTE B1 (ASIGNACIONES DE CONSULTORIO)
+// =========================================================================
+
 // RUTA API: Eliminar un consultorio por su ID
 app.delete('/api/offices/:id', (req, res) => {
     const { id } = req.params;
@@ -206,13 +232,8 @@ app.delete('/api/offices/:id', (req, res) => {
     });
 });
 
-
-
-
-
 // RUTA API: Obtener solo empleados de la categoría 'médico'
 app.get('/api/employees/doctors-only', (req, res) => {
-    // CORRECCIÓN: Se cambiaron comillas dobles por comillas simples estándar en 'médico'
     const sql = "SELECT id, rfc, first_name, last_name_paternal, last_name_maternal, shift FROM employees WHERE LOWER(category) = 'médico' ORDER BY last_name_paternal ASC";
     pool.query(sql, (err, results) => {
         if (err) {
@@ -225,7 +246,6 @@ app.get('/api/employees/doctors-only', (req, res) => {
 
 // RUTA API: Obtener la lista de asignaciones unificando la nueva tabla independiente
 app.get('/api/assignments', (req, res) => {
-    // CORRECCIÓN: Se cambiaron comillas dobles por comillas simples estándar en 'médico'
     const sql = `
         SELECT da.id AS assignment_id, e.id AS employee_id, e.rfc, e.first_name, e.last_name_paternal, e.last_name_maternal, e.shift AS emp_shift,
                o.id AS office_id, o.office_name, o.shift AS office_shift
@@ -244,10 +264,6 @@ app.get('/api/assignments', (req, res) => {
     });
 });
 
-
-
-
-
 // RUTA API: Vincular médico con consultorio (Con doble validación de seguridad)
 app.post('/api/assignments', (req, res) => {
     const { employeeId, officeId } = req.body;
@@ -256,7 +272,6 @@ app.post('/api/assignments', (req, res) => {
         return res.status(400).json({ message: 'El médico y el consultorio son obligatorios.' });
     }
 
-    // --- VALIDACIÓN 1: Verificar si el médico ya tiene un consultorio asignado ---
     const checkDoctorSql = 'SELECT * FROM doctor_offices WHERE employee_id = ?';
     pool.query(checkDoctorSql, [employeeId], (err, doctorResults) => {
         if (err) {
@@ -270,7 +285,6 @@ app.post('/api/assignments', (req, res) => {
             });
         }
 
-        // --- VALIDACIÓN 2: Verificar si el consultorio ya está ocupado en ese turno ---
         const checkOfficeSql = 'SELECT * FROM doctor_offices WHERE office_id = ?';
         pool.query(checkOfficeSql, [officeId], (err, officeResults) => {
             if (err) {
@@ -284,7 +298,6 @@ app.post('/api/assignments', (req, res) => {
                 });
             }
 
-            // --- INSERCIÓN LIMPIA: Si pasa ambos filtros, se guarda en la tabla independiente ---
             const insertSql = 'INSERT INTO doctor_offices (employee_id, office_id) VALUES (?, ?)';
             pool.query(insertSql, [employeeId, officeId], (err, result) => {
                 if (err) {
@@ -298,31 +311,11 @@ app.post('/api/assignments', (req, res) => {
 });
 
 
+// =========================================================================
+// 3. RUTAS DE LA API - PARTE B2 (TRÁMITES, DICTAMINACIÓN Y ARRANQUE)
+// =========================================================================
 
-
-
-// RUTA API: Eliminar un consultorio por su ID (FUNCIÓN CORREGIDA Y CERRADA)
-app.delete('/api/offices/:id', (req, res) => {
-    const { id } = req.params;
-    const sql = 'DELETE FROM offices WHERE id = ?';
-    pool.query(sql, [id], (err, result) => {
-        if (err) {
-            console.error('Error al eliminar consultorio:', err);
-            return res.status(500).json({ message: 'Error interno al intentar eliminar el consultorio.' });
-        }
-        res.status(200).json({ message: 'Consultorio eliminado correctamente.' });
-    });
-});
-
-
-
-
-
-
-
-// RUTA API: Registrar trámite incluyendo el motivo del cambio y consultorios cruzados
-// RUTA API ACTUALIZADA: Registrar trámite con motivo único y beneficiarios en texto plano
-// 1. RUTA API POST: Recibir trámite incluyendo el nuevo campo 'email'
+// RUTA API POST: Recibir trámite incluyendo el nuevo campo 'email'
 app.post('/api/office-changes', (req, res) => {
     const {
         paternalLastname, maternalLastname, firstNames, rfc,
@@ -359,7 +352,7 @@ app.post('/api/office-changes', (req, res) => {
         parseInt(age),
         maritalStatus,
         phone.trim(),
-        email.trim(), // Guarda el correo en la nueva columna
+        email.trim(), 
         insuredType,
         parseInt(totalFamilyMembers),
         beneficiaries,
@@ -375,14 +368,7 @@ app.post('/api/office-changes', (req, res) => {
     });
 });
 
-
-
-
-
-
-
-// RUTA API: Obtener todas las solicitudes cruzando nombres de consultorios (JOIN)
-// 2. RUTA API GET: Descargar solicitudes incluyendo correos y motivos de dictamen
+// RUTA API GET: Descargar solicitudes incluyendo correos y motivos de dictamen
 app.get('/api/office-changes', (req, res) => {
     const sql = `
         SELECT r.*, 
@@ -402,41 +388,7 @@ app.get('/api/office-changes', (req, res) => {
     });
 });
 
-
-
-
-
-
-
-
-
-
-
-const nodemailer = require('nodemailer');
-
-// CONFIGURACIÓN DEL EMISOR DE CORREOS SMTP PURO (CORREGIDO SIN LA PROPIEDAD SERVICE)
-const transportadorCorreo = nodemailer.createTransport({
-    host: '://gmail.com', // Servidor de salida oficial de Google
-    port: 465,              // Puerto seguro mandatorio
-    secure: true,           // Forzar obligatoriamente SSL/TLS
-    auth: {
-        user: 'cmfermitacalidad@gmail.com', 
-        pass: 'uwnpqjdzkzxdolnh' // Tus 16 caracteres de la contraseña de aplicación (sin espacios)
-    },
-    tls: {
-        // Permite que Render ignore restricciones de certificados locales del hosting
-        rejectUnauthorized: false
-    }
-});
-
-
-
-
-
-
-
-// RUTA API: Actualizar estatus de dictaminación (Aprobar o Rechazar)
-// 3. RUTA API PUT: Procesar dictamen (Actualiza estatus, guarda notas y dispara el correo)
+// RUTA API PUT: Procesar dictamen (Actualiza estatus, guarda notas y dispara el correo)
 app.put('/api/office-changes/:id', (req, res) => {
     const { id } = req.params;
     const { status, statusNotes } = req.body;
@@ -445,7 +397,6 @@ app.put('/api/office-changes/:id', (req, res) => {
         return res.status(400).json({ message: 'Estatus o notas de justificación inválidas.' });
     }
 
-    // Primero localizamos el correo electrónico y nombre del derechohabiente antes de actualizar
     const findUserSql = 'SELECT first_names, paternal_lastname, email FROM office_change_requests WHERE id = ?';
     pool.query(findUserSql, [id], (err, userResult) => {
         if (err || !userResult || userResult.length === 0) {
@@ -453,22 +404,19 @@ app.put('/api/office-changes/:id', (req, res) => {
             return res.status(500).json({ message: 'No se pudo localizar el correo para la notificación.' });
         }
 
-        // CORRECCIÓN MANDATORIA: Extraemos la primera fila real agregando el [0]
+        // EXTRACCIÓN CORRECTA DE LA FILA 0
         const paciente = userResult[0]; 
         console.log(`[NOTIFICACIÓN] Destinatario real: ${paciente.email}, Nombre: ${paciente.first_names}`);
 
-        // Procedemos a guardar el estatus en la base de datos
         const updateSql = 'UPDATE office_change_requests SET status = ?, status_notes = ? WHERE id = ?';
-
         pool.query(updateSql, [status, statusNotes, id], (err, result) => {
             if (err) {
                 console.error('Error al actualizar dictamen:', err);
                 return res.status(500).json({ message: 'Error al escribir el dictamen en el servidor.' });
             }
 
-            // REDACCIÓN DEL CORREO INSTITUCIONAL
             const opcionesEmail = {
-                from: '"C.M.F. ERMITA - ISSSTE" <cmfermitacalidad@gmail.com>', // DEBE SER IGUAL A TU USER
+                from: '"C.M.F. ERMITA - ISSSTE" <cmfermitacalidad@gmail.com>', 
                 to: paciente.email, 
                 subject: `Estatus de Trámite: Solicitud de Cambio de Consultorio - Folio ${id}`,
                 text: `Estimado(a) ${paciente.first_names} ${paciente.paternal_lastname},\n\nLe informamos que la Coordinación Médica de la Clínica de Medicina Familiar Ermita ha revisado su solicitud de reasignación de espacio clínico.\n\nDictamen del trámite: ${status}\nMotivo expuesto por la autoridad: ${statusNotes}\n\nAtentamente,\nCoordinación de Enseñanza y Calidad\nISSSTE - C.M.F. ERMITA`,
@@ -493,7 +441,6 @@ app.put('/api/office-changes/:id', (req, res) => {
                 `
             };
 
-            // Disparar el envío
             transportadorCorreo.sendMail(opcionesEmail, (errorMail, info) => {
                 if (errorMail) {
                     console.error('❌ ERROR CRÍTICO EN NODEMAILER:', errorMail);
@@ -503,16 +450,9 @@ app.put('/api/office-changes/:id', (req, res) => {
             });
 
             res.status(200).json({ success: true, message: 'Trámite dictaminado y notificado correctamente.' });
-        }); // Cierre de pool.query (UPDATE)
-    }); // Cierre de pool.query (SELECT)
-}); // Cierre de app.put
-
-
-
-
-
-
-
+        }); 
+    }); 
+}); 
 
 // =========================================================================
 // 4. SERVIR EL HTML
