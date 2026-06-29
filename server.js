@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 23');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 24');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -62,7 +62,10 @@ const transportadorCorreo = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false,
 	requireTLS: true
-    }
+    },
+    // ACTIVACIÓN DE BITÁCORAS DE CONTROL:
+    logger: true, // Imprime todo el flujo en los logs de Render
+    debug: true   // Muestra los errores internos detallados de la conexión SMTP
 });
 
 // CÓDIGO DE VERIFICACIÓN DIRECTO Y SIN PROMESAS CONGELADAS
