@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 26.2');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 26.3');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -68,17 +68,6 @@ const transportadorCorreo = nodemailer.createTransport({
     debug: true
 });
 
-// CÓDIGO DE VERIFICACIÓN DIRECTO Y SIN PROMESAS CONGELADAS
-console.log('[SISTEMA] Disparando validación directa con Google SMTP...');
-
-transportadorCorreo.verify((error, success) => {
-    if (error) {
-        console.error('❌ [ERROR GOOGLE NODEMAILER DETECTADO]:', error.message);
-        console.error('👉 REVISIÓN: Asegúrate de que la variable GMAIL_APP_PASSWORD en Render no tenga espacios ni comillas.');
-    } else {
-        console.log('🚀 [ÉXITO NODEMAILER]: ¡Autenticado correctamente con Google y listo para enviar correos desde Render!');
-    }
-});
 
 
 
