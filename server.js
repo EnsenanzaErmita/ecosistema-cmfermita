@@ -56,7 +56,7 @@ const transportadorCorreo = nodemailer.createTransport({
     secure: true,           
     auth: {
         user: 'cmfermitacalidad@gmail.com', 
-        pass: 'hqqrjjthpffohxra' 
+        pass: process.env.GMAIL_APP_PASSWORD // ← Ocultamos la clave de los ojos de GitHub
     },
     tls: {
         rejectUnauthorized: false
