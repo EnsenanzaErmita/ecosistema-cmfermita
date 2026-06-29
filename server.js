@@ -414,21 +414,21 @@ app.get('/api/office-changes', (req, res) => {
 
 const nodemailer = require('nodemailer');
 
-// CONFIGURACIÓN DEL EMISOR DE CORREOS (VERSIÓN BLINDADA CON TLS CONTRACANDADOS)
+// CONFIGURACIÓN DEL EMISOR DE CORREOS SMTP PURO (CORREGIDO SIN LA PROPIEDAD SERVICE)
 const transportadorCorreo = nodemailer.createTransport({
-    service: 'gmail',
-    host: '://gmail.com',
-    port: 465,
-    secure: true, // Forzar uso de SSL/TLS
+    host: '://gmail.com', // Servidor de salida oficial de Google
+    port: 465,              // Puerto seguro mandatorio
+    secure: true,           // Forzar obligatoriamente SSL/TLS
     auth: {
         user: 'cmfermitacalidad@gmail.com', 
-        pass: 'uwnp qjdz kzxd olnh' // Tus 16 dígitos reales de Google (sin espacios)
+        pass: 'uwnpqjdzkzxdolnh' // Tus 16 caracteres de la contraseña de aplicación (sin espacios)
     },
     tls: {
-        // REGLA DE ORO: Evita que Render bloquee el envío por temas de certificados locales
+        // Permite que Render ignore restricciones de certificados locales del hosting
         rejectUnauthorized: false
     }
 });
+
 
 
 
@@ -446,7 +446,7 @@ app.put('/api/office-changes/:id', (req, res) => {
     }
 
     // Primero localizamos el correo electrónico y nombre del derechohabiente antes de actualizar
-            const findUserSql = 'SELECT first_names, paternal_lastname, email FROM office_change_requests WHERE id = ?';
+    const findUserSql = 'SELECT first_names, paternal_lastname, email FROM office_change_requests WHERE id = ?';
     pool.query(findUserSql, [id], (err, userResult) => {
         if (err || !userResult || userResult.length === 0) {
             console.error('Error crítico: No se encontró el trámite o falló la consulta en Clever Cloud:', err);
@@ -459,7 +459,6 @@ app.put('/api/office-changes/:id', (req, res) => {
 
         // Procedemos a guardar el estatus en la base de datos
         const updateSql = 'UPDATE office_change_requests SET status = ?, status_notes = ? WHERE id = ?';
-        // ... todo el resto de tu código de UPDATE, opcionesEmail y sendMail continúa igual ...
 
         pool.query(updateSql, [status, statusNotes, id], (err, result) => {
             if (err) {
@@ -507,7 +506,6 @@ app.put('/api/office-changes/:id', (req, res) => {
         }); // Cierre de pool.query (UPDATE)
     }); // Cierre de pool.query (SELECT)
 }); // Cierre de app.put
-
 
 
 
