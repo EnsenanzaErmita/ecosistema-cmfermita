@@ -51,7 +51,7 @@ pool.getConnection((err, connection) => {
 // CONFIGURACIÓN GLOBAL DE NOTIFICACIONES (NODEMAILER EN LA CABECERA)
 // =========================================================================
 const transportadorCorreo = nodemailer.createTransport({
-    host: '://gmail.com', 
+    host: 'smtp.gmail.com', 
     port: 465,              
     secure: true,           
     auth: {
