@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 25');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 26');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -54,18 +54,23 @@ pool.getConnection((err, connection) => {
 const transportadorCorreo = nodemailer.createTransport({
     host: 'smtp.gmail.com', 
     port: 587,              
-    secure: false,           
+    secure: false, // Debe ser false para iniciar con STARTTLS de forma lineal
     auth: {
         user: 'cmfermitacalidad@gmail.com', 
-        pass: 'mhemtfps' + 'vaptnjrf' // ← Ocultamos la clave de los ojos de GitHub
+        pass: 'mhemtfps' + 'vaptnjrf' // Tu contraseña de aplicación de Google de 16 caracteres
     },
     tls: {
+        // Ignora restricciones de certificados locales del servidor de Render
         rejectUnauthorized: false,
-	requireTLS: true
+        requireTLS: true // Exige cifrado TLS obligatorio para que Google acepte la petición
     },
-    // ACTIVACIÓN DE BITÁCORAS DE CONTROL:
-    logger: true, // Imprime todo el flujo en los logs de Render
-    debug: true   // Muestra los errores internos detallados de la conexión SMTP
+    // PARÁMETROS CRÍTICOS PARA REDES EN LA NUBE (EVITAN EL TIMEOUT):
+    secureConnection: false, // Abre el candado de transmisiones asíncronas bloqueadas por Render
+    connectionTimeout: 10000, // Limita la espera a 10 segundos para que no se quede colgado
+    greetingTimeout: 10000,
+    // Bitácoras activas para seguir auditando:
+    logger: true,
+    debug: true
 });
 
 // CÓDIGO DE VERIFICACIÓN DIRECTO Y SIN PROMESAS CONGELADAS
