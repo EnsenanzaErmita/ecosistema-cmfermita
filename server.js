@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 21');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 22');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -454,7 +454,12 @@ app.put('/api/office-changes/:id', (req, res) => {
                 }
             });
 
-            res.status(200).json({ success: true, message: 'Trámite dictaminado y notificado correctamente.' });
+            res.status(200).json({ 
+    success: true, 
+    message: 'Trámite dictaminado correctamente.',
+    correoDestino: paciente.email,    // ← ENVIAMOS EL CORREO AL FRONTEND
+    nombreDestino: paciente.first_names // ← ENVIAMOS EL NOMBRE AL FRONTEND
+});
         }); 
     }); 
 }); 

@@ -161,7 +161,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v21.0.0
+        v22.0.0
     </div>
 
 
@@ -1714,8 +1714,13 @@ async function dictaminarSolicitud(idTramite, nuevoEstatus) {
         if (response.ok) {
             const data = await response.json();
             
-            // ALERTA DE VALIDACIÓN: Te confirma qué correo y qué nombre procesó el servidor de Render
-            alert(`[SISTEMA DE CONTROL GENERAL]\n\n¡Trámite procesado con éxito!\n\nDatos de Notificación Enviados:\n• Folio: ${idTramite}\n• Estatus Nuevo: ${nuevoEstatus}\n• Destinatario Interno: Recuperando datos...`);
+            // ALERTA EXTRAÍDA DE LAS VARIABLES REALES DEL SERVIDOR
+            alert(`[AUDITORÍA DE TRÁMITES - ISSSTE]\n\n` +
+                  `¡El dictamen se guardó con éxito en Clever Cloud!\n\n` +
+                  `• Folio: ${idTramite}\n` +
+                  `• Nuevo Estatus: ${nuevoEstatus}\n` +
+                  `• Destinatario: ${data.correoDestino || 'VACÍO O NO DEF'}\n` +
+                  `• Asegurado: ${data.nombreDestino || 'N/A'}`);
             
             cargarSolicitudesCoordinacionNube(); 
             if (typeof actualizarBurbujaNotificaciones === 'function') {
