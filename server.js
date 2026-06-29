@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 26.1');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 26.2');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -53,11 +53,11 @@ pool.getConnection((err, connection) => {
 // =========================================================================
 const transportadorCorreo = nodemailer.createTransport({
     host: 'smtp.gmail.com', 
-    port: 2525,              
+    port: 587,              
     secure: false, // Debe ser false para iniciar con STARTTLS de forma lineal
     auth: {
         user: 'cmfermitacalidad@gmail.com', 
-        pass: 'mhemtfps' + 'vaptnjrf' // Tu contraseña de aplicación de Google de 16 caracteres
+        pass: process.env.GMAIL_APP_PASSWORD // Tu contraseña de aplicación de Google de 16 caracteres
     },
     tls: {
         rejectUnauthorized: false,
