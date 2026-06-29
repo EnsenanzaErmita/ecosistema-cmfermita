@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 22');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 23');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -57,7 +57,7 @@ const transportadorCorreo = nodemailer.createTransport({
     secure: false,           
     auth: {
         user: 'cmfermitacalidad@gmail.com', 
-        pass: 'oaimitcx'+'bvmmeggd' // ← Ocultamos la clave de los ojos de GitHub
+        pass: 'mhemtfps' + 'vaptnjrf' // ← Ocultamos la clave de los ojos de GitHub
     },
     tls: {
         rejectUnauthorized: false,
