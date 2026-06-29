@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 24');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 25');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -396,7 +396,9 @@ app.get('/api/office-changes', (req, res) => {
     });
 });
 
-// RUTA API PUT: Procesar dictamen (Actualiza estatus, guarda notas y dispara el correo)
+
+
+// RUTA API PUT: Procesar dictamen (ORDEN SECUENCIAL GARANTIZADO DE CORREO)
 app.put('/api/office-changes/:id', (req, res) => {
     const { id } = req.params;
     const { status, statusNotes } = req.body;
@@ -405,23 +407,34 @@ app.put('/api/office-changes/:id', (req, res) => {
         return res.status(400).json({ message: 'Estatus o notas de justificación inválidas.' });
     }
 
-    const findUserSql = 'SELECT first_names, paternal_lastname, email FROM office_change_requests WHERE id = ?';
-    pool.query(findUserSql, [id], (err, userResult) => {
-        if (err || !userResult || userResult.length === 0) {
-            console.error('Error crítico: No se encontró el trámite o falló la consulta en Clever Cloud:', err);
-            return res.status(500).json({ message: 'No se pudo localizar el correo para la notificación.' });
+    // PASO 1: Guardamos primero el estatus y las notas en Clever Cloud
+    const updateSql = 'UPDATE office_change_requests SET status = ?, status_notes = ? WHERE id = ?';
+    
+    pool.query(updateSql, [status, statusNotes, id], (err, updateResult) => {
+        if (err) {
+            console.error('Error crítico al escribir el dictamen en Clever Cloud:', err);
+            return res.status(500).json({ message: 'Error al escribir el dictamen en el servidor.' });
         }
 
-        // EXTRACCIÓN CORRECTA DE LA FILA 0
-        const paciente = userResult[0]; 
-        console.log(`[NOTIFICACIÓN] Destinatario real: ${paciente.email}, Nombre: ${paciente.first_names}`);
+        console.log(`[SISTEMA-PUT] Base de datos actualizada con éxito para el Folio: ${id}`);
 
-        const updateSql = 'UPDATE office_change_requests SET status = ?, status_notes = ? WHERE id = ?';
-        pool.query(updateSql, [status, statusNotes, id], (err, result) => {
-            if (err) {
-                console.error('Error al actualizar dictamen:', err);
-                return res.status(500).json({ message: 'Error al escribir el dictamen en el servidor.' });
+        // PASO 2: Solo si el UPDATE fue exitoso, buscamos los datos del paciente para el correo
+        const findUserSql = 'SELECT first_names, paternal_lastname, email FROM office_change_requests WHERE id = ?';
+        
+        pool.query(findUserSql, [id], (errFind, userResult) => {
+            if (errFind || !userResult || userResult.length === 0) {
+                console.error('Error al recuperar correo del derechohabiente tras UPDATE:', errFind);
+                // Si la BD falló, le avisamos al front pero cerramos la petición de forma segura
+                return res.status(200).json({ 
+                    success: true, 
+                    message: 'Trámite dictaminado en BD, pero falló la extracción del correo.',
+                    correoDestino: 'VACÍO'
+                });
             }
+
+            // Extracción segura del renglón cero
+            const paciente = userResult[0];
+            console.log(`[SISTEMA-PUT] Preparando disparo de correo SMTP hacia: ${paciente.email}`);
 
             const opcionesEmail = {
                 from: '"C.M.F. ERMITA - ISSSTE" <cmfermitacalidad@gmail.com>', 
@@ -449,23 +462,28 @@ app.put('/api/office-changes/:id', (req, res) => {
                 `
             };
 
+            // PASO 3: Disparar el envío de Nodemailer
             transportadorCorreo.sendMail(opcionesEmail, (errorMail, info) => {
                 if (errorMail) {
-                    console.error('❌ ERROR CRÍTICO EN NODEMAILER:', errorMail);
+                    console.error('❌ ERROR CRÍTICO EN EXCLUSIVO DE NODEMAILER:', errorMail.message);
                 } else {
                     console.log('--- ¡CORREO ENVIADO CON ÉXITO DESDE RENDER! ---', info.response);
                 }
             });
 
+            // PASO 4: Responder al frontend de forma limpia devolviendo los datos reales
             res.status(200).json({ 
-    success: true, 
-    message: 'Trámite dictaminado correctamente.',
-    correoDestino: paciente.email,    // ← ENVIAMOS EL CORREO AL FRONTEND
-    nombreDestino: paciente.first_names // ← ENVIAMOS EL NOMBRE AL FRONTEND
-});
-        }); 
-    }); 
-}); 
+                success: true, 
+                message: 'Trámite dictaminado y procesado de forma secuencial.',
+                correoDestino: paciente.email,
+                nombreDestino: paciente.first_names
+            });
+        }); // Fin de pool.query (SELECT)
+    }); // Fin de pool.query (UPDATE)
+}); // Fin de app.put
+
+
+
 
 // =========================================================================
 // 4. SERVIR EL HTML
