@@ -161,7 +161,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v29.0.0
+        v30.0.0
     </div>
 
 
@@ -524,47 +524,47 @@
             </div>
 
             <!-- Encabezado con el Estatus del Trámite -->
-            <div style="background-color: var(--verde-issste); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
+            <div style="background-color: var(--guinda); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
                 <span style="font-weight: bold; font-size: 1.2em;">Trámite de Cambio de Consultorio</span>
                 <span style="text-align: right; font-size: 0.85em;">Estatus de Ingreso: <strong style="color: #611232; background: white; padding: 2px 6px; border-radius: 4px;">PENDIENTE</strong> ⏳</span>
             </div>
             
             <!-- Cuerpo del Formulario con fondo verde menta tenue -->
-            <div style="background: #f0fdf4; border-left: 5px solid var(--verde-issste); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-family: 'Segoe UI', sans-serif;">
+            <div style="background: #f0fdf4; border-left: 5px solid var(--guinda); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-family: 'Segoe UI', sans-serif;">
                 <form id="form-solicitud-cambio" onsubmit="guardarSolicitudCambioNube(event)">
                     
                     <!-- ================================================================= -->
                     <!-- SUBSECCIÓN: DATOS DEL ASEGURADO                                   -->
                     <!-- ================================================================= -->
-                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--verde-issste); padding-bottom: 5px; margin-top: 0; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS DEL DERECHOHABIENTE</h3>
+                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--guinda); padding-bottom: 5px; margin-top: 0; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS DEL DERECHOHABIENTE</h3>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
                         <div>
-                            <label for="sol-paternal" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Apellido Paterno:</label>
-                            <input type="text" id="sol-paternal" required placeholder="Ej. GONZÁLEZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                            <label for="sol-paternal" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--guinda); margin-bottom: 5px;">Apellido Paterno:</label>
+                            <input type="text" id="sol-paternal" required placeholder="Ej. GONZÁLEZ" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
                         <div>
-                            <label for="sol-maternal" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Apellido Materno:</label>
-                            <input type="text" id="sol-maternal" required placeholder="Ej. ZAMUDIO" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                            <label for="sol-maternal" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--guinda); margin-bottom: 5px;">Apellido Materno:</label>
+                            <input type="text" id="sol-maternal" required placeholder="Ej. ZAMUDIO" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
                         <div>
-                            <label for="sol-names" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">Nombre(s):</label>
-                            <input type="text" id="sol-names" required placeholder="Ej. MANUEL ALEJANDRO" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                            <label for="sol-names" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--guinda); margin-bottom: 5px;">Nombre(s):</label>
+                            <input type="text" id="sol-names" required placeholder="Ej. MANUEL ALEJANDRO" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
                         <div>
-                            <label for="sol-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">RFC:</label>
-                            <input type="text" id="sol-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                            <label for="sol-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--guinda); margin-bottom: 5px;">RFC:</label>
+                            <input type="text" id="sol-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
                         <div>
-                            <label for="sol-worker" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">¿Es Trabajador(a)?:</label>
-                            <select id="sol-worker" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                            <label for="sol-worker" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--guinda); margin-bottom: 5px;">¿Es Trabajador(a)?:</label>
+                            <select id="sol-worker" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white;">
                                 <option value="SÍ">Sí</option>
                                 <option value="NO">No</option>
                             </select>
                         </div>
                         <div>
-                            <label for="sol-pensioner" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">¿Es Pensionado(a)?:</label>
-                            <select id="sol-pensioner" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+                            <label for="sol-pensioner" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--guinda); margin-bottom: 5px;">¿Es Pensionado(a)?:</label>
+                            <select id="sol-pensioner" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white;">
                                 <option value="SÍ">Sí</option>
                                 <option value="NO">No</option>
                             </select>
@@ -838,6 +838,7 @@
                     <th style="padding: 10px; border: 1px solid #ddd;">Ruta de Cambio</th>
                     <th style="padding: 10px; border: 1px solid #ddd;">Motivo expuesto</th>
                     <th style="padding: 10px; border: 1px solid #ddd;">Integrantes / Beneficiarios</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Correo Electrónico<</th>
                     <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Estatus</th>
                     <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Acción Administrativa</th>
                 </tr>
@@ -910,6 +911,21 @@
 
 
 
+
+<!-- MODAL ESTILIZADO DE AUDITORÍA OFICIAL -->
+<div id="modalAuditoria" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
+    <div style="background-color: white; border-radius: 8px; width: 100%; max-width: 450px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); overflow: hidden; font-family: sans-serif;">
+        <div style="background-color: #611232; color: white; padding: 15px; font-weight: bold; font-size: 1.1em; border-bottom: 3px solid #b38e5d;">
+            🏛️ C.M.F. ERMITA - AUDITORÍA DE NOTIFICACIÓN
+        </div>
+        <div id="cuerpoModalAuditoria" style="padding: 20px; color: #333; line-height: 1.6; font-size: 0.95em;">
+            <!-- El contenido dinámico se inyectará aquí -->
+        </div>
+        <div style="background-color: #f9f9f9; padding: 12px; text-align: right; border-top: 1px solid #eee;">
+            <button onclick="cerrarModalAuditoria()" style="background-color: #611232; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;">Entendido</button>
+        </div>
+    </div>
+</div>
 
 
 
@@ -1639,7 +1655,8 @@ async function cargarSolicitudesCoordinacionNube() {
         tbody.innerHTML = '';
 
         if (solicitudes.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #888; padding: 25px;">No se registran solicitudes de cambio en el sistema.</td></tr>`;
+            // CORREGIDO: Se incrementó colspan a 8 por la nueva columna de correo
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #888; padding: 25px;">No se registran solicitudes de cambio en el sistema.</td></tr>`;
             return;
         }
 
@@ -1664,6 +1681,12 @@ async function cargarSolicitudesCoordinacionNube() {
                     <strong>Total: ${sol.total_family_members}</strong><br>
                     <span style="display:block; max-height:60px; overflow-y:auto; color:#4b5563;">${sol.beneficiaries}</span>
                 </td>
+                
+                <!-- 1. NUEVA CELDA INYECTADA: MUESTRA EL CORREO ELECTRÓNICO DEL PACIENTE -->
+                <td style="padding: 12px; border: 1px solid #ddd; font-size:0.9em; max-width:180px; word-break: break-all;">
+                    <a href="mailto:${sol.email}" style="color: #611232; font-weight: bold; text-decoration: none;" title="Dar clic para redactar correo directo">${sol.email}</a>
+                </td>
+                
                 <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
                     <span class="badge ${claseBadge}">${sol.status}</span>
                 </td>
@@ -1680,10 +1703,10 @@ async function cargarSolicitudesCoordinacionNube() {
         });
     } catch (error) {
         console.error('Error al cargar tabla de dictaminación:', error);
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #cc0000; font-weight:bold; padding: 25px;">Error de comunicación con Render al descargar trámites.</td></tr>`;
+        // CORREGIDO: Se incrementó colspan a 8 por la nueva columna de correo
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #cc0000; font-weight:bold; padding: 25px;">Error de comunicación con Render al descargar trámites.</td></tr>`;
     }
 }
-
 
 
 
@@ -1714,13 +1737,25 @@ async function dictaminarSolicitud(idTramite, nuevoEstatus) {
         if (response.ok) {
             const data = await response.json();
             
-            // ALERTA EXTRAÍDA DE LAS VARIABLES REALES DEL SERVIDOR
-            alert(`[AUDITORÍA DE TRÁMITES - ISSSTE]\n\n` +
-                  `¡El dictamen se guardó con éxito en Clever Cloud!\n\n` +
-                  `• Folio: ${idTramite}\n` +
-                  `• Nuevo Estatus: ${nuevoEstatus}\n` +
-                  `• Destinatario: ${data.correoDestino || 'VACÍO O NO DEF'}\n` +
-                  `• Asegurado: ${data.nombreDestino || 'N/A'}`);
+            // 1. EXTRAEMOS EL CONTENEDOR DEL CUERPO DEL MODAL
+            const cuerpo = document.getElementById('cuerpoModalAuditoria');
+            if (cuerpo) {
+                // 2. INYECTAMOS EL DISEÑO INSTITUCIONAL GUINDA CON LOS DATOS DE AUDITORÍA REALES
+                cuerpo.innerHTML = `
+                    <p style="margin-top:0; color:#15803d; font-weight:bold; font-size:1.1em; display:flex; align-items:center; gap:5px;">
+                        ✓ ¡El dictamen se guardó con éxito en Clever Cloud!
+                    </p>
+                    <hr style="border:0; border-top:1px solid #eee; margin:12px 0;">
+                    <p style="margin: 6px 0;"><strong>Folio de Trámite:</strong> #${idTramite}</p>
+                    <p style="margin: 6px 0;"><strong>Estatus Dictaminado:</strong> <span style="background:${nuevoEstatus === 'APROBADA' ? '#dcfce7' : '#fee2e2'}; color:${nuevoEstatus === 'APROBADA' ? '#15803d' : '#b91c1c'}; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.9em;">${nuevoEstatus}</span></p>
+                    <p style="margin: 6px 0;"><strong>Asegurado(a):</strong> ${data.nombreDestino || 'N/A'}</p>
+                    <p style="margin: 6px 0;"><strong>Notificación Enviada a:</strong><br><span style="color:#611232; font-weight:bold; word-break:break-all;">${data.correoDestino || 'VACÍO O NO DEF'}</span></p>
+                `;
+                
+                // 3. ENCENDEMOS LA VENTANA EMERGENTE USANDO FLEX
+                const modal = document.getElementById('modalAuditoria');
+                if (modal) modal.style.display = 'flex';
+            }
             
             cargarSolicitudesCoordinacionNube(); 
             if (typeof actualizarBurbujaNotificaciones === 'function') {
@@ -1736,6 +1771,11 @@ async function dictaminarSolicitud(idTramite, nuevoEstatus) {
     }
 }
 
+// 4. FUNCIÓN AUXILIAR PARA CERRAR LA VENTANA EMERGENTE ESTILIZADA
+function cerrarModalAuditoria() {
+    const modal = document.getElementById('modalAuditoria');
+    if (modal) modal.style.display = 'none';
+}
 
 
 
