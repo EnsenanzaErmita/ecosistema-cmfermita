@@ -15,6 +15,7 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "mysql2": "^3.22.5",
-    "nodemailer": "^6.10.0"
+    "nodemailer": "^6.10.0",
+    "@getbrevo/brevo": "^2.0.0"
   }
 }

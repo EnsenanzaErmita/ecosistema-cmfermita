@@ -55,19 +55,6 @@ pool.getConnection((err, connection) => {
 });
 
 
-// =========================================================================
-// CONFIGURACIÓN GLOBAL DE NOTIFICACIONES VÍA API HTTP (BREVO - LIBRE DE BLOQUEOS)
-// =========================================================================
-const SibApiV3Sdk = require('@getbrevo/brevo');
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-
-// Configura tu llave de acceso de Brevo (Oculta en entorno)
-const apiKey = apiInstance.authentications['apiKey'];
-apiKey.apiKey = process.env.BREVO_API_KEY || 'TU_API_KEY_DE_BREVO';
-
-
-
-
 
 
 
