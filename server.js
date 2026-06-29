@@ -53,14 +53,15 @@ pool.getConnection((err, connection) => {
 // =========================================================================
 const transportadorCorreo = nodemailer.createTransport({
     host: 'smtp.gmail.com', 
-    port: 465,              
-    secure: true,           
+    port: 587,              
+    secure: false,           
     auth: {
         user: 'cmfermitacalidad@gmail.com', 
         pass: process.env.GMAIL_APP_PASSWORD // ← Ocultamos la clave de los ojos de GitHub
     },
     tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+	requireTLS: true
     }
 });
 
