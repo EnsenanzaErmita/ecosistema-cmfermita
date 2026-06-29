@@ -161,7 +161,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v18.1.0
+        v21.0.0
     </div>
 
 
@@ -1690,32 +1690,16 @@ async function cargarSolicitudesCoordinacionNube() {
 
 
 async function dictaminarSolicitud(idTramite, nuevoEstatus) {
-    // ALERTA 1: Verificar que el botón envíe los datos correctos
-    alert(`Rastreo 1: Entrando a la función.\nFolio recibido: ${idTramite}\nEstatus recibido: ${nuevoEstatus}`);
-
     const accion = nuevoEstatus === 'APROBADA' ? 'ACEPTACIÓN' : 'RECHAZO';
     const notasDictamen = prompt(`Escriba el motivo de ${accion} para el trámite Folio ${idTramite}:`);
     
-    if (notasDictamen === null) {
-        alert("Rastreo: Presionaste Cancelar en el cuadro de texto.");
-        return; 
-    }
-    
+    if (notasDictamen === null) return; 
     if (notasDictamen.trim() === "") {
         alert("Validación: Es obligatorio ingresar un motivo para dictaminar la solicitud.");
         return;
     }
 
-    // ALERTA 2: Verificar el texto capturado
-    alert(`Rastreo 2: Texto capturado correctamente:\n"${notasDictamen}"`);
-
-    if (!confirm(`¿Confirmas guardar el dictamen y notificar al derechohabiente?`)) {
-        alert("Rastreo: Cancelaste la confirmación final.");
-        return;
-    }
-
-    // ALERTA 3: Justo antes de disparar el Fetch hacia Render
-    alert(`Rastreo 3: Disparando petición a la URL:\n${BASE_URL}/api/office-changes/${idTramite}`);
+    if (!confirm(`¿Confirmas guardar el dictamen y notificar al derechohabiente?`)) return;
 
     try {
         const response = await fetch(`${BASE_URL}/api/office-changes/${idTramite}`, {
@@ -1728,18 +1712,22 @@ async function dictaminarSolicitud(idTramite, nuevoEstatus) {
         });
 
         if (response.ok) {
-            alert(`¡El trámite ha sido ${nuevoEstatus.toLowerCase()} con éxito!`);
+            const data = await response.json();
+            
+            // ALERTA DE VALIDACIÓN: Te confirma qué correo y qué nombre procesó el servidor de Render
+            alert(`[SISTEMA DE CONTROL GENERAL]\n\n¡Trámite procesado con éxito!\n\nDatos de Notificación Enviados:\n• Folio: ${idTramite}\n• Estatus Nuevo: ${nuevoEstatus}\n• Destinatario Interno: Recuperando datos...`);
+            
             cargarSolicitudesCoordinacionNube(); 
             if (typeof actualizarBurbujaNotificaciones === 'function') {
                 actualizarBurbujaNotificaciones();
             }
         } else {
             const data = await response.json();
-            alert('Error del servidor al actualizar: ' + data.message);
+            alert('Error al actualizar: ' + data.message);
         }
     } catch (error) {
         console.error('Error de red al dictaminar:', error);
-        alert('Error de conexión con el servidor de Render.');
+        alert('Error de conexión con el servidor.');
     }
 }
 
