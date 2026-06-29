@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 28.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 29.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -438,7 +438,8 @@ app.put('/api/office-changes/:id', (req, res) => {
             apiInstance.sendTransacEmail(sendSmtpEmail).then((data) => {
                 console.log('--- ¡CORREO ENVIADO CON ÉXITO VÍA API HTTP DESDE RENDER! ---', data.messageId);
             }, (error) => {
-                console.error('❌ ERROR CRÍTICO EN API DE CORREO (BREVO):', error.message || error);
+                // MODIFICACIÓN DE DIAGNÓSTICO: Nos muestra el texto exacto del rechazo de Brevo
+                console.error('❌ ERROR CRÍTICO EN API DE CORREO (BREVO):', error.response ? error.response.body : error);
             });
 
             // PASO 4: Responder al frontend de forma limpia devolviendo los datos reales
