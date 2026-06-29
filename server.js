@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 26');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 26.1');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -53,22 +53,17 @@ pool.getConnection((err, connection) => {
 // =========================================================================
 const transportadorCorreo = nodemailer.createTransport({
     host: 'smtp.gmail.com', 
-    port: 587,              
+    port: 2525,              
     secure: false, // Debe ser false para iniciar con STARTTLS de forma lineal
     auth: {
         user: 'cmfermitacalidad@gmail.com', 
         pass: 'mhemtfps' + 'vaptnjrf' // Tu contraseña de aplicación de Google de 16 caracteres
     },
     tls: {
-        // Ignora restricciones de certificados locales del servidor de Render
         rejectUnauthorized: false,
-        requireTLS: true // Exige cifrado TLS obligatorio para que Google acepte la petición
+        requireTLS: true // Le exige a Google cifrar la transmisión inmediatamente
     },
-    // PARÁMETROS CRÍTICOS PARA REDES EN LA NUBE (EVITAN EL TIMEOUT):
-    secureConnection: false, // Abre el candado de transmisiones asíncronas bloqueadas por Render
-    connectionTimeout: 10000, // Limita la espera a 10 segundos para que no se quede colgado
-    greetingTimeout: 10000,
-    // Bitácoras activas para seguir auditando:
+    connectionTimeout: 15000, // Extendemos a 15 segundos para dar margen en planes gratuitos
     logger: true,
     debug: true
 });
