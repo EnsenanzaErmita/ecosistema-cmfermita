@@ -48,7 +48,7 @@
         .card-admin { border-top: 8px solid var(--dorado-calidad); }
         .card-doctor { border-top: 8px solid #5d8ab3; } 
         .card-staff { border-top: 8px solid var(--guinda); }
-        .card-patient { border-top: 8px solid var(--verde-issste); }
+        .card-patient { border-top: 8px solid var(--guinda); }
         .card-rol { border: 2px solid #ddd; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; }
         .card-coord { border-top: 8px solid var(--morado-issste); }
         .card-archivo { border-top: 8px solid var(--guinda); }
@@ -191,11 +191,11 @@
                 </div>
 
                 <!-- TARJETA 2: DERECHOHABIENTES (ACCESO DIRECTO SIN LOGUEO, COLOR VERDE ISSSTE) -->
-                <div class="card card-patient" style="border-top: 8px solid var(--verde-issste) !important;">
-                    <h3 style="color: var(--verde-issste); text-align: center; font-size: 2.50em;">Derechohabientes</h3>
+                <div class="card card-patient" style="border-top: 8px solid var(--guinda) !important;">
+                    <h3 style="color: var(--guinda); text-align: center; font-size: 2.50em;">Derechohabientes</h3>
                     <p style="font-size: 0.85em; text-align: center;">Área de trámites, solicitudes y gestión de servicios para pacientes de la clínica.</p>
                     <!-- Al darle click, salta directo a su panel independiente -->
-                    <button class="btn-save" style="background: var(--verde-issste); color: white !important;" onclick="activarModulo('panel-derechohabientes', this)">ACCESO DERECHOHABIENTES</button>
+                    <button class="btn-save" style="background: var(--guinda); color: white !important;" onclick="activarModulo('panel-derechohabientes', this)">ACCESO DERECHOHABIENTES</button>
                 </div>
 
             </div>
@@ -494,17 +494,17 @@
         <!-- ========================================================================= -->
         <div id="panel-derechohabientes" class="view" style="display: none;">
             
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
-                <h2 style="color: var(--verde-issste); margin:0; font-family: 'Segoe UI', sans-serif;">Panel de Servicios al Derechohabiente</h2>
-                <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--verde-issste)'" onmouseout="this.style.background='#98989a'">← Volver al Menú Principal</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--guinda); margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 style="color: var(--guinda); margin:0; font-family: 'Segoe UI', sans-serif;">Panel de Servicios al Derechohabiente</h2>
+                <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--guinda)'" onmouseout="this.style.background='#98989a'">← Volver al Menú Principal</button>
             </div>
 
             <!-- Menú de Opciones del Derechohabiente -->
             <div class="login-grid">
-                <div class="card card-patient" style="border-top: 8px solid var(--verde-issste) !important;">
-                    <h3 style="color: var(--verde-issste); text-align: center;">Solicitar cambio de consultorio</h3>
+                <div class="card card-patient" style="border-top: 8px solid var(--guinda) !important;">
+                    <h3 style="color: var(--guinda); text-align: center;">Solicitar cambio de consultorio</h3>
                     <p style="font-size: 0.85em; color: #666;">Inicia un trámite para solicitar cambio de consultorio.</p>
-                    <button class="btn-save" style="background: var(--verde-issste); color: white !important;" onclick="activarModulo('modulo-solicitud-cambio', this)">INICIAR SOLICITUD</button>
+                    <button class="btn-save" style="background: var(--guinda); color: white !important;" onclick="activarModulo('modulo-solicitud-cambio', this)">INICIAR SOLICITUD</button>
                 </div>
             </div>
         </div>
@@ -518,7 +518,7 @@
         <div id="modulo-solicitud-cambio" class="view" style="display: none;">
             
             <!-- Barra superior con botones de navegación -->
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--guinda); margin-bottom: 20px; padding-bottom: 10px;">
                 <h2 style="color: var(--guinda); margin:0; font-family: 'Segoe UI', sans-serif;">Solicitud de Cambio de Consultorio</h2>
                 <button onclick="activarModulo('panel-derechohabientes', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--guinda)'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
             </div>
