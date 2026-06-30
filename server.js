@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 30.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 32.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -414,20 +414,20 @@ app.put('/api/office-changes/:id', (req, res) => {
             sendSmtpEmail.subject = `Estatus de Trámite: Solicitud de Cambio de Consultorio - Folio ${id}`;
             sendSmtpEmail.htmlContent = `
                 <div style="font-family: sans-serif; border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 550px;">
-                    <h2 style="color: #611232; border-bottom: 3px solid #b38e5d; padding-bottom: 10px; margin-top:0;">C.M.F. ERMITA - NOTIFICACIÓN OFICIAL</h2>
+                    <h2 style="color: #611232; border-bottom: 3px solid #b38e5d; padding-bottom: 10px; margin-top:0;">C.M.F. ERMITA - NOTIFICACIÓN CAMBIO DE CONSULTORIO</h2>
                     <p>Estimado(a) <strong>${paciente.first_names} ${paciente.paternal_lastname}</strong>,</p>
-                    <p>Le informamos que la Coordinación Médica ha dictaminado su solicitud de reasignación de espacio clínico:</p>
+                    <p>Le informamos que la Coordinación Médica ha dictaminado su solicitud de Cambio de Consultorio:</p>
                     <div style="background: ${status === 'APROBADA' ? '#dcfce7' : '#fee2e2'}; color: ${status === 'APROBADA' ? '#15803d' : '#b91c1c'}; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; font-size: 1.2em; margin: 15px 0;">
                         ESTATUS: ${status}
                     </div>
-                    <p><strong>Fundamento / Motivo institucional:</strong></p>
+                    <p><strong>Fundamento / Motivo:</strong></p>
                     <blockquote style="background: #f3f4f6; padding: 10px 15px; border-left: 4px solid #98989a; font-style: italic; margin: 10px 0;">
                         "${statusNotes}"
                     </blockquote>
                     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
                     <p style="font-size: 0.85em; color: #666; text-align: center; margin-bottom:0;">
                         Este es un correo automático. Por favor no responda a este mensaje.<br>
-                        <strong>Coordinación de Enseñanza y Calidad - ISSSTE</strong>
+                        <strong>Coordinación de Enseñanza y Calidad - ISSSTE - C.M.F. Ermita</strong>
                     </p>
                 </div>
             `;
