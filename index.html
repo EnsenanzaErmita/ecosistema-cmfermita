@@ -193,7 +193,7 @@
                 <!-- TARJETA 2: DERECHOHABIENTES (ACCESO DIRECTO SIN LOGUEO, COLOR VERDE ISSSTE) -->
                 <div class="card card-patient" style="border-top: 8px solid var(--guinda) !important;">
                     <h3 style="color: var(--guinda); text-align: center; font-size: 2.50em;">Derechohabientes</h3>
-                    <p style="font-size: 0.85em; text-align: center;">Área de trámites, solicitudes y gestión de servicios para pacientes de la clínica.</p>
+                    <p style="font-size: 0.85em; text-align: center;">Trámites, solicitudes y gestión de servicios para pacientes de la C.M.F. Ermita.</p>
                     <!-- Al darle click, salta directo a su panel independiente -->
                     <button class="btn-save" style="background: var(--guinda); color: white !important;" onclick="activarModulo('panel-derechohabientes', this)">ACCESO DERECHOHABIENTES</button>
                 </div>
@@ -503,7 +503,7 @@
             <div class="login-grid">
                 <div class="card card-patient" style="border-top: 8px solid var(--guinda) !important;">
                     <h3 style="color: var(--guinda); text-align: center;">Solicitar cambio de consultorio</h3>
-                    <p style="font-size: 0.85em; color: #666;">Inicia un trámite para solicitar cambio de consultorio.</p>
+                    <p style="font-size: 0.85em; color: #666; text-align: center;">Inicia un trámite para solicitar cambio de consultorio.</p>
                     <button class="btn-save" style="background: var(--guinda); color: white !important;" onclick="activarModulo('modulo-solicitud-cambio', this)">INICIAR SOLICITUD</button>
                 </div>
             </div>
@@ -659,7 +659,7 @@
                     <!-- ================================================================= -->
                     <!-- SUBSECCIÓN: DATOS DE LOS BENEFICIARIOS                            -->
                     <!-- ================================================================= -->
-                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--guinda); padding-bottom: 5px; margin-top: 25px; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS DE LOS BENEFICIARIOS (Anotar todos los integrantes)</h3>
+                    <h3 style="color: var(--guinda); font-size: 1.1em; border-bottom: 2px solid var(--guinda); padding-bottom: 5px; margin-top: 25px; margin-bottom: 15px; letter-spacing: 0.5px;">DATOS DE LOS BENEFICIARIOS (Anotar a los integrantes que también se requieren cambiar)</h3>
                     
                     <!-- Formulario local para capturar un beneficiario a la vez -->
                     <div style="background: #fdf2f4; border: 1px solid rgba(97, 18, 50, 0.15); padding: 15px; border-radius: 6px; margin-bottom: 15px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
@@ -729,7 +729,7 @@
                                 </select>
                             </div>
                             <div style="margin-bottom: 10px;">
-                                <label style="font-size: 0.8em; font-weight: bold; color: #666;">Médico Asignado Actual (Solo Lectura):</label>
+                                <label style="font-size: 0.8em; font-weight: bold; color: #666;">Médico Asignado Actual:</label>
                                 <input type="text" id="sol-current-doctor" readonly placeholder="Médico no asignado" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background: #f3f4f6; color: #4b5563; font-weight: bold;">
                             </div>
                         </div>
@@ -744,7 +744,7 @@
                                 </select>
                             </div>
                             <div style="margin-bottom: 10px;">
-                                <label style="font-size: 0.8em; font-weight: bold; color: #666;">Médico Asignado Solicitado (Solo Lectura):</label>
+                                <label style="font-size: 0.8em; font-weight: bold; color: #666;">Médico Asignado Solicitado:</label>
                                 <input type="text" id="sol-requested-doctor" readonly placeholder="Médico no asignado" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background: #f3f4f6; color: #4b5563; font-weight: bold;">
                             </div>
                         </div>
@@ -761,7 +761,7 @@
 
                     <!-- BLOQUE FINAL: CUADROS DE RESUMEN AUTOMÁTICO -->
                     <div style="background: #fdf2f4; border: 1px solid var(--guinda); padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-                        <span style="display: block; font-weight: bold; color: var(--guinda); font-size: 0.9em; margin-bottom: 8px; text-align: center; letter-spacing: 1px;">RESUMEN DE CONSULTORIOS SELECCIONADOS</span>
+                        <span style="display: block; font-weight: bold; color: var(--guinda); font-size: 0.9em; margin-bottom: 8px; text-align: center; letter-spacing: 1px;">RESUMEN DE SOLICITUD</span>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center;">
                             <div>
                                 <label style="font-size: 0.75em; font-weight: bold; color: #444; display:block;">CONSULTORIO ACTUAL:</label>
@@ -823,9 +823,9 @@
     </div>
 
     <!-- Encabezado Operativo -->
-    <div style="background-color: var(--azul-issste); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
-        <span style="font-weight: bold; font-size: 1.2em;">Solicitudes de Reasignación Recibidas</span>
-        <span style="text-align: right; font-size: 0.85em;">Conexión en Tiempo Real: <strong>Clever Cloud</strong> ⚡</span>
+    <div style="background-color: #2c4e72; display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
+        <span style="font-weight: bold; font-size: 1.2em;">Solicitudes de Cambio de Consultorio Recibidas</span>
+        <span style="text-align: right; font-size: 0.85em;">ISSSTE<strong>C.M.F. ERMITA</strong> ⚡</span>
     </div>
     
     <!-- Tabla de visualización de trámites -->
@@ -834,13 +834,13 @@
             <thead>
                 <tr style="background: #611232; color: white;">
                     <th style="padding: 10px; border: 1px solid #ddd;">Folio / Fecha</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">Datos del Asegurado (RFC)</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Registro del Derechohabiente</th>
                     <th style="padding: 10px; border: 1px solid #ddd;">Ruta de Cambio</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">Motivo expuesto</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Motivo del Cambio</th>
                     <th style="padding: 10px; border: 1px solid #ddd;">Integrantes / Beneficiarios</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">Correo Electrónico<</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Correo Electrónico</th>
                     <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Estatus</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Acción Administrativa</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Respuesta Coordinación</th>
                 </tr>
             </thead>
             <tbody>
@@ -955,6 +955,67 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+<!-- TERCER MODAL: ÉXITO DE REGISTRO DE TRÁMITE (DERECHOHABIENTE) -->
+<div id="modalExitoTramite" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
+    <div style="background-color: white; border-radius: 8px; width: 100%; max-width: 450px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); overflow: hidden; font-family: sans-serif; text-align: center;">
+        <!-- Encabezado Guinda con Borde Dorado -->
+        <div style="background-color: #611232; color: white; padding: 15px; font-weight: bold; font-size: 1.1em; border-bottom: 3px solid #b38e5d;">
+            🏛️ ISSSTE - C.M.F. ERMITA
+        </div>
+        <!-- Cuerpo del Mensaje -->
+        <div style="padding: 25px; color: #333; line-height: 1.6;">
+            <div style="color: #15803d; font-size: 3em; margin-bottom: 10px;">✓</div>
+            <h3 style="color: #611232; margin: 0 0 10px 0; font-size: 1.3em;">¡Registro Exitoso!</h3>
+            <p style="margin: 0; font-size: 0.95em; color: #4b5563;">
+                Su trámite de solicitud de cambio de consultorio ha iniciado con éxito de forma correcta en nuestro sistema.
+            </p>
+            <p style="margin: 10px 0 0 0; font-size: 0.85em; color: #b38e5d; font-weight: bold;">
+                Se ha enviado una notificación automática a su correo electrónico.
+            </p>
+        </div>
+        <!-- Botón de Cierre -->
+        <div style="background-color: #f9f9f9; padding: 12px; border-top: 1px solid #eee;">
+            <button onclick="cerrarModalExitoTramite()" style="background-color: #611232; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.95em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Aceptar</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1639,7 +1700,7 @@ async function guardarSolicitudCambioNube(event) {
         age: parseInt(document.getElementById('sol-age').value),
         maritalStatus: document.getElementById('sol-civil').value,
         phone: document.getElementById('sol-phone').value.trim(),
-	email: document.getElementById('sol-email').value.trim(),
+        email: document.getElementById('sol-email').value.trim(),
         insuredType: document.getElementById('sol-type').value,
         totalFamilyMembers: parseInt(document.getElementById('sol-members').value),
         beneficiaries: beneficiariosTextoPlano, 
@@ -1656,10 +1717,20 @@ async function guardarSolicitudCambioNube(event) {
         });
 
         if (response.ok) {
-            alert('¡Su trámite ha iniciado con éxito!');
+            // 1. REEMPLAZO DE ALERTA: Encendemos de forma elegante el modal de éxito del trámite
+            const modalExito = document.getElementById('modalExitoTramite');
+            if (modalExito) modalExito.style.display = 'flex';
+
+            // 2. RESETEAMOS LOS COMPONENTES DE MEMORIA Y FORMULARIO
             document.getElementById('form-solicitud-cambio').reset();
             listaBeneficiariosTemporales = [];
-            renderizarTablaBeneficiariosLocal();
+            
+            // Verificamos si existe la función para actualizar tu tabla local de integrantes
+            if (typeof renderizarTablaBeneficiariosLocal === 'function') {
+                renderizarTablaBeneficiariosLocal();
+            }
+
+            // Redireccionamos al panel original
             activarModulo('panel-derechohabientes', null);
         } else {
             const data = await response.json();
@@ -1671,6 +1742,12 @@ async function guardarSolicitudCambioNube(event) {
     }
 }
 
+
+// 3. FUNCIÓN AUXILIAR MANDATORIA: Cierra la ventana flotante de éxito del trámite
+function cerrarModalExitoTramite() {
+    const modalExito = document.getElementById('modalExitoTramite');
+    if (modalExito) modalExito.style.display = 'none';
+}
 
 
 
