@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 32.8.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.0.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -429,11 +429,11 @@ app.put('/api/office-changes/:id', (req, res) => {
                     <div style="background: #fbf8f3; border: 1px solid #e1d3bf; padding: 15px; border-radius: 6px; margin: 20px 0; text-align: center;">
                         <h4 style="color: #611232; margin: 0 0 8px 0; font-size: 1em; letter-spacing: 0.5px;">📋 SU OPINIÓN ES MUY IMPORTANTE</h4>
                         <p style="margin: 0 0 12px 0; font-size: 0.9em; color: #4b5563;">
-                            Con el objetivo de seguir mejorando la calidad en la atención de nuestra unidad médica, le solicitamos de la manera más atenta apoyarnos a responder una breve encuesta de Trato Digno.
+                            Con el objetivo de seguir mejorando la calidad en la atención de nuestra unidad médica, le solicitamos de la manera más atenta apoyarnos a responder una breve encuesta de Adicciones.
                         </p>
                         <!-- BOTÓN BLINDADO CON ATRIBUTOS DE SEGURIDAD PARA ENLACES -->
                         <a href="https://encuestas-ermita-salud-mental.onrender.com/" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            Responder Encuesta de Trato Digno
+                            Responder Encuesta de Adicciones
                         </a>
                     </div>
 
