@@ -56,7 +56,25 @@
         .card-assign { border-top: 8px solid #ea580c !important; } 
 
         .teaching-hero { background: #fdfaf6; border: 2px solid var(--dorado-calidad); padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 25px; }
-        #phrase-container { font-style: italic; color: var(--guinda); font-size: 1.2em; font-weight: bold; transition: opacity 0.8s; }
+
+	/* ESTILO PARA LOS PENSAMIENTOS INSTITUCIONALES EN EL HERO */
+	#phrase-container {
+	    font-size: 1.1em;
+	    font-style: italic;
+	    color: #ffffff; /* Letras blancas para contrastar con el fondo guinda del hero */
+	    margin-top: 8px;
+	    font-weight: 300;
+	    transition: opacity 0.8s ease-in-out; /* Transición suave de 0.8 segundos */
+	    opacity: 1;
+	    min-height: 2.2em; /* Evita que el diseño de la caja salte si la frase es larga */
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    max-width: 700px;
+	    margin-left: auto;
+	    margin-right: auto;
+	}
+
 
         /* PIE DE PÁGINA */
         footer { background-color: var(--negro-footer); color: var(--blanco); text-align: center; padding: 25px 10px; font-size: 0.95em; border-top: 3px solid var(--dorado-calidad); }
@@ -161,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v32.8.0
+        v33.0.0
     </div>
 
 
@@ -1950,10 +1968,57 @@ async function actualizarBurbujaNotificaciones() {
 
 
 
+// =========================================================================
+// CARRUSEL DINÁMICO DE PENSAMIENTOS DE ENSEÑANZA Y CALIDAD (ISSSTE)
+// =========================================================================
+const FRASES_INSTITUCIONALES = [
+    "\"Por un servicio con calidez humana, eficacia y el más alto sentido ético profesional.\"",
+    "\"La enseñanza médica continua es el pilar fundamental de la seguridad del paciente.\"",
+    "\"Calidad no es un acto aislado, es el hábito diario de hacer las cosas bien por nuestra derechohabiencia.\"",
+    "\"La formación y la investigación clínica transforman la práctica médica en bienestar social.\"",
+    "\"En el ISSSTE, la excelencia académica guía nuestras manos y el humanismo atiende los corazones.\"",
+    "\"La evaluación constante y la mejora continua dignifican el servicio público de salud.\"",
+    "\"Educar al personal de salud es sembrar la semilla de una atención médica de excelencia.\""
+];
+
+let _indiceFraseActual = 0;
+
+function iniciarCarruselPensamientos() {
+    const contenedor = document.getElementById('phrase-container');
+    if (!contenedor) return;
+
+    // Colocamos la primera frase de inmediato al cargar la página
+    contenedor.innerText = FRASES_INSTITUCIONALES[_indiceFraseActual];
+
+    // Configurar temporizador automático cada 7 segundos
+    setInterval(() => {
+        // PASO 1: Desvanecer la frase actual (Opacidad a cero)
+        contenedor.style.opacity = 0;
+
+        // PASO 2: Esperar a que termine el desvanecimiento para cambiar el texto (0.8 segundos)
+        setTimeout(() => {
+            _indiceFraseActual = (_indiceFraseActual + 1) % FRASES_INSTITUCIONALES.length;
+            contenedor.innerText = FRASES_INSTITUCIONALES[_indiceFraseActual];
+            
+            // PASO 3: Aparecer la nueva frase con suavidad (Opacidad a uno)
+            contenedor.style.opacity = 1;
+        }, 800); 
+
+    }, 7000); // 7000 milisegundos = 7 segundos por frase
+}
 
 
 
 
+
+
+
+
+
+    // OBLIGATORIO: Mandamos a llamar la función cuando toda la pantalla cargue inicialmente
+    window.addEventListener('DOMContentLoaded', () => {
+        iniciarCarruselPensamientos();
+    });
     // VINCULACIÓN: Haz que se ejecute de inmediato cuando el login sea exitoso.
     // Busca tu función 'procesarLogin(e)' y justo debajo de la línea donde enciendes el panel:
     // panelCoord.style.display = 'block';
