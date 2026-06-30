@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO CON NODEMAILER COMPILANDO 32.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 32.2.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -424,6 +424,19 @@ app.put('/api/office-changes/:id', (req, res) => {
                     <blockquote style="background: #f3f4f6; padding: 10px 15px; border-left: 4px solid #98989a; font-style: italic; margin: 10px 0;">
                         "${statusNotes}"
                     </blockquote>
+                    
+                    <!-- NUEVA SECCIÓN DE ENCUESTA INSTITUCIONAL (GUINDA Y DORADO) -->
+                    <div style="background: #fbf8f3; border: 1px solid #e1d3bf; padding: 15px; border-radius: 6px; margin: 20px 0; text-align: center;">
+                        <h4 style="color: #611232; margin: 0 0 8px 0; font-size: 1em; letter-spacing: 0.5px;">📋 SU OPINIÓN ES MUY IMPORTANTE</h4>
+                        <p style="margin: 0 0 12px 0; font-size: 0.9em; color: #4b5563;">
+                            Con el objetivo de seguir mejorando la calidad en la atención de nuestra unidad médica, le solicitamos de la manera más atenta apoyarnos a responder una breve encuesta de satisfacción.
+                        </p>
+                        <!-- BOTÓN CON LINK DE LA ENCUESTA -->
+                        <a href="AQUÍ_PEGA_EL_LINK_DE_TU_ENCUESTA" target="_blank" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            Responder Encuesta de Calidad
+                        </a>
+                    </div>
+
                     <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
                     <p style="font-size: 0.85em; color: #666; text-align: center; margin-bottom:0;">
                         Este es un correo automático. Por favor no responda a este mensaje.<br>
