@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 32.4.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 32.5.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -431,8 +431,8 @@ app.put('/api/office-changes/:id', (req, res) => {
                         <p style="margin: 0 0 12px 0; font-size: 0.9em; color: #4b5563;">
                             Con el objetivo de seguir mejorando la calidad en la atención de nuestra unidad médica, le solicitamos de la manera más atenta apoyarnos a responder una breve encuesta de satisfacción.
                         </p>
-                        <!-- BOTÓN BLINDADO CON ATRIBUTOS DE SEGURIDAD PARA ENLACES -->
-                        <a href="https://onrender.com" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <!-- BOTÓN CON LINK DE LA ENCUESTA -->
+                        <a href="https://encuestas-ermita-salud-mental.onrender.com/" target="_blank" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             Responder Encuesta de Calidad
                         </a>
                     </div>
