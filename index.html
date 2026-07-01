@@ -179,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.5.0
+        v1.6.0
     </div>
 
 
@@ -1755,8 +1755,11 @@ async function eliminarAsociacionNube(assignmentId) {
 async function guardarSolicitudCambioNube(event) {
     event.preventDefault();
 
-    const currentOfficeId = document.getElementById('sol-current-office').value;
-    const requestedOfficeId = document.getElementById('sol-requested-office').value;
+    const selectActual = document.getElementById('sol-current-office');
+    const selectSolicitado = document.getElementById('sol-requested-office');
+
+    const currentOfficeId = selectActual.value;
+    const requestedOfficeId = selectSolicitado.value;
 
     if (parseInt(currentOfficeId) === parseInt(requestedOfficeId)) {
         alert('Validación del Sistema:\nEl Consultorio Solicitado no puede ser igual al Consultorio Actual. Seleccione una opción de cambio válida.');
@@ -1773,7 +1776,19 @@ async function guardarSolicitudCambioNube(event) {
         beneficiariosTextoPlano = "SIN BENEFICIARIOS REGISTRADOS";
     }
 
-    // CORRECCIÓN DE LLAVES: Coincidencia exacta con el desestructurado de tu server.js
+    // 1. EXTRAEMOS EL TEXTO VISIBLE DE LOS CONSULTORIOS DIRECTAMENTE DEL SELECT
+    const textoConsultorioActual = selectActual.options[selectActual.selectedIndex].text;
+    const textoConsultorioSolicitado = selectSolicitado.options[selectSolicitado.selectedIndex].text;
+
+    // 2. CORREGIDO: EXTRAEMOS LOS NOMBRES DE LOS MÉDICOS DIRECTAMENTE DE TUS INPUTS READONLY (.value)
+    const inputMedicoActual = document.getElementById('sol-current-doctor');
+    const inputMedicoSolicitado = document.getElementById('sol-requested-doctor');
+
+    // Si el campo está vacío o dice el placeholder, guardamos un texto seguro de control
+    const textoMedicoActual = (inputMedicoActual && inputMedicoActual.value.trim() !== "") ? inputMedicoActual.value.trim().toUpperCase() : "SIN MÉDICO ASIGNADO";
+    const textoMedicoSolicitado = (inputMedicoSolicitado && inputMedicoSolicitado.value.trim() !== "") ? inputMedicoSolicitado.value.trim().toUpperCase() : "SIN MÉDICO ASIGNADO";
+
+    // 3. ARMAMOS EL PAYLOAD CON LOS NUEVOS CAMPOS HISTÓRICOS CONGELADOS
     const payload = {
         paternalLastname: document.getElementById('sol-paternal').value.trim().toUpperCase(),
         maternalLastname: document.getElementById('sol-maternal').value.trim().toUpperCase(),
@@ -1795,7 +1810,13 @@ async function guardarSolicitudCambioNube(event) {
         beneficiaries: beneficiariosTextoPlano, 
         currentOfficeId: parseInt(currentOfficeId),
         requestedOfficeId: parseInt(requestedOfficeId),
-        changeReason: document.getElementById('sol-change-reason').value.trim().toUpperCase()
+        changeReason: document.getElementById('sol-change-reason').value.trim().toUpperCase(),
+        
+        // LAS 4 NUEVAS VARIABLES COMPATIBLES CON LAS COLUMNAS DE CLEVER CLOUD:
+        currentOfficeNameSnapshot: textoConsultorioActual,
+        requestedOfficeNameSnapshot: textoConsultorioSolicitado,
+        currentDoctorNameSnapshot: textoMedicoActual,
+        requestedDoctorNameSnapshot: textoMedicoSolicitado
     };
 
     try {
@@ -1806,15 +1827,14 @@ async function guardarSolicitudCambioNube(event) {
         });
 
         if (response.ok) {
-            // 1. REEMPLAZO DE ALERTA: Encendemos de forma elegante el modal de éxito del trámite
+            // REEMPLAZO DE ALERTA: Encendemos de forma elegante el modal de éxito del trámite
             const modalExito = document.getElementById('modalExitoTramite');
             if (modalExito) modalExito.style.display = 'flex';
 
-            // 2. RESETEAMOS LOS COMPONENTES DE MEMORIA Y FORMULARIO
+            // RESETEAMOS LOS COMPONENTES DE MEMORIA Y FORMULARIO
             document.getElementById('form-solicitud-cambio').reset();
             listaBeneficiariosTemporales = [];
             
-            // Verificamos si existe la función para actualizar tu tabla local de integrantes
             if (typeof renderizarTablaBeneficiariosLocal === 'function') {
                 renderizarTablaBeneficiariosLocal();
             }

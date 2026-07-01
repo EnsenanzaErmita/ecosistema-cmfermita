@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.5.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.6.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -322,28 +322,35 @@ app.delete('/api/assignments/:id', (req, res) => {
 // 3. RUTAS DE LA API - PARTE B2 (TRÁMITES, DICTAMINACIÓN Y ARRANQUE)
 // =========================================================================
 
-// RUTA API POST: Recibir trámite incluyendo el nuevo campo 'email'
+// RUTA API POST: Recibir trámite e inyectar historial congelado de consultorios y médicos
 app.post('/api/office-changes', (req, res) => {
     const {
         paternalLastname, maternalLastname, firstNames, rfc,
         isWorker, isPensioner, street, extNum, intNum, colonia,
         postalCode, age, maritalStatus, phone, email, insuredType, totalFamilyMembers,
-        beneficiaries, currentOfficeId, requestedOfficeId, changeReason
+        beneficiaries, currentOfficeId, requestedOfficeId, changeReason,
+        // RECIBIMOS LOS 4 NUEVOS ATRIBUTOS DESDE EL FRONTEND
+        currentOfficeNameSnapshot, requestedOfficeNameSnapshot,
+        currentDoctorNameSnapshot, requestedDoctorNameSnapshot
     } = req.body;
 
     if (!paternalLastname || !firstNames || !rfc || !email || !currentOfficeId || !requestedOfficeId || !changeReason) {
         return res.status(400).json({ message: 'Todos los datos obligatorios, incluyendo el correo y el motivo de cambio, deben ser requisitados.' });
     }
 
+    // AMPLIAMOS LAS COLUMNAS EN EL INSERT INTO DE CLEVER CLOUD
     const insertSql = `
         INSERT INTO office_change_requests (
             paternal_lastname, maternal_lastname, first_names, rfc,
             is_worker, is_pensioner, street, ext_num, int_num, colonia,
             postal_code, age, marital_status, phone, email, insured_type, total_family_members,
-            beneficiaries, current_office_id, requested_office_id, change_reason
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            beneficiaries, current_office_id, requested_office_id, change_reason,
+            current_office_name_snapshot, requested_office_name_snapshot,
+            current_doctor_name_snapshot, requested_doctor_name_snapshot
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
+    // AGREGAMOS LAS VARIABLES AL ARREGLO EN EL MISMO ORDEN DE LAS COLUMNAS (25 EN TOTAL)
     pool.query(insertSql, [
         paternalLastname.trim().toUpperCase(),
         maternalLastname ? maternalLastname.trim().toUpperCase() : '',
@@ -365,15 +372,24 @@ app.post('/api/office-changes', (req, res) => {
         beneficiaries,
         parseInt(currentOfficeId),
         parseInt(requestedOfficeId),
-        changeReason.trim().toUpperCase()
+        changeReason.trim().toUpperCase(),
+        // INYECCIÓN ORDENADA DE LOS 4 VALORES CONGELADOS
+        currentOfficeNameSnapshot ? currentOfficeNameSnapshot.trim().toUpperCase() : 'N/A',
+        requestedOfficeNameSnapshot ? requestedOfficeNameSnapshot.trim().toUpperCase() : 'N/A',
+        currentDoctorNameSnapshot ? currentDoctorNameSnapshot.trim().toUpperCase() : 'SIN MÉDICO ASIGNADO',
+        requestedDoctorNameSnapshot ? requestedDoctorNameSnapshot.trim().toUpperCase() : 'SIN MÉDICO ASIGNADO'
     ], (err, result) => {
         if (err) {
-            console.error('Error al insertar trámite en Clever Cloud:', err);
+            console.error('Error al insertar trámite con snapshots en Clever Cloud:', err);
             return res.status(500).json({ message: 'No se pudo guardar la solicitud.' });
         }
         res.status(201).json({ message: 'Solicitud tramitada correctamente.' });
     });
 });
+
+
+
+
 
 // RUTA API GET: Descargar solicitudes incluyendo correos y motivos de dictamen
 app.get('/api/office-changes', (req, res) => {
