@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.4.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.5.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -298,6 +298,24 @@ app.post('/api/assignments', (req, res) => {
         });
     });
 });
+
+
+
+
+// RUTA API BACKEND: Eliminar una asignación de médico de la tabla independiente
+app.delete('/api/assignments/:id', (req, res) => {
+    const { id } = req.params; // Este ID debe ser el PRIMARY KEY de doctor_offices
+    
+    const sql = 'DELETE FROM doctor_offices WHERE id = ?';
+    pool.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error crítico al eliminar asignación en Clever Cloud:', err);
+            return res.status(500).json({ message: 'Error interno al intentar eliminar la asignación.' });
+        }
+        res.status(200).json({ message: 'Asociación removida correctamente de la base de datos.' });
+    });
+});
+
 
 
 // =========================================================================

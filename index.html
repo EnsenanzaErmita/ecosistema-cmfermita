@@ -179,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.4.0
+        v1.5.0
     </div>
 
 
@@ -1514,59 +1514,63 @@ async function cargarConsultoriosSelect() {
 
 
 
-    async function cargarListaAsociacionesNube() {
-        const tbody = document.querySelector('#tabla-asociaciones tbody');
-        if (!tbody) return;
+async function cargarListaAsociacionesNube() {
+    const tbody = document.querySelector('#tabla-asociaciones tbody');
+    if (!tbody) return;
 
-        try {
-            // Consulta el nuevo endpoint que unifica las tablas mediante doctor_offices
-            const response = await fetch(`${BASE_URL}/api/assignments`);
-            const datos = await response.json();
-            tbody.innerHTML = '';
+    try {
+        // Consulta el nuevo endpoint que unifica las tablas mediante doctor_offices
+        const response = await fetch(`${BASE_URL}/api/assignments`);
+        const datos = await response.json();
+        tbody.innerHTML = '';
 
-            if (datos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #888; padding: 20px;">No hay médicos asociados a ningún consultorio actualmente.</td></tr>`;
-                return;
-            }
-
-            datos.forEach(asoc => {
-                const fila = document.createElement('tr');
-                fila.innerHTML = `
-                    <td style="padding: 12px; border: 1px solid #ddd;">${asoc.rfc}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase; font-weight:bold;">${asoc.last_name_paternal} ${asoc.last_name_maternal || ''}, ${asoc.first_name}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;">${asoc.emp_shift}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase; color: #ea580c; font-weight:bold;">${asoc.office_name}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd;">${asoc.office_shift}</td>
-                    <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
-                        <!-- Envía correctamente el ID del médico para remover el renglón de doctor_offices -->
-                        <button onclick="eliminarAsociacionNube(${asoc.employee_id})" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Desvincular</button>
-                    </td>
-                `;
-                tbody.appendChild(fila);
-            });
-        } catch (error) {
-            console.error('Error al cargar vinculaciones:', error);
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos.</td></tr>`;
+        if (datos.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #888; padding: 20px;">No hay médicos asociados a ningún consultorio actualmente.</td></tr>`;
+            return;
         }
+
+        datos.forEach(asoc => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td style="padding: 12px; border: 1px solid #ddd;">${asoc.rfc}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase; font-weight:bold;">${asoc.last_name_paternal} ${asoc.last_name_maternal || ''}, ${asoc.first_name}</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${asoc.emp_shift}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase; color: #ea580c; font-weight:bold;">${asoc.office_name}</td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${asoc.office_shift}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
+                    <!-- CORREGIDO: Envía el assignment_id de la tabla doctor_offices en lugar del employee_id -->
+                    <button onclick="eliminarAsociacionNube(${asoc.assignment_id})" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Desvincular</button>
+                </td>
+            `;
+            tbody.appendChild(fila);
+        });
+    } catch (error) {
+        console.error('Error al cargar vinculaciones:', error);
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos.</td></tr>`;
     }
+}
 
 
+// CORREGIDO: Ahora recibe el ID único de la asignación de la tabla doctor_offices
+async function eliminarAsociacionNube(assignmentId) {
+    if (!confirm('¿Deseas desvincular a este médico de su consultorio actual?')) return;
 
-    async function eliminarAsociacionNube(employeeId) {
-        if (!confirm('¿Deseas desvincular a este médico de su consultorio actual?')) return;
-
-        try {
-            const response = await fetch(`${BASE_URL}/api/assignments/${employeeId}`, { method: 'DELETE' });
-            if (response.ok) {
-                alert('Médico liberado del consultorio correctamente.');
+    try {
+        // Enviamos el assignmentId correcto a la API de Render
+        const response = await fetch(`${BASE_URL}/api/assignments/${assignmentId}`, { method: 'DELETE' });
+        if (response.ok) {
+            alert('Médico liberado del consultorio correctamente.');
+            // Verificamos el nombre exacto de tu función para recargar la tabla
+            if (typeof cargarListaAsociacionesNube === 'function') {
                 cargarListaAsociacionesNube();
-            } else {
-                alert('No se pudo remover la asignación.');
             }
-        } catch (error) {
-            console.error('Error al eliminar asignación:', error);
+        } else {
+            alert('No se pudo remover la asignación.');
         }
+    } catch (error) {
+        console.error('Error al eliminar asignación:', error);
     }
+}
 
 
 
