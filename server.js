@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.0.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.1.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -152,8 +152,10 @@ app.delete('/api/doctors/:rfc', (req, res) => {
 });
 
 // RUTA API: Obtener todos los consultorios registrados
+// RUTA API: Obtener todos los consultorios registrados (INCLUYENDO TIPO DE CITA)
 app.get('/api/offices', (req, res) => {
-    const sql = 'SELECT id, office_name, shift, created_at FROM offices ORDER BY office_name ASC, shift ASC';
+    // Agregamos el campo appointment_type a la consulta SELECT
+    const sql = 'SELECT id, office_name, shift, appointment_type, created_at FROM offices ORDER BY office_name ASC, shift ASC';
     pool.query(sql, (err, results) => {
         if (err) {
             console.error('Error al consultar consultorios:', err);
@@ -163,16 +165,21 @@ app.get('/api/offices', (req, res) => {
     });
 });
 
+
 // RUTA API: Registrar un consultorio nuevo (Valida texto y duplicados por turno)
+// RUTA API: Registrar un consultorio nuevo (CON TIPO DE CITA MANDATORIO)
 app.post('/api/offices', (req, res) => {
-    const { officeName, shift } = req.body;
+    // Recibimos el nuevo campo appointmentType desde el frontend
+    const { officeName, shift, appointmentType } = req.body;
     
-    if (!officeName || !shift) {
-        return res.status(400).json({ message: 'El nombre del consultorio y el turno son obligatorios.' });
+    if (!officeName || !shift || !appointmentType) {
+        return res.status(400).json({ message: 'El nombre, turno y tipo de cita son obligatorios.' });
     }
 
     const officeUpper = officeName.trim().toUpperCase();
+    const typeUpper = appointmentType.trim().toUpperCase(); // 'CITA MÉDICA' o 'CITA PRESENCIAL'
 
+    // Validamos que no exista esa combinación exacta de consultorio y turno
     const checkSql = 'SELECT * FROM offices WHERE office_name = ? AND shift = ?';
     pool.query(checkSql, [officeUpper, shift], (err, results) => {
         if (err) {
@@ -183,8 +190,9 @@ app.post('/api/offices', (req, res) => {
             return res.status(400).json({ message: 'Este consultorio ya está registrado para el turno seleccionado.' });
         }
 
-        const insertSql = 'INSERT INTO offices (office_name, shift) VALUES (?, ?)';
-        pool.query(insertSql, [officeUpper, shift], (err, result) => {
+        // Inserción limpia incluyendo el nuevo campo appointment_type
+        const insertSql = 'INSERT INTO offices (office_name, shift, appointment_type) VALUES (?, ?, ?)';
+        pool.query(insertSql, [officeUpper, shift, typeUpper], (err, result) => {
             if (err) {
                 console.error('Error al insertar consultorio:', err);
                 return res.status(500).json({ message: 'No se pudo guardar el consultorio en el servidor.' });
@@ -193,7 +201,6 @@ app.post('/api/offices', (req, res) => {
         });
     });
 });
-
 
 
 
