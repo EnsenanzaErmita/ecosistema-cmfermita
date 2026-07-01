@@ -179,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.3.0
+        v1.4.0
     </div>
 
 
@@ -371,32 +371,31 @@
 
 
         <!-- ========================================================================= -->
-        <!-- VISTA 4: PANTALLA DE CONSULTORIOS CON MODAL DE CAPTURA INTEGRADO          -->
+        <!-- VISTA 4: PANTALLA DE CONSULTORIOS CON PALETA ROSA COINCIDENTE             -->
         <!-- ========================================================================= -->
         <div id="modulo-consultorios" class="view" style="display: none;">
             
-            <!-- Barra superior con botón disparador de alta -->
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #b38e5d; margin-bottom: 20px; padding-bottom: 10px;">
+            <!-- Barra superior con línea divisoria Rosa Fucsia -->
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #db2777; margin-bottom: 20px; padding-bottom: 10px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Control de Consultorios</h2>
-                    <!-- 1. BOTÓN PARA ABRIR VENTANA EMERGENTE -->
-                    <button onclick="abrirModalNuevoConsultorio()" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 5px;" onmouseover="this.style.backgroundColor='#4a0d25'" onmouseout="this.style.backgroundColor='#611232'">
+                    <button onclick="abrirModalNuevoConsultorio()" style="background-color: #db2777; color: white; border: 1px solid #db2777; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 5px;" onmouseover="this.style.backgroundColor='#611232', this.style.borderColor='#611232'" onmouseout="this.style.backgroundColor='#db2777', this.style.borderColor='#db2777'">
                         ➕ Añadir Nuevo Consultorio
                     </button>
                 </div>
-                <button onclick="activarModulo('panel-coordinacion', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#611232'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
+                <button onclick="activarModulo('panel-coordinacion', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#db2777'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
             </div>
 
-            <!-- 2. TABLA DE VISUALIZACIÓN CON COLUMNA DE TIPO DE CITA -->
+            <!-- TABLA DE VISUALIZACIÓN CON CABECERA ROSA FUCSIA -->
             <div style="margin-top: 10px;">
-                <h4 style="color: #611232; margin: 0 0 12px 0; font-family: 'Segoe UI', sans-serif; font-size: 1.1em; border-left: 4px solid #b38e5d; padding-left: 8px;">Consultorios Activos por Horario</h4>
+                <h4 style="color: #db2777; margin: 0 0 12px 0; font-family: 'Segoe UI', sans-serif; font-size: 1.1em; border-left: 4px solid #db2777; padding-left: 8px;">Consultorios Activos por Horario</h4>
                 <table id="tabla-consultorios" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden;">
                     <thead>
-                        <tr style="background: #611232; color: white; border-bottom: 3px solid #b38e5d;">
+                        <tr style="background: #db2777; color: white; border-bottom: 3px solid #611232;">
                             <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">ID</th>
                             <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Consultorio / Área</th>
                             <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Turno</th>
-                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Tipo de Cita / Espacio</th> <!-- REQUERIMIENTO 2: COLUMNA INYECTADA -->
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Tipo de Cita / Espacio</th>
                             <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Fecha Alta</th>
                             <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Acción</th>
                         </tr>
@@ -409,29 +408,25 @@
                 </table>
             </div>
 
-            <!-- ========================================================================= -->
-            <!-- VENTANA EMERGENTE DE CAPTURA (MODAL OCULTO DE ALTA)                       -->
-            <!-- ========================================================================= -->
+            <!-- VENTANA EMERGENTE DE CAPTURA CON DETALLES ROSA FUCSIA -->
             <div id="modalAltaConsultorio" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
                 <div style="background-color: white; border-radius: 8px; width: 100%; max-width: 450px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); overflow: hidden; font-family: sans-serif;">
                     
-                    <!-- Encabezado Institucional -->
-                    <div style="background-color: #611232; color: white; padding: 15px; font-weight: bold; font-size: 1.1em; border-bottom: 3px solid #b38e5d;">
+                    <div style="background-color: #db2777; color: white; padding: 15px; font-weight: bold; font-size: 1.1em; border-bottom: 3px solid #611232;">
                         🏛️ C.M.F. ERMITA - REGISTRO DE CONSULTORIO
                     </div>
                     
-                    <!-- Formulario Interno -->
                     <form id="form-registro-consultorio" onsubmit="guardarConsultorioNube(event)">
-                        <div style="padding: 20px; background-color: #fdf2f4;">
+                        <div style="padding: 20px; background-color: #fdf2f8;">
                             
                             <div style="margin-bottom: 15px;">
                                 <label for="cons-name" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Identificador / Nombre del Consultorio:</label>
-                                <input type="text" id="cons-name" required placeholder="Ej. CONSULTORIO 5 o ALERGOLOGÍA A" style="width: 100%; padding: 10px; border: 1px solid #611232; border-radius: 4px; box-sizing: border-box; background: white; outline: none; text-transform: uppercase;">
+                                <input type="text" id="cons-name" required placeholder="Ej. CONSULTORIO 5" style="width: 100%; padding: 10px; border: 1px solid #db2777; border-radius: 4px; box-sizing: border-box; background: white; outline: none; text-transform: uppercase;">
                             </div>
                             
                             <div style="margin-bottom: 15px;">
                                 <label for="cons-shift" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Turno de Operación:</label>
-                                <select id="cons-shift" style="width: 100%; padding: 10px; border: 1px solid #611232; border-radius: 4px; box-sizing: border-box; background: white; outline: none;">
+                                <select id="cons-shift" style="width: 100%; padding: 10px; border: 1px solid #db2777; border-radius: 4px; box-sizing: border-box; background: white; outline: none;">
                                     <option value="Matutino">Matutino</option>
                                     <option value="Vespertino">Vespertino</option>
                                     <option value="Nocturno">Nocturno</option>
@@ -441,7 +436,7 @@
                             
                             <div style="margin-bottom: 5px;">
                                 <label for="reg-office-appointment-type" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Tipo de Cita / Espacio:</label>
-                                <select id="reg-office-appointment-type" required style="width: 100%; padding: 10px; border: 1px solid #611232; border-radius: 4px; box-sizing: border-box; background: white; outline: none;">
+                                <select id="reg-office-appointment-type" required style="width: 100%; padding: 10px; border: 1px solid #db2777; border-radius: 4px; box-sizing: border-box; background: white; outline: none;">
                                     <option value="CITA MÉDICA" selected>CITA MÉDICA (Soporta cambios)</option>
                                     <option value="CITA PRESENCIAL">CITA PRESENCIAL (Atención abierta)</option>
                                 </select>
@@ -449,10 +444,9 @@
                             
                         </div>
                         
-                        <!-- Barra Inferior de Acciones -->
                         <div style="background-color: #f9f9f9; padding: 12px; text-align: right; border-top: 1px solid #eee; display: flex; gap: 10px; justify-content: flex-end;">
                             <button type="button" onclick="cerrarModalNuevoConsultorio()" style="background-color: #e5e7eb; color: #374151; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em;">Cancelar</button>
-                            <button type="submit" style="background-color: #611232; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Registrar Alta</button>
+                            <button type="submit" style="background-color: #db2777; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onmouseover="this.style.backgroundColor='#611232'" onmouseout="this.style.backgroundColor='#db2777'">Registrar Alta</button>
                         </div>
                     </form>
                 </div>
@@ -1342,11 +1336,17 @@ async function guardarConsultorioNube(event) {
         });
 
         if (response.ok) {
-            // CIERRE AUTOMÁTICO DE VENTANA AL TENER ÉXITO
+            // 1. Cerramos la ventana modal
             cerrarModalNuevoConsultorio();
+            // 2. Avisamos al usuario con éxito real
             alert('¡Consultorio registrado con éxito en el sistema!');
+            // 3. Limpiamos el formulario
             document.getElementById('form-registro-consultorio').reset();
-            cargarConsultoriosNube(); // Llamada obligatoria para refrescar la tabla
+            
+            // 4. CORRECCIÓN CLAVE: Mapeo exacto al nombre de tu función real
+            if (typeof cargarListaConsultoriosNube === 'function') {
+                cargarListaConsultoriosNube();
+            }
         } else {
             const data = await response.json();
             alert('Error: ' + data.message);
