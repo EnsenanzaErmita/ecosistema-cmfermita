@@ -179,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.1.0
+        v1.2.0
     </div>
 
 
@@ -406,6 +406,21 @@
                                 <option value="Jornada Acumulada">Jornada Acumulada</option>
                             </select>
                         </div>
+
+
+
+<!-- NUEVO SELECTOR: TIPO DE CITA MANDATORIO -->
+<div style="margin-bottom: 15px;">
+    <label for="reg-office-appointment-type" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--guinda); margin-bottom: 5px;">Tipo de Cita / Espacio:</label>
+    <select id="reg-office-appointment-type" required style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white; outline: none;">
+        <option value="CITA MÉDICA" selected>CITA MÉDICA</option>
+        <option value="CITA PRESENCIAL">CITA PRESENCIAL</option>
+    </select>
+</div>
+
+
+
+
                         <div style="display: flex; align-items: flex-end;">
                             <button type="submit" style="background-color: #db2777; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#611232'" onmouseout="this.style.backgroundColor='#db2777'">REGISTRAR EN CLEVER CLOUD</button>
                         </div>
@@ -1287,34 +1302,39 @@ async function cargarListaPersonalNube() {
     // =========================================================================
     // 5. OPERACIONES DE CONTROL DE CONSULTORIOS (TABLA OFFICES)
     // =========================================================================
-    async function guardarConsultorioNube(event) {
-        event.preventDefault();
+async function guardarConsultorioNube(event) {
+    event.preventDefault();
 
-        const officeName = document.getElementById('cons-name').value.trim().toUpperCase();
-        const shift = document.getElementById('cons-shift').value;
-        const urlServidor = `${BASE_URL}/api/offices`;
+    const officeName = document.getElementById('reg-office-name').value;
+    const shift = document.getElementById('reg-office-shift').value;
+    // CAPTURAMOS EL NUEVO CAMPO DEL SELECTOR HTML
+    const appointmentType = document.getElementById('reg-office-appointment-type').value;
 
-        try {
-            const response = await fetch(urlServidor, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ officeName, shift })
-            });
+    try {
+        const response = await fetch(`${BASE_URL}/api/offices`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                officeName: officeName, 
+                shift: shift,
+                appointmentType: appointmentType // ← Enviado correctamente al Backend
+            })
+        });
 
+        if (response.ok) {
+            alert('¡Consultorio registrado con éxito en el sistema!');
+            document.getElementById('form-registro-consultorio').reset(); // Limpia campos
+            cargarConsultoriosNube(); // Recarga la tabla de consultorios
+        } else {
             const data = await response.json();
-
-            if (response.ok) {
-                alert('¡Consultorio dado de alta exitosamente en Clever Cloud!');
-                document.getElementById('form-registro-consultorio').reset();
-                cargarListaConsultoriosNube();
-            } else {
-                alert('Error del servidor: ' + (data.message || 'No se pudo guardar.'));
-            }
-        } catch (error) {
-            console.error('Error al guardar consultorio:', error);
-            alert('No se pudo conectar con el servidor.');
+            alert('Error: ' + data.message);
         }
+    } catch (error) {
+        console.error('Error al registrar consultorio:', error);
+        alert('No se pudo conectar con el servidor.');
     }
+}
+
 
     async function cargarListaConsultoriosNube() {
         const tbody = document.querySelector('#tabla-consultorios tbody');
@@ -1400,22 +1420,26 @@ async function cargarListaPersonalNube() {
         }
     }
 
-    async function cargarConsultoriosSelect() {
-        const select = document.getElementById('asoc-office');
-        if (!select) return;
+async function cargarConsultoriosSelect() {
+    const select = document.getElementById('asoc-office');
+    if (!select) return;
 
-        try {
-            const response = await fetch(`${BASE_URL}/api/offices`);
-            const consultorios = await response.json();
-            
-            select.innerHTML = '<option value="">-- Seleccionar Consultorio --</option>';
-            consultorios.forEach(c => {
-                select.innerHTML += `<option value="${c.id}">${c.office_name} - Turno ${c.shift}</option>`;
-            });
-        } catch (error) {
-            console.error('Error al cargar select de consultorios:', error);
-        }
+    try {
+        const response = await fetch(`${BASE_URL}/api/offices`);
+        const consultorios = await response.json();
+        
+        // 🔍 FILTRO: Dejamos únicamente los consultorios del tipo 'CITA MÉDICA'
+        const consultoriosMedicosOnly = consultorios.filter(c => c.appointment_type === 'CITA MÉDICA');
+        
+        select.innerHTML = '<option value="">-- Seleccionar Consultorio --</option>';
+        consultoriosMedicosOnly.forEach(c => {
+            select.innerHTML += `<option value="${c.id}">${c.office_name} - Turno ${c.shift}</option>`;
+        });
+    } catch (error) {
+        console.error('Error al cargar select de consultorios:', error);
     }
+}
+
 
     async function guardarAsociacionNube(event) {
         event.preventDefault();
