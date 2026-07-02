@@ -179,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.6.0
+        v1.7.0
     </div>
 
 
@@ -1468,14 +1468,15 @@ async function cargarConsultoriosSelect() {
     if (!select) return;
 
     try {
+        // Consultamos el catálogo completo a tu servidor de Render
         const response = await fetch(`${BASE_URL}/api/offices`);
         const consultorios = await response.json();
         
-        // 🔍 FILTRO: Dejamos únicamente los consultorios del tipo 'CITA MÉDICA'
-        const consultoriosMedicosOnly = consultorios.filter(c => c.appointment_type === 'CITA MÉDICA');
-        
+        // CORRECCIÓN: Quitamos el filtro .filter() para que se muestren TODOS los espacios (Médica y Presencial)
         select.innerHTML = '<option value="">-- Seleccionar Consultorio --</option>';
-        consultoriosMedicosOnly.forEach(c => {
+        
+        consultorios.forEach(c => {
+            // El menú desplegable ahora listará todo tu catálogo activo sin excepciones
             select.innerHTML += `<option value="${c.id}">${c.office_name} - Turno ${c.shift}</option>`;
         });
     } catch (error) {
