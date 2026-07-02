@@ -179,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.7.0
+        v1.8.0
     </div>
 
 
@@ -1686,36 +1686,42 @@ async function eliminarAsociacionNube(assignmentId) {
     let catalogoConsultoriosGlobal = [];
     let mapaAsignacionesMedicosGlobal = [];
 
-    async function cargarConsultoriosFormularioPacientes() {
-        const selectActual = document.getElementById('sol-current-office');
-        const selectSolicitado = document.getElementById('sol-requested-office');
-        if (!selectActual || !selectSolicitado) return;
+async function cargarConsultoriosFormularioPacientes() {
+    const selectActual = document.getElementById('sol-current-office');
+    const selectSolicitado = document.getElementById('sol-requested-office');
+    if (!selectActual || !selectSolicitado) return;
 
-        try {
-            // 1. Descargar catálogo de consultorios y asignaciones vigentes desde Render
-            const resOffices = await fetch(`${BASE_URL}/api/offices`);
-            catalogoConsultoriosGlobal = await resOffices.json();
+    try {
+        // 1. Descargar catálogo de consultorios y asignaciones vigentes desde Render
+        const resOffices = await fetch(`${BASE_URL}/api/offices`);
+        catalogoConsultoriosGlobal = await resOffices.json();
 
-            const resAssignments = await fetch(`${BASE_URL}/api/assignments`);
-            mapaAsignacionesMedicosGlobal = await resAssignments.json();
+        const resAssignments = await fetch(`${BASE_URL}/api/assignments`);
+        mapaAsignacionesMedicosGlobal = await resAssignments.json();
 
-            // 2. Poblar los dos componentes select HTML
-            const opcionesHtml = catalogoConsultoriosGlobal.map(c => 
-                `<option value="${c.id}">${c.office_name} (${c.shift})</option>`
-            ).join('');
+        // 🔍 REGLA DEFINITIVA: FILTRADO ESTRICTO DE LA LISTA GLOBAL
+        // Filtramos el catálogo para quedarnos ÚNICAMENTE con los de 'CITA MÉDICA'
+        const consultoriosMedicosOnly = catalogoConsultoriosGlobal.filter(c => c.appointment_type === 'CITA MÉDICA');
 
-            selectActual.innerHTML = '<option value="">-- Seleccionar Actual --</option>' + opcionesHtml;
-            selectSolicitado.innerHTML = '<option value="">-- Seleccionar Solicitado --</option>' + opcionesHtml;
+        // 2. Poblar los dos componentes select HTML usando el catálogo filtrado
+        const opcionesHtml = consultoriosMedicosOnly.map(c => 
+            `<option value="${c.id}">${c.office_name} (${c.shift})</option>`
+        ).join('');
 
-            // Resetear cuadros de resumen
-            document.getElementById('resumen-actual').value = 'NINGUNO';
-            document.getElementById('resumen-solicitado').value = 'NINGUNO';
-            document.getElementById('sol-current-doctor').value = '';
-            document.getElementById('sol-requested-doctor').value = '';
-        } catch (error) {
-            console.error('Error al sincronizar datos para el derechohabiente:', error);
-        }
+        selectActual.innerHTML = '<option value="">-- Seleccionar Actual --</option>' + opcionesHtml;
+        selectSolicitado.innerHTML = '<option value="">-- Seleccionar Solicitado --</option>' + opcionesHtml;
+
+        // Resetear cuadros de resumen
+        if(document.getElementById('resumen-actual')) document.getElementById('resumen-actual').value = 'NINGUNO';
+        if(document.getElementById('resumen-solicitado')) document.getElementById('resumen-solicitado').value = 'NINGUNO';
+        if(document.getElementById('sol-current-doctor')) document.getElementById('sol-current-doctor').value = '';
+        if(document.getElementById('sol-requested-doctor')) document.getElementById('sol-requested-doctor').value = '';
+        
+    } catch (error) {
+        console.error('Error al sincronizar datos para el derechohabiente:', error);
     }
+}
+
 
     // CRUCE INTELIGENTE LADO CLIENTE: Recupera al médico asignado al consultorio seleccionado
     function detectarMedicoActual(officeId) {
