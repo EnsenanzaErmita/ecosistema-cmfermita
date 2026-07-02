@@ -179,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.8.0
+        v1.9.0
     </div>
 
 
@@ -541,10 +541,64 @@
                 <div class="card card-patient" style="border-top: 8px solid var(--guinda) !important;">
                     <h3 style="color: var(--guinda); text-align: center;">Solicitar cambio de consultorio</h3>
                     <p style="font-size: 0.85em; color: #666; text-align: center;">Inicia un trámite para solicitar cambio de consultorio.</p>
-                    <button class="btn-save" style="background: var(--guinda); color: white !important;" onclick="activarModulo('modulo-solicitud-cambio', this)">INICIAR SOLICITUD</button>
+                    <button class="btn-save" style="background: var(--guinda); color: white !important;" onclick="iniciarTramiteConAviso()">INICIAR SOLICITUD</button>
                 </div>
             </div>
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- CUARTO MODAL: ADVERTENCIA / TÉRMINOS E INFORMACIÓN AL DERECHOHABIENTE -->
+<div id="modalAvisoDerechohabiente" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;">
+    <div style="background-color: white; border-radius: 8px; width: 100%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); overflow: hidden; font-family: sans-serif;">
+        <!-- Encabezado Guinda Institucional -->
+        <div style="background-color: #611232; color: white; padding: 15px; font-weight: bold; font-size: 1.1em; border-bottom: 3px solid #b38e5d;">
+            🏛️ ISSSTE - AVISO IMPORTANTE AL DERECHOHABIENTE
+        </div>
+        <!-- Cuerpo del Mensaje Informativo -->
+        <div style="padding: 20px; color: #333; line-height: 1.6; font-size: 0.95em; max-height: 350px; overflow-y: auto;">
+            <p style="margin-top: 0; font-weight: bold; color: #611232;">Estimado(a) Derechohabiente:</p>
+            <p style="margin-bottom: 12px;">
+                Antes de proceder con su solicitud de reasignación de espacio clínico, le solicitamos tomar en cuenta los siguientes lineamientos institucionales de la C.M.F. Ermita:
+            </p>
+            <ul style="padding-left: 20px; margin-bottom: 12px; color: #4b5563;">
+                <li style="margin-bottom: 6px;">Este trámite está sujeto a la <strong>disponibilidad de cupo y horario</strong> del consultorio solicitado.</li>
+                <li style="margin-bottom: 6px;">Es obligatorio contar con sus datos de vigencia actualizados y registrar un <strong>correo electrónico válido</strong> para recibir su dictamen.</li>
+                <li style="margin-bottom: 6px;">La Coordinación Médica revisará los fundamentos expuestos y emitirá una resolución inapelable en los próximos días hábiles.</li>
+            </ul>
+            <p style="margin-bottom: 0; font-style: italic; color: #666; font-size: 0.9em; border-top: 1px solid #eee; padding-top: 10px;">
+                ¿Desea continuar con el llenado de la solicitud digital de cambio de consultorio?
+            </p>
+        </div>
+        <!-- Botones de Decisión Uniformes -->
+        <div style="background-color: #f9f9f9; padding: 12px; text-align: right; border-top: 1px solid #eee; display: flex; gap: 10px; justify-content: flex-end;">
+            <!-- Opción NO Continuar -->
+            <button onclick="rechazarAvisoDerechohabiente()" style="background-color: #e5e7eb; color: #374151; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em;">No Continuar</button>
+            <!-- Opción SÍ Continuar -->
+            <button onclick="aceptarAvisoDerechohabiente()" style="background-color: #611232; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Deseo Continuar</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1428,7 +1482,7 @@ async function cargarListaConsultoriosNube() {
                 alert('Consultorio removido correctamente de Clever Cloud.');
                 cargarListaConsultoriosNube();
             } else {
-                alert('No se pudo eliminar el consultorio.');
+                alert('No se pudo eliminar el consultorio ya que cuenta con un Médico asociado.');
             }
         } catch (error) {
             console.error('Error al eliminar consultorio:', error);
@@ -2104,6 +2158,43 @@ function iniciarCarruselPensamientos() {
 
     }, 7000); // 7000 milisegundos = 7 segundos por frase
 }
+
+
+
+
+
+
+
+// 1. FUNCIÓN INTERMEDIA: Se debe invocar al dar clic en "Iniciar Solicitud"
+function iniciarTramiteConAviso() {
+    // Encendemos la ventana emergente de advertencia antes de mostrar el formulario
+    const modalAviso = document.getElementById('modalAvisoDerechohabiente');
+    if (modalAviso) modalAviso.style.display = 'flex';
+}
+
+// 2. ACCIÓN: El usuario acepta los términos y pasa al panel del formulario
+function aceptarAvisoDerechohabiente() {
+    // Cerramos el modal de advertencia
+    document.getElementById('modalAvisoDerechohabiente').style.display = 'none';
+    
+    // 🚀 Cambia 'formulario-solicitud' por el ID REAL que tenga la vista de tu formulario de cambio
+    activarModulo('formulario-solicitud', null); 
+    
+    // Llamada obligatoria para rellenar los selectores al entrar al formulario
+    if (typeof cargarConsultoriosFormularioPacientes === 'function') {
+        cargarConsultoriosFormularioPacientes();
+    }
+}
+
+// 3. ACCIÓN: El usuario rechaza y regresa al Panel de Servicios al Derechohabiente
+function rechazarAvisoDerechohabiente() {
+    // Cerramos el modal de advertencia
+    document.getElementById('modalAvisoDerechohabiente').style.display = 'none';
+    
+    // 🏛️ Cambia 'panel-derechohabientes' por el ID REAL que tenga tu menú de servicios principal
+    activarModulo('panel-derechohabientes', null);
+}
+
 
 
 
