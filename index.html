@@ -179,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.9.0
+        v1.10.0
     </div>
 
 
@@ -570,15 +570,13 @@
         <div style="padding: 20px; color: #333; line-height: 1.6; font-size: 0.95em; max-height: 350px; overflow-y: auto;">
             <p style="margin-top: 0; font-weight: bold; color: #611232;">Estimado(a) Derechohabiente:</p>
             <p style="margin-bottom: 12px;">
-                Antes de proceder con su solicitud de reasignación de espacio clínico, le solicitamos tomar en cuenta los siguientes lineamientos institucionales de la C.M.F. Ermita:
+                Antes de proceder con su solicitud de <strong>CAMBIO DE CONSULTORIO</strong>, le solicitamos tomar en cuenta el siguiente aviso:
             </p>
             <ul style="padding-left: 20px; margin-bottom: 12px; color: #4b5563;">
-                <li style="margin-bottom: 6px;">Este trámite está sujeto a la <strong>disponibilidad de cupo y horario</strong> del consultorio solicitado.</li>
-                <li style="margin-bottom: 6px;">Es obligatorio contar con sus datos de vigencia actualizados y registrar un <strong>correo electrónico válido</strong> para recibir su dictamen.</li>
-                <li style="margin-bottom: 6px;">La Coordinación Médica revisará los fundamentos expuestos y emitirá una resolución inapelable en los próximos días hábiles.</li>
+                <li style="margin-bottom: 6px;">Los <strong>MÉDICOS / CONSULTORIOS</strong> sujetos a cambio, únicamente son los que la plataforma de <strong>CITA MÉDICA</strong> tiene <strong>REGISTRADOS</strong>, MISMOS QUE SE MUESTRAN EN ESTA HERRAMIENTA.</li>
             </ul>
             <p style="margin-bottom: 0; font-style: italic; color: #666; font-size: 0.9em; border-top: 1px solid #eee; padding-top: 10px;">
-                ¿Desea continuar con el llenado de la solicitud digital de cambio de consultorio?
+                ¿Desea continuar con el llenado de la solicitud de cambio de consultorio?
             </p>
         </div>
         <!-- Botones de Decisión Uniformes -->
@@ -2172,19 +2170,20 @@ function iniciarTramiteConAviso() {
     if (modalAviso) modalAviso.style.display = 'flex';
 }
 
-// 2. ACCIÓN: El usuario acepta los términos y pasa al panel del formulario
+// ACCIÓN: El usuario acepta los términos y pasa al formulario institucional
 function aceptarAvisoDerechohabiente() {
-    // Cerramos el modal de advertencia
+    // 1. Cerramos el modal de advertencia de forma limpia
     document.getElementById('modalAvisoDerechohabiente').style.display = 'none';
     
-    // 🚀 Cambia 'formulario-solicitud' por el ID REAL que tenga la vista de tu formulario de cambio
-    activarModulo('formulario-solicitud', null); 
+    // 🚀 SINCRO: Apunta exactamente a tu contenedor de solicitud real
+    activarModulo('modulo-solicitud-cambio', null); 
     
-    // Llamada obligatoria para rellenar los selectores al entrar al formulario
+    // 2. Forzamos la descarga del catálogo de Citas Médicas al cambiar de pantalla
     if (typeof cargarConsultoriosFormularioPacientes === 'function') {
         cargarConsultoriosFormularioPacientes();
     }
 }
+
 
 // 3. ACCIÓN: El usuario rechaza y regresa al Panel de Servicios al Derechohabiente
 function rechazarAvisoDerechohabiente() {
