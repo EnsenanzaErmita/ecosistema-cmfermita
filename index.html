@@ -179,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.0.0
+        v2.1.0
     </div>
 
 
@@ -980,7 +980,7 @@
         <div style="border: 1px solid #374151; background: #f9fafb; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); text-align: center;">
             <h3 style="color: #374151; margin-top: 0;">Administración de Usuarios</h3>
             <p style="font-size: 0.85em; color: #555; margin-bottom: 20px;">Alta de personal interno, asignación de claves y control relacional de roles.</p>
-            <button onclick="activarModulo('panel-control-usuarios', this); de inmediatoCargarRolesYUsuarios();" style="background: #374151; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Gestionar Usuarios y Roles</button>
+            <button onclick="activarModulo('panel-control-usuarios', this); deInmediatoCargarRolesYUsuarios();" style="background: #374151; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Gestionar Usuarios y Roles</button>
         </div>
         
         <!-- Aquí podrás agregar a futuro nuevas tarjetas (ej. Auditoría de Logs, Respaldos de BD, etc.) -->
@@ -2353,7 +2353,7 @@ function rechazarAvisoDerechohabiente() {
 // =========================================================================
 
 // 1. FUNCIÓN MATRIZ: Se activa al abrir el panel de control para precargar las dos tablas
-async function de de inmediatoCargarRolesYUsuarios() {
+async function deInmediatoCargarRolesYUsuarios() {
     const selectRol = document.getElementById('adm-user-role');
     const tbodyRoles = document.querySelector('#tabla-adm-roles tbody');
     const tbodyUsuarios = document.querySelector('#tabla-adm-usuarios tbody');
@@ -2409,6 +2409,7 @@ async function de de inmediatoCargarRolesYUsuarios() {
         console.error('Error crítico al sincronizar panel de seguridad:', error);
     }
 }
+
 
 // 2. DISPARADOR ROL: Envía el nuevo rol al endpoint POST del server.js
 async function guardarRolNube(event) {
