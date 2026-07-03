@@ -179,7 +179,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.1.0
+        v2.2.0
     </div>
 
 
@@ -2352,14 +2352,18 @@ function rechazarAvisoDerechohabiente() {
 // CONTROLADORES DE SEGURIDAD GENERAL: GESTIÓN DE USUARIOS Y ROLES (ADMIN)
 // =========================================================================
 
-// 1. FUNCIÓN MATRIZ: Se activa al abrir el panel de control para precargar las dos tablas
+// =========================================================================
+// CONTROLADORES DE SEGURIDAD GENERAL: GESTIÓN DE USUARIOS Y ROLES (ADMIN)
+// =========================================================================
+
+// FUNCIÓN CORREGIDA SIN ESPACIOS NI DUPLICADOS
 async function deInmediatoCargarRolesYUsuarios() {
     const selectRol = document.getElementById('adm-user-role');
     const tbodyRoles = document.querySelector('#tabla-adm-roles tbody');
     const tbodyUsuarios = document.querySelector('#tabla-adm-usuarios tbody');
 
     try {
-        // PASO A: Descargamos y pintamos los Roles
+        // PASO A: Descargamos y pintamos los Roles desde tu API de Render
         const resRoles = await fetch(`${BASE_URL}/api/roles`);
         const roles = await resRoles.json();
         
@@ -2384,7 +2388,7 @@ async function deInmediatoCargarRolesYUsuarios() {
             });
         }
 
-        // PASO C: Descargamos y pintamos los Usuarios
+        // PASO C: Descargamos y pintamos los Usuarios desde tu API de Render
         const resUsers = await fetch(`${BASE_URL}/api/users`);
         const usuarios = await resUsers.json();
 
@@ -2410,8 +2414,7 @@ async function deInmediatoCargarRolesYUsuarios() {
     }
 }
 
-
-// 2. DISPARADOR ROL: Envía el nuevo rol al endpoint POST del server.js
+// DISPARADOR ROL: Envía el nuevo rol al endpoint POST del server.js
 async function guardarRolNube(event) {
     event.preventDefault();
 
@@ -2428,7 +2431,7 @@ async function guardarRolNube(event) {
         if (response.ok) {
             alert('¡Rol de servicio guardado correctamente!');
             document.getElementById('form-registro-rol').reset();
-            de de inmediatoCargarRolesYUsuarios(); // Recarga automática de tablas y selects
+            deInmediatoCargarRolesYUsuarios(); 
         } else {
             const data = await response.json();
             alert('Error: ' + data.message);
@@ -2439,7 +2442,7 @@ async function guardarRolNube(event) {
     }
 }
 
-// 3. DISPARADOR USUARIO: Envía las credenciales y la llave foránea del rol seleccionado
+// DISPARADOR USUARIO: Envía las credenciales y la llave foránea del rol seleccionado
 async function guardarUsuarioNube(event) {
     event.preventDefault();
 
@@ -2457,7 +2460,7 @@ async function guardarUsuarioNube(event) {
         if (response.ok) {
             alert('¡Usuario maestro registrado con éxito en la nube!');
             document.getElementById('form-registro-usuario').reset();
-            de de inmediatoCargarRolesYUsuarios(); // Recarga automática instantánea
+            deInmediatoCargarRolesYUsuarios(); 
         } else {
             const data = await response.json();
             alert('Error: ' + data.message);
