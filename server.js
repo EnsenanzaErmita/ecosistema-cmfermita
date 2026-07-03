@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.9.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.0.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -506,6 +506,112 @@ app.put('/api/office-changes/:id', (req, res) => {
         }); // Fin de pool.query (SELECT)
     }); // Fin de pool.query (UPDATE)
 }); // Fin de app.put
+
+
+
+
+
+
+// =========================================================================
+// MÓDULO DE ADMINISTRACIÓN DE USUARIOS Y ROLES (SEGURIDAD GLOBAL)
+// =========================================================================
+
+// ENDPOINT 1: Obtener todos los roles registrados (Para listados y selects)
+app.get('/api/roles', (req, res) => {
+    const sql = 'SELECT id, role_name, description, created_at FROM roles ORDER BY role_name ASC';
+    pool.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error al consultar roles en Clever Cloud:', err);
+            return res.status(500).json({ message: 'Error interno al obtener el catálogo de roles.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// ENDPOINT 2: Registrar un nuevo Rol de Servicio
+app.post('/api/roles', (req, res) => {
+    const { roleName, description } = req.body;
+
+    if (!roleName) {
+        return res.status(400).json({ message: 'El nombre del rol es mandatorio.' });
+    }
+
+    const roleUpper = roleName.trim().toUpperCase();
+    const descUpper = description ? description.trim().toUpperCase() : 'SIN DESCRIPCIÓN ADICIONAL';
+
+    const sql = 'INSERT INTO roles (role_name, description) VALUES (?, ?)';
+    pool.query(sql, [roleUpper, descUpper], (err, result) => {
+        if (err) {
+            console.error('Error al insertar rol en Clever Cloud:', err);
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ message: 'Este rol de servicio ya se encuentra registrado.' });
+            }
+            return res.status(500).json({ message: 'No se pudo guardar el rol en el servidor.' });
+        }
+        res.status(201).json({ message: 'Rol de servicio registrado correctamente.' });
+    });
+});
+
+// ENDPOINT 3: Obtener todos los usuarios (Con JOIN para ver el nombre de su rol)
+app.get('/api/users', (req, res) => {
+    const sql = `
+        SELECT u.id, u.username, u.role_id, r.role_name, u.created_at 
+        FROM users u 
+        LEFT JOIN roles r ON u.role_id = r.id 
+        ORDER BY u.username ASC
+    `;
+    pool.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error al consultar usuarios en Clever Cloud:', err);
+            return res.status(500).json({ message: 'Error interno al obtener el listado de usuarios.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+
+
+
+// ENDPOINT 4: Registrar un nuevo Usuario del Sistema
+app.post('/api/users', (req, res) => {
+    const { username, password, roleId } = req.body;
+
+    if (!username || !password || !roleId) {
+        return res.status(400).json({ message: 'Nombre de usuario, contraseña y rol son obligatorios.' });
+    }
+
+    const userUpper = username.trim().toUpperCase();
+    // Nota: Mantenemos almacenamiento directo en texto plano como solicitaste para tus pruebas de desarrollo
+    const passTrim = password.trim(); 
+
+    const sql = 'INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)';
+    pool.query(sql, [userUpper, passTrim, parseInt(roleId)], (err, result) => {
+        if (err) {
+            console.error('Error al insertar usuario en Clever Cloud:', err);
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ message: 'El nombre de usuario ya está ocupado por otro personal.' });
+            }
+            return res.status(500).json({ message: 'No se pudo registrar el usuario en el servidor.' });
+        }
+        res.status(201).json({ message: 'Usuario del sistema registrado correctamente.' });
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
