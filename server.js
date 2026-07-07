@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 4.0.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 5.0.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -63,33 +63,52 @@ pool.getConnection((err, connection) => {
 // 3. RUTAS DE LA API - PARTE A (AUTENTICACIÓN, PERSONAL Y CONSULTORIOS)
 // =========================================================================
 
-// RUTA API: Validación de usuarios y roles para el login
-app.post('/api/login', (req, res) => {
-    const { username, password, requiredRole } = req.body;
+// RUTA API POST: Validación de usuarios y roles unificada (REEMPLAZO ASOCIADO A ROLES)
+app.post('/api/auth/login', (req, res) => {
+    const { username, password } = req.body;
 
     if (!username || !password) {
-        return res.status(400).json({ success: false, message: 'Usuario y contraseña obligatorios.' });
+        return res.status(400).json({ message: 'El nombre de usuario y la contraseña son obligatorios.' });
     }
 
-    const sql = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    
-    pool.query(sql, [username, password], (err, results) => {
+    const userUpper = username.trim().toUpperCase();
+    const passTrim = password.trim();
+
+    // Consulta relacional unificando la tabla users con la de roles mediante INNER JOIN
+    const sql = `
+        SELECT u.id, u.username, u.password, u.role_id, r.role_name 
+        FROM users u
+        LEFT JOIN roles r ON u.role_id = r.id
+        WHERE u.username = ?
+    `;
+
+    pool.query(sql, [userUpper], (err, results) => {
         if (err) {
-            console.error('Error en consulta de login:', err);
-            return res.status(500).json({ success: false, message: 'Error interno en el servidor.' });
+            console.error('Error al autenticar usuario en Clever Cloud:', err);
+            return res.status(500).json({ message: 'Error interno en el servidor al procesar el ingreso.' });
         }
 
         if (!results || results.length === 0) {
-            return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos.' });
+            return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas.' });
         }
 
-        const user = results[0]; 
+        const usuarioEncontrado = results[0]; // Extraemos de forma segura el registro
 
-        if (user.role !== requiredRole && user.role !== 'admin') {
-            return res.status(403).json({ success: false, message: 'No tienes permisos para acceder.' });
+        // Validación de coincidencia de contraseña en desarrollo
+        if (usuarioEncontrado.password !== passTrim) {
+            return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas.' });
         }
 
-        res.status(200).json({ success: true, message: 'Acceso autorizado.' });
+        // Devolvemos el formato JSON legítimo que tu función procesarLogin del frontend necesita leer
+        res.status(200).json({
+            message: 'Acceso concedido.',
+            user: {
+                id: usuarioEncontrado.id,
+                username: usuarioEncontrado.username,
+                roleId: usuarioEncontrado.role_id,
+                roleName: usuarioEncontrado.role_name || 'SIN ROL ASIGNADO'
+            }
+        });
     });
 });
 
