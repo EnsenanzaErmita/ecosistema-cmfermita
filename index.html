@@ -180,7 +180,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.0.0
+        v3.0.0
     </div>
 
 
@@ -1062,6 +1062,7 @@
                         <th style="padding:8px; border:1px solid #ddd; text-align:left;">ID</th>
                         <th style="padding:8px; border:1px solid #ddd; text-align:left;">Usuario</th>
                         <th style="padding:8px; border:1px solid #ddd; text-align:left;">Rol de Acceso</th>
+			<th style="padding:8px; border:1px solid #ddd; text-align:center;">Acción</th> <!-- COLUMNA INYECTADA -->
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -1270,6 +1271,46 @@
 
 
 
+<!-- CONTROL MODAL: VENTANA EMERGENTE PARA EDITAR O ELIMINAR USUARIOS -->
+<div id="modalGestionUsuario" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 15px; box-sizing: border-box;">
+    <div style="background-color: white; border-radius: 8px; width: 100%; max-width: 420px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); overflow: hidden; font-family: sans-serif;">
+        <!-- Cabecera Dinámica Gris Oxford -->
+        <div id="modal-user-header" style="background-color: #374151; color: white; padding: 15px; font-weight: bold; font-size: 1.1em; border-bottom: 3px solid #b38e5d;">
+            🏛️ ADMINISTRACIÓN DE USUARIO
+        </div>
+        
+        <!-- CUERPO PARA MODO: EDICIÓN -->
+        <div id="cuerpo-modal-editar-user" style="padding: 20px; background-color: #f3f4f6; display: none;">
+            <input type="hidden" id="modal-user-id">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85em; font-weight: bold; color: #374151; margin-bottom: 5px;">Nombre de Usuario:</label>
+                <input type="text" id="modal-user-name" style="width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 4px; box-sizing: border-box; text-transform: uppercase; outline: none; background: white;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85em; font-weight: bold; color: #374151; margin-bottom: 5px;">Nueva Contraseña:</label>
+                <input type="text" id="modal-user-pass" placeholder="Dejar igual o escribir nueva clave" style="width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 4px; box-sizing: border-box; outline: none; background: white;">
+            </div>
+            <div style="margin-bottom: 5px;">
+                <label style="display: block; font-size: 0.85em; font-weight: bold; color: #374151; margin-bottom: 5px;">Modificar Rol de Servicio:</label>
+                <select id="modal-user-role" style="width: 100%; padding: 10px; border: 1px solid #374151; border-radius: 4px; box-sizing: border-box; background: white; outline: none;"></select>
+            </div>
+        </div>
+
+        <!-- CUERPO PARA MODO: ELIMINACIÓN -->
+        <div id="cuerpo-modal-eliminar-user" style="padding: 20px; background-color: #fff5f5; color: #b91c1c; font-size: 0.95em; line-height: 1.5; display: none;">
+            <p style="margin-top: 0; font-weight: bold;">¿Está seguro de eliminar esta cuenta de usuario?</p>
+            <p style="margin-bottom: 0; font-size: 0.85em; color: #7f1d1d;">
+                El usuario perderá el acceso inmediato al ecosistema clínico. Esta acción no se puede deshacer.
+            </p>
+        </div>
+        
+        <!-- Barra Inferior de Acciones -->
+        <div style="background-color: #f9f9f9; padding: 12px; text-align: right; border-top: 1px solid #eee; display: flex; gap: 10px; justify-content: flex-end;">
+            <button onclick="cerrarModalGestionUsuario()" style="background-color: #e5e7eb; color: #374151; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em;">Cancelar</button>
+            <button id="btn-modal-user-confirmar" style="color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Confirmar</button>
+        </div>
+    </div>
+</div>
 
 
 
@@ -2392,19 +2433,18 @@ function rechazarAvisoDerechohabiente() {
 // =========================================================================
 
 // FUNCIÓN CORREGIDA SIN ESPACIOS NI DUPLICADOS
-// 1. FUNCIÓN MATRIZ: Se activa al abrir el panel de control para precargar las dos tablas
+// 1. MODIFICACIÓN EN FUNCIÓN MATRIZ (AGREGADO DE BOTONES Y COLSPAN)
 async function deInmediatoCargarRolesYUsuarios() {
     const selectRol = document.getElementById('adm-user-role');
+    const selectRolModal = document.getElementById('modal-user-role'); // Selector del modal
     const tbodyRoles = document.querySelector('#tabla-adm-roles tbody');
     const tbodyUsuarios = document.querySelector('#tabla-adm-usuarios tbody');
 
     try {
-        // PASO A: Descargamos y pintamos los Roles
         const resRoles = await fetch(`${BASE_URL}/api/roles`);
         const roles = await resRoles.json();
         
         if (tbodyRoles) {
-            // CORREGIDO: Incrementado colspan a 4 por la nueva columna de acciones
             tbodyRoles.innerHTML = roles.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:#888;padding:10px;">Sin roles registrados.</td></tr>' : '';
             roles.forEach(r => {
                 tbodyRoles.innerHTML += `
@@ -2413,7 +2453,6 @@ async function deInmediatoCargarRolesYUsuarios() {
                         <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#611232;">${r.role_name}</td>
                         <td style="padding:6px; border:1px solid #ddd; color:#555;"><small>${r.description || 'N/A'}</small></td>
                         <td style="padding:6px; border:1px solid #ddd; text-align:center; display: flex; gap: 5px; justify-content: center;">
-                            <!-- BOTONES DE CONTROL DE ROLES -->
                             <button onclick="editarRolNube(${r.id}, '${r.role_name}', '${r.description || ''}')" style="background:#fef3c7; color:#d97706; border:1px solid #fcd34d; padding:2px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Editar</button>
                             <button onclick="eliminarRolNube(${r.id})" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:2px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
                         </td>
@@ -2422,20 +2461,19 @@ async function deInmediatoCargarRolesYUsuarios() {
             });
         }
 
-        // PASO B: Alimentamos dinámicamente el selector del formulario de usuarios con los roles vigentes
-        if (selectRol) {
-            selectRol.innerHTML = '<option value="" disabled selected>-- Seleccione Rol de Servicio --</option>';
-            roles.forEach(r => {
-                selectRol.innerHTML += `<option value="${r.id}">${r.role_name}</option>`;
-            });
-        }
+        // Alimentamos los 2 selectores (formulario y modal)
+        const opcionesRolesHtml = '<option value="" disabled selected>-- Seleccione Rol de Servicio --</option>' + 
+            roles.map(r => `<option value="${r.id}">${r.role_name}</option>`).join('');
+        
+        if (selectRol) selectRol.innerHTML = opcionesRolesHtml;
+        if (selectRolModal) selectRolModal.innerHTML = opcionesRolesHtml;
 
-        // PASO C: Descargamos y pintamos los Usuarios
         const resUsers = await fetch(`${BASE_URL}/api/users`);
         const usuarios = await resUsers.json();
 
         if (tbodyUsuarios) {
-            tbodyUsuarios.innerHTML = usuarios.length === 0 ? '<tr><td colspan="3" style="text-align:center;color:#888;padding:10px;">Sin usuarios registrados.</td></tr>' : '';
+            // CORREGIDO: Incrementado colspan a 4 por los nuevos botones
+            tbodyUsuarios.innerHTML = usuarios.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:#888;padding:10px;">Sin usuarios registrados.</td></tr>' : '';
             usuarios.forEach(u => {
                 tbodyUsuarios.innerHTML += `
                     <tr>
@@ -2446,15 +2484,160 @@ async function deInmediatoCargarRolesYUsuarios() {
                                 ${u.role_name || 'SIN ROL ASIGNADO'}
                             </span>
                         </td>
+                        <td style="padding:6px; border:1px solid #ddd; text-align:center;">
+                            <!-- BOTONES INYECTADOS EN USUARIOS -->
+                            <button onclick="editarUsuarioNube(${u.id}, '${u.username}', ${u.role_id || 0})" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db; padding:2px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Editar</button>
+                            <button onclick="eliminarUsuarioNube(${u.id})" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:2px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
+                        </td>
                     </tr>
                 `;
             });
         }
-
     } catch (error) {
         console.error('Error crítico al sincronizar panel de seguridad:', error);
     }
 }
+
+
+// DISPARADOR USUARIO: Envía las credenciales y la llave foránea del rol seleccionado
+async function guardarUsuarioNube(event) {
+    event.preventDefault();
+
+    const username = document.getElementById('adm-user-name').value;
+    const password = document.getElementById('adm-user-pass').value;
+    const roleId = document.getElementById('adm-user-role').value;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/users`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, roleId })
+        });
+
+        if (response.ok) {
+            alert('¡Usuario maestro registrado con éxito en la nube!');
+            document.getElementById('form-registro-usuario').reset();
+            deInmediatoCargarRolesYUsuarios(); 
+        } else {
+            const data = await response.json();
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error de red al guardar usuario:', error);
+        alert('No se pudo establecer conexión para guardar el usuario.');
+    }
+}
+
+
+// FUNCIÓN AUXILIAR: Cierra la ventana emergente de gestión de usuarios
+function cerrarModalGestionUsuario() {
+    document.getElementById('modalGestionUsuario').style.display = 'none';
+}
+
+
+
+
+// NUEVA FUNCIÓN: Prepara y abre el Modal en Modo EDICIÓN de Usuarios
+function editarUsuarioNube(id, usuarioActual, roleIdActual) {
+    document.getElementById('modal-user-header').innerText = '📝 MODIFICAR USUARIO INTERNO';
+    document.getElementById('cuerpo-modal-editar-user').style.display = 'block';
+    document.getElementById('cuerpo-modal-eliminar-user').style.display = 'none';
+    
+    document.getElementById('modal-user-id').value = id;
+    document.getElementById('modal-user-name').value = usuarioActual;
+    document.getElementById('modal-user-pass').value = ''; // Se deja vacío por seguridad visual
+    document.getElementById('modal-user-role').value = roleIdActual || '';
+
+    const btnConfirmar = document.getElementById('btn-modal-user-confirmar');
+    btnConfirmar.style.backgroundColor = '#374151';
+    btnConfirmar.innerText = 'Guardar Cambios';
+    
+    btnConfirmar.onclick = async function() {
+        const nuevoNombre = document.getElementById('modal-user-name').value.trim();
+        const nuevaClave = document.getElementById('modal-user-pass').value.trim();
+        const nuevoRolId = document.getElementById('modal-user-role').value;
+
+        if (nuevoNombre === "" || nuevoRolId === "") return alert("El nombre y el rol son obligatorios.");
+        if (nuevaClave === "") return alert("Por favor, ingrese o confirme la contraseña de acceso.");
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/users/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: nuevoNombre, password: nuevaClave, roleId: nuevoRolId })
+            });
+
+            if (response.ok) {
+                cerrarModalGestionUsuario();
+                alert('¡Usuario actualizado correctamente en Clever Cloud!');
+                deInmediatoCargarRolesYUsuarios();
+            } else {
+                const data = await response.json();
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error de red al editar usuario:', error);
+        }
+    };
+
+    document.getElementById('modalGestionUsuario').style.display = 'flex';
+}
+
+// NUEVA FUNCIÓN: Prepara y abre el Modal en Modo ELIMINACIÓN de Usuarios
+function eliminarUsuarioNube(id) {
+    if (parseInt(id) === 1) return alert("Seguridad de Fábrica:\nEl usuario ADMINISTRADOR Maestro (ID: 1) no puede ser eliminado del sistema.");
+
+    document.getElementById('modal-user-header').innerText = '⚠️ ELIMINAR CUENTA DE USUARIO';
+    document.getElementById('cuerpo-modal-editar-user').style.display = 'none';
+    document.getElementById('cuerpo-modal-eliminar-user').style.display = 'block';
+
+    const btnConfirmar = document.getElementById('btn-modal-user-confirmar');
+    btnConfirmar.style.backgroundColor = '#b91c1c';
+    btnConfirmar.innerText = 'Eliminar Cuenta';
+
+    btnConfirmar.onclick = async function() {
+        try {
+            const response = await fetch(`${BASE_URL}/api/users/${id}`, { method: 'DELETE' });
+
+            if (response.ok) {
+                cerrarModalGestionUsuario();
+                alert('Usuario removido correctamente del sistema.');
+                deInmediatoCargarRolesYUsuarios();
+            } else {
+                const data = await response.json();
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error de red al eliminar usuario:', error);
+        }
+    };
+
+    document.getElementById('modalGestionUsuario').style.display = 'flex';
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2578,34 +2761,12 @@ function eliminarRolNube(id) {
 
 
 
-// DISPARADOR USUARIO: Envía las credenciales y la llave foránea del rol seleccionado
-async function guardarUsuarioNube(event) {
-    event.preventDefault();
 
-    const username = document.getElementById('adm-user-name').value;
-    const password = document.getElementById('adm-user-pass').value;
-    const roleId = document.getElementById('adm-user-role').value;
 
-    try {
-        const response = await fetch(`${BASE_URL}/api/users`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password, roleId })
-        });
 
-        if (response.ok) {
-            alert('¡Usuario maestro registrado con éxito en la nube!');
-            document.getElementById('form-registro-usuario').reset();
-            deInmediatoCargarRolesYUsuarios(); 
-        } else {
-            const data = await response.json();
-            alert('Error: ' + data.message);
-        }
-    } catch (error) {
-        console.error('Error de red al guardar usuario:', error);
-        alert('No se pudo establecer conexión para guardar el usuario.');
-    }
-}
+
+
+
 
 
 

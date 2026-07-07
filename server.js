@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.0.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 3.0.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -655,6 +655,47 @@ app.post('/api/users', (req, res) => {
 });
 
 
+
+
+
+// ENDPOINT BACKEND: Actualizar las credenciales o rol de un Usuario existente (Edición)
+app.put('/api/users/:id', (req, res) => {
+    const { id } = req.params;
+    const { username, password, roleId } = req.body;
+
+    if (!username || !password || !roleId) {
+        return res.status(400).json({ message: 'Nombre de usuario, contraseña y rol son obligatorios.' });
+    }
+
+    const userUpper = username.trim().toUpperCase();
+    const passTrim = password.trim();
+
+    const sql = 'UPDATE users SET username = ?, password = ?, role_id = ? WHERE id = ?';
+    pool.query(sql, [userUpper, passTrim, parseInt(roleId), id], (err, result) => {
+        if (err) {
+            console.error('Error al actualizar usuario en Clever Cloud:', err);
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ message: 'Ese nombre de usuario ya está ocupado por otra cuenta.' });
+            }
+            return res.status(500).json({ message: 'Error interno en el servidor al actualizar el usuario.' });
+        }
+        res.status(200).json({ message: 'Usuario del sistema actualizado correctamente.' });
+    });
+});
+
+// ENDPOINT BACKEND: Eliminar un Usuario de la Base de Datos
+app.delete('/api/users/:id', (req, res) => {
+    const { id } = req.params;
+
+    const sql = 'DELETE FROM users WHERE id = ?';
+    pool.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error al eliminar usuario en Clever Cloud:', err);
+            return res.status(500).json({ message: 'No se pudo eliminar el usuario de la base de datos.' });
+        }
+        res.status(200).json({ message: 'Usuario eliminado correctamente.' });
+    });
+});
 
 
 
