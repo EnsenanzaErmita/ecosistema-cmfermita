@@ -180,7 +180,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v3.0.0
+        v4.0.0
     </div>
 
 
@@ -206,7 +206,7 @@
                 <div class="card card-coord">
                     <h3 style="color: #800080; text-align: center; font-size: 2.50em;">Coordinación Médica</h3>
                     <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para el Servicio de Coordinación Médica de la C.M.F. Ermita.</p>
-                    <button class="btn-save" style="background: #800080; color: white !important;" onclick="entrar('coordinacion')">ACCESO COORDINACIÓN MÉDICA</button>
+                    <button class="btn-save" style="background: #800080; color: white !important;" onclick="entrar('COORDINACIÓN MÉDICA')">ACCESO COORDINACIÓN MÉDICA</button>
                 </div>
 
                 <!-- TARJETA 2: DERECHOHABIENTES (ACCESO DIRECTO SIN LOGUEO, COLOR VERDE ISSSTE) -->
@@ -222,7 +222,7 @@
 <div class="card card-admin" style="border-top: 8px solid var(--azul-admin);">
     <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 2.50em; text-align: center;">Panel de Administración</h3>
     <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Control global de seguridad, roles, auditoría y usuarios maestros.</p>
-    <button class="btn-save" style="background: #374151; color: white;" onclick="activarModulo('panel-administrador', this)">ACCESO ADMINISTRADOR</button>
+    <button class="btn-save" style="background: #374151; color: white;" onclick="entrar('ADMINISTRADOR')">ACCESO ADMINISTRADOR</button>
 </div>
 
 
@@ -1351,27 +1351,28 @@
     // =========================================================================
     // 2. SISTEMA DE LOGIN Y CONTROL DE MODALES
     // =========================================================================
-    function entrar(rol) {
-        if (rol === 'coordinacion' || rol === 'doctor') {
-            moduloDestino = rol;
-            document.getElementById('login-username').value = '';
-            document.getElementById('login-password').value = '';
+function entrar(rol) {
+    // SINCRO: Convertimos a mayúsculas para emparejar con la base de datos
+    const rolUpper = rol.trim().toUpperCase();
 
-            if (rol === 'coordinacion') {
-                document.getElementById('login-title').innerText = 'Coordinación Médica';
-                document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
-            }
-            document.getElementById('login-modal').style.display = 'flex';
-        } else {
-            document.getElementById('section-login').classList.remove('active-view');
-            const targetPanel = document.getElementById(`panel-${rol}`);
-            if (targetPanel) targetPanel.classList.add('active-view');
+    if (rolUpper === 'COORDINACIÓN MÉDICA' || rolUpper === 'COORDINACION' || rolUpper === 'DOCTOR') {
+        // Guardamos el rol en tu variable global de control
+        moduloDestino = rolUpper === 'COORDINACION' ? 'COORDINACIÓN MÉDICA' : rolUpper;
+        
+        document.getElementById('login-username').value = '';
+        document.getElementById('login-password').value = '';
+
+        if (moduloDestino === 'COORDINACIÓN MÉDICA') {
+            document.getElementById('login-title').innerText = 'Coordinación Médica';
+            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
         }
+        document.getElementById('login-modal').style.display = 'flex';
+    } else {
+        document.getElementById('section-login').classList.remove('active-view');
+        const targetPanel = document.getElementById(`panel-${rol.toLowerCase()}`);
+        if (targetPanel) targetPanel.classList.add('active-view');
     }
-
-    function cerrarLogin() {
-        document.getElementById('login-modal').style.display = 'none';
-    }
+}
 
 
 
@@ -1382,17 +1383,21 @@ async function procesarLogin(e) {
     const passVal = document.getElementById('login-password').value.trim();
 
     try {
-        const response = await fetch(`${BASE_URL}/api/login`, {
+        // 1. SINCRO BACKEND: Apuntamos al nuevo endpoint unificado de autenticación de roles
+        const response = await fetch(`${BASE_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: userVal, password: passVal, requiredRole: moduloDestino })
-            });
+            body: JSON.stringify({ username: userVal, password: passVal })
+        });
 
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || 'Error al validar las credenciales.');
 
         cerrarLogin();
-        alert("¡Acceso concedido correctamente!");
+        alert(`¡Acceso concedido correctamente!\nBienvenido: ${data.user.username}\nRol: ${data.user.roleName}`);
+
+        // Guardamos los datos del usuario activo en la memoria local por seguridad
+        localStorage.setItem('usuarioLogueado', JSON.stringify(data.user));
 
         // Oculta la raíz del login por completo
         const sectionLogin = document.getElementById('section-login');
@@ -1401,15 +1406,29 @@ async function procesarLogin(e) {
             sectionLogin.style.display = 'none';
         }
 
-        // Enciende el panel de coordinación de forma limpia
-        const panelCoord = document.getElementById('panel-coordinacion');
-        if (panelCoord) {
-            panelCoord.classList.add('active-view');
-            panelCoord.style.display = 'block';
+        // 🎛️ REGLA INSTITUCIONAL DE CONTROL DE ACCESOS Y PANELES
+        if (data.user.roleName === 'ADMINISTRADOR') {
+            // Si el rol es ADMINISTRADOR, lo mandamos directo a su nuevo Panel Maestro
+            const panelAdmin = document.getElementById('panel-administrador');
+            if (panelAdmin) {
+                panelAdmin.classList.add('active-view');
+                panelAdmin.style.display = 'block';
+            }
+        } else if (data.user.roleName === 'COORDINADOR MÉDICO') {
+            // Si es COORDINADOR, lo mandamos al panel tradicional de coordinación médica
+            const panelCoord = document.getElementById('panel-coordinacion');
+            if (panelCoord) {
+                panelCoord.classList.add('active-view');
+                panelCoord.style.display = 'block';
+            }
+            // Lanzamos la consulta de notificaciones en segundo plano
+            if (typeof actualizarBurbujaNotificaciones === 'function') {
+                actualizarBurbujaNotificaciones();
+            }
+        } else {
+            // Cualquier otro rol de servicio (médicos o personal base)
+            alert('Aviso de Seguridad:\nSu rol cuenta con permisos vigentes en la base de datos, pero su panel de vista rápida se encuentra en proceso de asignación.');
         }
-
-        // LLAMADA CLAVE: Lanza la consulta en segundo plano al entrar al panel
-        actualizarBurbujaNotificaciones();
 
     } catch (error) {
         alert(error.message);
