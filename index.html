@@ -180,7 +180,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.3.0
+        v1.0.0
     </div>
 
 
@@ -219,7 +219,7 @@
 
 
 <!-- NUEVA TARJETA: ACCESO ADMINISTRADOR -->
-<div class="card card-admin" style="border-top: 8px solid var(--guinda);">
+<div class="card card-admin" style="border-top: 8px solid var(--azul-admin);">
     <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 2.50em; text-align: center;">Panel de Administración</h3>
     <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Control global de seguridad, roles, auditoría y usuarios maestros.</p>
     <button class="btn-save" style="background: #374151; color: white;" onclick="activarModulo('panel-administrador', this)">ACCESO ADMINISTRADOR</button>
@@ -1024,8 +1024,9 @@
                 <thead>
                     <tr style="background:#611232; color:white;">
                         <th style="padding:8px; border:1px solid #ddd; text-align:left;">ID</th>
-                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Rol de Servicio</th>
-                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Descripción</th>
+                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Rol (Servicio)</th>
+                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Descripción de Rol (Servicio)</th>
+			<th style="padding:8px; border:1px solid #ddd; text-align:center;">Acción</th> <!-- COLUMNA INYECTADA -->
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -2355,24 +2356,31 @@ function rechazarAvisoDerechohabiente() {
 // =========================================================================
 
 // FUNCIÓN CORREGIDA SIN ESPACIOS NI DUPLICADOS
+// 1. FUNCIÓN MATRIZ: Se activa al abrir el panel de control para precargar las dos tablas
 async function deInmediatoCargarRolesYUsuarios() {
     const selectRol = document.getElementById('adm-user-role');
     const tbodyRoles = document.querySelector('#tabla-adm-roles tbody');
     const tbodyUsuarios = document.querySelector('#tabla-adm-usuarios tbody');
 
     try {
-        // PASO A: Descargamos y pintamos los Roles desde tu API de Render
+        // PASO A: Descargamos y pintamos los Roles
         const resRoles = await fetch(`${BASE_URL}/api/roles`);
         const roles = await resRoles.json();
         
         if (tbodyRoles) {
-            tbodyRoles.innerHTML = roles.length === 0 ? '<tr><td colspan="3" style="text-align:center;color:#888;padding:10px;">Sin roles registrados.</td></tr>' : '';
+            // CORREGIDO: Incrementado colspan a 4 por la nueva columna de acciones
+            tbodyRoles.innerHTML = roles.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:#888;padding:10px;">Sin roles registrados.</td></tr>' : '';
             roles.forEach(r => {
                 tbodyRoles.innerHTML += `
                     <tr>
                         <td style="padding:6px; border:1px solid #ddd;"><strong>${r.id}</strong></td>
                         <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#611232;">${r.role_name}</td>
                         <td style="padding:6px; border:1px solid #ddd; color:#555;"><small>${r.description || 'N/A'}</small></td>
+                        <td style="padding:6px; border:1px solid #ddd; text-align:center; display: flex; gap: 5px; justify-content: center;">
+                            <!-- BOTONES DE CONTROL DE ROLES -->
+                            <button onclick="editarRolNube(${r.id}, '${r.role_name}', '${r.description || ''}')" style="background:#fef3c7; color:#d97706; border:1px solid #fcd34d; padding:2px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Editar</button>
+                            <button onclick="eliminarRolNube(${r.id})" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:2px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
+                        </td>
                     </tr>
                 `;
             });
@@ -2386,7 +2394,7 @@ async function deInmediatoCargarRolesYUsuarios() {
             });
         }
 
-        // PASO C: Descargamos y pintamos los Usuarios desde tu API de Render
+        // PASO C: Descargamos y pintamos los Usuarios
         const resUsers = await fetch(`${BASE_URL}/api/users`);
         const usuarios = await resUsers.json();
 
@@ -2411,6 +2419,8 @@ async function deInmediatoCargarRolesYUsuarios() {
         console.error('Error crítico al sincronizar panel de seguridad:', error);
     }
 }
+
+
 
 // DISPARADOR ROL: Envía el nuevo rol al endpoint POST del server.js
 async function guardarRolNube(event) {
@@ -2439,6 +2449,56 @@ async function guardarRolNube(event) {
         alert('No se pudo establecer conexión para guardar el rol.');
     }
 }
+
+
+
+// NUEVA FUNCIÓN: Editar un Rol existente de la Base de Datos
+async function editarRolNube(id, nombreActual, descActual) {
+    const nuevoNombre = prompt("Modificar Nombre del Rol de Servicio:", nombreActual);
+    if (nuevoNombre === null) return; // Cancelado por el usuario
+    if (nuevoNombre.trim() === "") return alert("El nombre del rol no puede quedar vacío.");
+
+    const nuevaDesc = prompt("Modificar Descripción de Funciones:", descActual);
+    if (nuevaDesc === null) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/roles/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roleName: nuevoNombre, description: nuevaDesc })
+        });
+
+        if (response.ok) {
+            alert('¡Rol de servicio actualizado correctamente!');
+            deInmediatoCargarRolesYUsuarios(); // Refresco automático instantáneo
+        } else {
+            const data = await response.json();
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error de red al editar rol:', error);
+    }
+}
+
+// NUEVA FUNCIÓN: Eliminar un Rol de la Base de Datos
+async function eliminarRolNube(id) {
+    if (!confirm('¿Desea eliminar este Rol de Servicio?\nLos usuarios en este rol se quedarán temporalmente marcados como SIN ROL ASIGNADO.')) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/roles/${id}`, { method: 'DELETE' });
+
+        if (response.ok) {
+            alert('Rol de servicio eliminado correctamente.');
+            deInmediatoCargarRolesYUsuarios(); // Refresco automático instantáneo
+        } else {
+            const data = await response.json();
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error de red al eliminar rol:', error);
+    }
+}
+
 
 // DISPARADOR USUARIO: Envía las credenciales y la llave foránea del rol seleccionado
 async function guardarUsuarioNube(event) {

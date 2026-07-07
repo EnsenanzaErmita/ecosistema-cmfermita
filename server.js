@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.2.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.0.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -551,6 +551,63 @@ app.post('/api/roles', (req, res) => {
         res.status(201).json({ message: 'Rol de servicio registrado correctamente.' });
     });
 });
+
+
+
+
+// ENDPOINT: Actualizar un Rol existente (Edición)
+app.put('/api/roles/:id', (req, res) => {
+    const { id } = req.params;
+    const { roleName, description } = req.body;
+
+    if (!roleName) {
+        return res.status(400).json({ message: 'El nombre del rol es mandatorio.' });
+    }
+
+    const roleUpper = roleName.trim().toUpperCase();
+    const descUpper = description ? description.trim().toUpperCase() : 'SIN DESCRIPCIÓN ADICIONAL';
+
+    const sql = 'UPDATE roles SET role_name = ?, description = ? WHERE id = ?';
+    pool.query(sql, [roleUpper, descUpper, id], (err, result) => {
+        if (err) {
+            console.error('Error al actualizar rol en Clever Cloud:', err);
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ message: 'Ya existe otro rol con ese nombre.' });
+            }
+            return res.status(500).json({ message: 'Error interno en el servidor al actualizar el rol.' });
+        }
+        res.status(200).json({ message: 'Rol de servicio actualizado correctamente.' });
+    });
+});
+
+// ENDPOINT: Eliminar un Rol de servicio
+app.delete('/api/roles/:id', (req, res) => {
+    const { id } = req.params;
+
+    // Al tener la llave foránea ON DELETE SET NULL en la tabla users,
+    // si borras un rol, los usuarios ligados a él no se borrarán, solo se quedarán temporalmente como "SIN ROL ASIGNADO"
+    const sql = 'DELETE FROM roles WHERE id = ?';
+    pool.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error al eliminar rol en Clever Cloud:', err);
+            return res.status(500).json({ message: 'No se pudo eliminar el rol por restricciones del sistema.' });
+        }
+        res.status(200).json({ message: 'Rol de servicio eliminado correctamente.' });
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ENDPOINT 3: Obtener todos los usuarios (Con JOIN para ver el nombre de su rol)
 app.get('/api/users', (req, res) => {
