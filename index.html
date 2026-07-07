@@ -180,7 +180,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v7.0.0
+        v8.0.0
     </div>
 
 
@@ -222,7 +222,7 @@
 <div class="card card-admin" style="border-top: 8px solid var(--azul-admin);">
     <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 2.50em; text-align: center;">Panel de Administración</h3>
     <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Control global de seguridad, roles, auditoría y usuarios maestros.</p>
-    <button class="btn-save" style="background: #374151; color: white;" onclick="entrar('ADMINISTRADOR')">ACCESO ADMINISTRADOR</button>
+    <button class="btn-save" style="background: #374151; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;" onclick="entrar('ADMINISTRADOR')">ACCESO ADMINISTRADOR</button>
 </div>
 
 
@@ -1352,22 +1352,33 @@
     // 2. SISTEMA DE LOGIN Y CONTROL DE MODALES
     // =========================================================================
 function entrar(rol) {
-    // SINCRO: Convertimos a mayúsculas para emparejar con la base de datos
     const rolUpper = rol.trim().toUpperCase();
 
-    if (rolUpper === 'COORDINACIÓN MÉDICA' || rolUpper === 'COORDINACION' || rolUpper === 'DOCTOR') {
-        // Guardamos el rol en tu variable global de control
-        moduloDestino = rolUpper === 'COORDINACION' ? 'COORDINACIÓN MÉDICA' : rolUpper;
+    // Validamos que el botón invoque a cualquiera de los dos perfiles autorizados
+    if (rolUpper === 'COORDINACIÓN MÉDICA' || rolUpper === 'COORDINACION' || rolUpper === 'ADMINISTRADOR' || rolUpper === 'ADMIN') {
         
+        // Estandarizamos el nombre del destino para la sesión
+        moduloDestino = (rolUpper === 'COORDINACION') ? 'COORDINACIÓN MÉDICA' : rolUpper;
+        if (moduloDestino === 'ADMIN') moduloDestino = 'ADMINISTRADOR';
+        
+        // Limpiamos los cuadros de texto del modal flotante por seguridad
         document.getElementById('login-username').value = '';
         document.getElementById('login-password').value = '';
 
-        if (moduloDestino === 'COORDINACIÓN MÉDICA') {
+        // Adaptamos dinámicamente los títulos del Modal según la tarjeta que presionaron
+        if (moduloDestino === 'ADMINISTRADOR') {
+            document.getElementById('login-title').innerText = 'Control del Administrador';
+            document.getElementById('login-subtitle').innerText = 'Acceso restringido para el Administrador Maestro';
+        } else {
             document.getElementById('login-title').innerText = 'Coordinación Médica';
             document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
         }
+
+        // Encendemos la ventana modal flotante de inicio de sesión
         document.getElementById('login-modal').style.display = 'flex';
+
     } else {
+        // Flujo secundario para accesos directos sin contraseña (ej. derechohabientes)
         document.getElementById('section-login').classList.remove('active-view');
         const targetPanel = document.getElementById(`panel-${rol.toLowerCase()}`);
         if (targetPanel) targetPanel.classList.add('active-view');
