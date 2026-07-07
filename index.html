@@ -23,6 +23,7 @@
             --amarillo: #b45309;
             --verde: #15803d;
             --rojo: #b91c1c;
+	    --azul-admin: #374151;
         }
 
         html, body { height: 100%; margin: 0; }
@@ -45,7 +46,7 @@
         .card h3 { margin-top: 0; font-size: 1.2em; border-bottom: 2px solid var(--gris-claro); padding-bottom: 10px; }
         
         /* Colores por Rol */
-        .card-admin { border-top: 8px solid var(--dorado-calidad); }
+        .card-admin { border-top: 8px solid var(--azul-admin); }
         .card-doctor { border-top: 8px solid #5d8ab3; } 
         .card-staff { border-top: 8px solid var(--guinda); }
         .card-patient { border-top: 8px solid var(--guinda); }
@@ -219,7 +220,7 @@
 
 <!-- NUEVA TARJETA: ACCESO ADMINISTRADOR -->
 <div class="card card-admin" style="border-top: 8px solid var(--guinda);">
-    <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 2.50em;">Panel de Administración</h3>
+    <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 2.50em; text-align: center;">Panel de Administración</h3>
     <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Control global de seguridad, roles, auditoría y usuarios maestros.</p>
     <button class="btn-save" style="background: #374151; color: white;" onclick="activarModulo('panel-administrador', this)">ACCESO ADMINISTRADOR</button>
 </div>
@@ -968,7 +969,7 @@
     <!-- Barra superior ejecutiva -->
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #374151; margin-bottom: 20px; padding-bottom: 10px;">
         <h2 style="color: #374151; margin:0; font-family: 'Segoe UI', sans-serif;">Panel General de Administración</h2>
-        <button onclick="activarModulo('panel-principal', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">← Salir del Módulo</button>
+        <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-admin)'" onmouseout="this.style.background='#98989a'">← Volver al Menú Principal</button>
     </div>
 
     <!-- Rejilla de Opciones del Administrador -->
@@ -997,7 +998,7 @@
     <!-- Barra de Navegación Superior -->
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #b38e5d; margin-bottom: 20px; padding-bottom: 10px;">
         <h2 style="color: #374151; margin:0; font-family: 'Segoe UI', sans-serif;">Administración del Personal y Privilegios</h2>
-        <button onclick="activarModulo('panel-administrador', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">← Volver</button>
+        <button onclick="activarModulo('panel-administrador', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-admin)'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
     </div>
 
     <!-- Rejilla de las 2 Tarjetas con Formularios Incorporados -->
