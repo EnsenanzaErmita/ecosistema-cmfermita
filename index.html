@@ -180,7 +180,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v6.0.0
+        v7.0.0
     </div>
 
 
@@ -1383,7 +1383,7 @@ async function procesarLogin(e) {
     const passVal = document.getElementById('login-password').value.trim();
 
     try {
-        // 1. SINCRO BACKEND: Apuntamos al nuevo endpoint unificado de autenticación de roles
+        // 1. Conectamos con tu nueva API unificada en Render
         const response = await fetch(`${BASE_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1406,15 +1406,18 @@ async function procesarLogin(e) {
             sectionLogin.style.display = 'none';
         }
 
-        // 🎛️ REGLA INSTITUCIONAL DE CONTROL DE ACCESOS Y PANELES
-        if (data.user.roleName === 'ADMINISTRADOR') {
-            // Si el rol es ADMINISTRADOR, lo mandamos directo a su nuevo Panel Maestro
+        // 🔍 NORMALIZACIÓN: Pasamos el rol a mayúsculas para evitar fallas por acentos o espacios
+        const rolNormalizado = data.user.roleName ? data.user.roleName.trim().toUpperCase() : '';
+
+        // 🎛️ REGLA INSTITUCIONAL DE CONTROL DE ACCESOS Y PANELES (YA ADMITE TU ROL 'ADMIN')
+        if (rolNormalizado === 'ADMINISTRADOR' || rolNormalizado === 'ADMIN') {
+            // Si el rol es ADMINISTRADOR o ADMIN, encendemos el Panel Maestro
             const panelAdmin = document.getElementById('panel-administrador');
             if (panelAdmin) {
                 panelAdmin.classList.add('active-view');
                 panelAdmin.style.display = 'block';
             }
-        } else if (data.user.roleName === 'COORDINADOR MÉDICO') {
+        } else if (rolNormalizado === 'COORDINACIÓN MÉDICA' || rolNormalizado === 'COORDINACION MEDICA' || rolNormalizado === 'COORDINACIÓN' || rolNormalizado === 'COORDINACION') {
             // Si es COORDINADOR, lo mandamos al panel tradicional de coordinación médica
             const panelCoord = document.getElementById('panel-coordinacion');
             if (panelCoord) {
@@ -1427,7 +1430,7 @@ async function procesarLogin(e) {
             }
         } else {
             // Cualquier otro rol de servicio (médicos o personal base)
-            alert('Aviso de Seguridad:\nSu rol cuenta con permisos vigentes en la base de datos, pero su panel de vista rápida se encuentra en proceso de asignación.');
+            alert(`Aviso de Seguridad:\nSu rol (${rolNormalizado}) cuenta con permisos vigentes, pero su panel de vista rápida se encuentra en proceso de asignación.`);
         }
 
     } catch (error) {
