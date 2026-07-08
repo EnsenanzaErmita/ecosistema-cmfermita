@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.1.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.2.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -731,7 +731,7 @@ app.delete('/api/users/:id', (req, res) => {
 
 
 
-// ENDPOINT 1: Generar clave aleatoria, guardarla en Clever Cloud y enviarla por correo (VERSIÓN ADAPTADA A BREVO API)
+// ENDPOINT 1: Generar clave aleatoria, guardarla en Clever Cloud y enviarla por correo (VERSIÓN DEFINITIVA PARA TU API DE BREVO)
 app.post('/api/trainee-keys/generate', (req, res) => {
     const { email } = req.body;
 
@@ -756,50 +756,52 @@ app.post('/api/trainee-keys/generate', (req, res) => {
             return res.status(500).json({ message: 'No se pudo registrar la clave en el servidor.' });
         }
 
-        // Estructura oficial del JSON para la API de Brevo
-        const sendSmtpEmail = {
-            sender: { name: "C.M.F. ERMITA - ISSSTE", email: "no-reply@issste.gob.mx" },
-            to: [{ email: emailTrim }],
-            subject: "🏛️ Clave de Acceso Institucional - Médicos en Formación",
-            htmlContent: `
-                <div style="font-family: sans-serif; max-width: 500px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden;">
-                    <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
-                        <h2>C.M.F. ERMITA - ISSSTE</h2>
-                        <p style="margin: 0; font-size: 0.9em;">Coordinación de Enseñanza y Calidad</p>
-                    </div>
-                    <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
-                        <p>Estimado(a) Médico en Formación (MIP, Pasante o Residente):</p>
-                        <p>Se ha generado su credencial de acceso para ingresar a las plataformas digitales de control clínico del ecosistema Ermita:</p>
-                        
-                        <div style="background: white; border-left: 5px solid #611232; padding: 15px; margin: 20px 0; text-align: center; border-radius: 0 4px 4px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                            <span style="font-size: 0.8em; color: #666; display: block; font-weight: bold; text-transform: uppercase;">Su Clave Privada de Acceso:</span>
-                            <strong style="font-size: 1.6em; color: #611232; letter-spacing: 2px; font-family: monospace; display: block; margin-top: 5px;">${claveGenerada}</strong>
-                        </div>
-
-                        <p style="font-size: 0.85em; color: #555;">
-                            *Esta clave es estrictamente personal e intransferible. Estará vigente durante el periodo de prestación de sus servicios institucionales en la clínica.
-                        </p>
-                    </div>
+        // 📝 CORRECCIÓN 1: Instanciación oficial mediante la clase de tu SDK de Brevo
+        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+        
+        sendSmtpEmail.subject = "🏛️ Clave de Acceso Institucional - Médicos en Formación";
+        sendSmtpEmail.htmlContent = `
+            <div style="font-family: sans-serif; max-width: 500px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
+                <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
+                    <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad</p>
                 </div>
-            `
-        };
+                <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
+                    <p>Estimado(a) Médico en Formación (MIP, Pasante o Residente):</p>
+                    <p>Se ha generado su credencial de acceso para ingresar a las plataformas digitales de control clínico del ecosistema Ermita:</p>
+                    
+                    <div style="background: white; border-left: 5px solid #611232; padding: 15px; margin: 20px 0; text-align: center; border-radius: 0 4px 4px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <span style="font-size: 0.8em; color: #666; display: block; font-weight: bold; text-transform: uppercase;">Su Clave Privada de Acceso:</span>
+                        <strong style="font-size: 1.6em; color: #611232; letter-spacing: 2px; font-family: monospace; display: block; margin-top: 5px;">${claveGenerada}</strong>
+                    </div>
 
-        // 🚀 INVOCACIÓN ASÍNCRONA DE BREVO: Ajusta 'apiInstance' si tu variable global de Brevo se llama distinto
+                    <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
+                        *Esta clave es estrictamente personal e intransferible. Estará vigente durante el periodo de prestación de sus servicios institucionales en la clínica.
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        // 📝 CORRECCIÓN 2: Remitente verificado en tu cuenta oficial de Brevo
+        sendSmtpEmail.sender = { "name": "C.M.F. ERMITA - ISSSTE", "email": "cmfermitacalidad@gmail.com" };
+        sendSmtpEmail.to = [{ "email": emailTrim }];
+
+        // 🚀 Invocación idéntica a tu ruta funcional pasándole el objeto instanciado
         apiInstance.sendTransacEmail(sendSmtpEmail)
-            .then(() => {
+            .then((data) => {
+                console.log('--- ¡CORREO DE CLAVE TRAINEE ENVIADO CON ÉXITO VÍA BREVO! ---', data.messageId);
                 res.status(201).json({ message: 'Clave generada y notificada por correo con éxito.' });
             })
             .catch((errorMail) => {
-                console.error('Error al enviar correo por API de Brevo:', errorMail);
-                // Notificamos que sí se guardó en la base de datos pero el correo falló temporalmente
+                console.error('❌ ERROR CRÍTICO EN API DE CORREO (BREVO TRAINEES):', errorMail.response ? errorMail.response.body : errorMail);
+                // Notificación de resguardo: se guardó en BD pero avisamos el fallo de red del correo
                 res.status(201).json({ 
-                    message: 'Clave generada en el sistema, pero ocurrió un fallo al enviar el correo automático por Brevo.',
+                    message: 'Clave generada en el sistema, pero ocurrió un fallo en la API de Brevo al enviar el correo automático.',
                     key: claveGenerada 
                 });
             });
     });
 });
-
 
 
 
