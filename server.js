@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 8.0.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.1.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -721,6 +721,164 @@ app.delete('/api/users/:id', (req, res) => {
 
 
 
+
+
+
+
+// =========================================================================
+// MÓDULO DE ACCESO PARA MIP'S, PASANTES Y RESIDENTES (BACKEND)
+// =========================================================================
+
+
+
+// ENDPOINT 1: Generar clave aleatoria, guardarla en Clever Cloud y enviarla por correo (VERSIÓN ADAPTADA A BREVO API)
+app.post('/api/trainee-keys/generate', (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ message: 'El correo electrónico es obligatorio.' });
+    }
+
+    const emailTrim = email.trim().toLowerCase();
+
+    // Generamos un código alfanumérico aleatorio y seguro de 8 caracteres
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let claveGenerada = 'CMF-';
+    for (let i = 0; i < 6; i++) {
+        claveGenerada += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+
+    // Guardamos el registro en la base de datos de Clever Cloud
+    const sqlInsert = 'INSERT INTO trainee_access_keys (email, access_key) VALUES (?, ?)';
+    pool.query(sqlInsert, [emailTrim, claveGenerada], (err, result) => {
+        if (err) {
+            console.error('Error al insertar clave en Clever Cloud:', err);
+            return res.status(500).json({ message: 'No se pudo registrar la clave en el servidor.' });
+        }
+
+        // Estructura oficial del JSON para la API de Brevo
+        const sendSmtpEmail = {
+            sender: { name: "C.M.F. ERMITA - ISSSTE", email: "no-reply@issste.gob.mx" },
+            to: [{ email: emailTrim }],
+            subject: "🏛️ Clave de Acceso Institucional - Médicos en Formación",
+            htmlContent: `
+                <div style="font-family: sans-serif; max-width: 500px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden;">
+                    <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
+                        <h2>C.M.F. ERMITA - ISSSTE</h2>
+                        <p style="margin: 0; font-size: 0.9em;">Coordinación de Enseñanza y Calidad</p>
+                    </div>
+                    <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
+                        <p>Estimado(a) Médico en Formación (MIP, Pasante o Residente):</p>
+                        <p>Se ha generado su credencial de acceso para ingresar a las plataformas digitales de control clínico del ecosistema Ermita:</p>
+                        
+                        <div style="background: white; border-left: 5px solid #611232; padding: 15px; margin: 20px 0; text-align: center; border-radius: 0 4px 4px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <span style="font-size: 0.8em; color: #666; display: block; font-weight: bold; text-transform: uppercase;">Su Clave Privada de Acceso:</span>
+                            <strong style="font-size: 1.6em; color: #611232; letter-spacing: 2px; font-family: monospace; display: block; margin-top: 5px;">${claveGenerada}</strong>
+                        </div>
+
+                        <p style="font-size: 0.85em; color: #555;">
+                            *Esta clave es estrictamente personal e intransferible. Estará vigente durante el periodo de prestación de sus servicios institucionales en la clínica.
+                        </p>
+                    </div>
+                </div>
+            `
+        };
+
+        // 🚀 INVOCACIÓN ASÍNCRONA DE BREVO: Ajusta 'apiInstance' si tu variable global de Brevo se llama distinto
+        apiInstance.sendTransacEmail(sendSmtpEmail)
+            .then(() => {
+                res.status(201).json({ message: 'Clave generada y notificada por correo con éxito.' });
+            })
+            .catch((errorMail) => {
+                console.error('Error al enviar correo por API de Brevo:', errorMail);
+                // Notificamos que sí se guardó en la base de datos pero el correo falló temporalmente
+                res.status(201).json({ 
+                    message: 'Clave generada en el sistema, pero ocurrió un fallo al enviar el correo automático por Brevo.',
+                    key: claveGenerada 
+                });
+            });
+    });
+});
+
+
+
+
+
+// ENDPOINT 2: Obtener el catálogo de claves emitidas para la tabla del Administrador
+app.get('/api/trainee-keys', (req, res) => {
+    const sql = 'SELECT id, email, access_key, status, created_at FROM trainee_access_keys ORDER BY created_at DESC';
+    pool.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error al consultar catálogo de claves en Clever Cloud:', err);
+            return res.status(500).json({ message: 'Error interno al obtener el catálogo de claves.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// ENDPOINT 3: Alternar estado de la clave (Inactivar / Activar de forma manual)
+app.put('/api/trainee-keys/:id/toggle', (req, res) => {
+    const { id } = req.params;
+    const { currentStatus } = req.body; // Recibimos el estado actual para conmutarlo
+
+    const nuevoEstado = (currentStatus === 'ACTIVA') ? 'INACTIVA' : 'ACTIVA';
+
+    const sql = 'UPDATE trainee_access_keys SET status = ? WHERE id = ?';
+    pool.query(sql, [nuevoEstado, id], (err, result) => {
+        if (err) {
+            console.error('Error al alternar estado en Clever Cloud:', err);
+            return res.status(500).json({ message: 'No se pudo modificar la vigencia de la clave.' });
+        }
+        res.status(200).json({ message: `Clave marcada como ${nuevoEstado} con éxito.`, newStatus: nuevoEstado });
+    });
+});
+
+
+
+
+
+
+// ENDPOINT BACKEND: Validar la clave de acceso para Médicos en Formación
+app.post('/api/trainee-auth/login', (req, res) => {
+    const { accessKey } = req.body;
+
+    if (!accessKey) {
+        return res.status(400).json({ message: 'La clave de acceso es obligatoria.' });
+    }
+
+    const keyUpper = accessKey.trim().toUpperCase();
+
+    // Buscamos la clave exacta en Clever Cloud
+    const sql = 'SELECT id, email, access_key, status FROM trainee_access_keys WHERE access_key = ?';
+    pool.query(sql, [keyUpper], (err, results) => {
+        if (err) {
+            console.error('Error al validar clave trainee en Clever Cloud:', err);
+            return res.status(500).json({ message: 'Error interno en el servidor al verificar la credencial.' });
+        }
+
+        // Si la clave no existe en la base de datos
+        if (!results || results.length === 0) {
+            return res.status(401).json({ message: 'La clave introducida no es válida o no existe en el registro institucional.' });
+        }
+
+        const registroClave = results[0];
+
+        // 🚫 REGLA DE ORO: Validamos que la clave no esté INACTIVA
+        if (registroClave.status === 'INACTIVA') {
+            return res.status(403).json({ message: 'Acceso Denegado:\nEsta clave ha sido desactivada por la Coordinación de Enseñanza debido a la conclusión de sus servicios.' });
+        }
+
+        // Si está ACTIVA, autorizamos el ingreso y mandamos el correo ligado por seguridad
+        res.status(200).json({
+            message: 'Acceso autorizado.',
+            trainee: {
+                id: registroClave.id,
+                email: registroClave.email,
+                accessKey: registroClave.access_key
+            }
+        });
+    });
+});
 
 
 
