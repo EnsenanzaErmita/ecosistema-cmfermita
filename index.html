@@ -181,7 +181,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.2.0
+        v1.3.0
     </div>
 
 
@@ -1040,7 +1040,7 @@
         <!-- COLUMNA IZQUIERDA: FORMULARIO DE GENERACIÓN AUTOMÁTICA -->
         <div style="background: #faf5ff; border: 1px solid rgba(124, 58, 237, 0.15); border-top: 5px solid #7c3aed; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
             <h3 style="color: #7c3aed; margin-top:0; border-bottom: 2px solid #7c3aed; padding-bottom:5px;">Emitir Nueva Credencial</h3>
-            <p style="font-size: 0.85em; color: #555; margin-bottom: 15px;">Ingrese el correo del médico interno, pasante o residente. El sistema calculará una clave aleatoria y la enviará de inmediato por Brevo.</p>
+            <p style="font-size: 0.85em; color: #555; margin-bottom: 15px;">Ingrese el correo del médico interno, pasante o residente. El sistema generará una clave aleatoria y la enviará mediante correo electrónico.</p>
             
             <form id="form-generar-clave-trainee" onsubmit="solicitarClaveTraineeNube(event)">
                 <div style="margin-bottom: 15px;">
@@ -3034,7 +3034,10 @@ async function solicitarClaveTraineeNube(event) {
     }
 }
 
-// 2. TABLA: Descarga el catálogo desde Clever Cloud y dibuja las filas
+
+
+
+// 1. TABLA: Descarga el catálogo e inyecta el nuevo botón de reenvío por correo
 async function cargarCatalogoClavesTrainees() {
     const tbody = document.querySelector('#tabla-control-claves-trainees tbody');
     if (!tbody) return;
@@ -3062,7 +3065,12 @@ async function cargarCatalogoClavesTrainees() {
                         ${tk.status}
                     </span>
                 </td>
-                <td style="padding:10px; border:1px solid #ddd; text-align:center;">
+                <td style="padding:10px; border:1px solid #ddd; text-align:center; display: flex; gap: 5px; justify-content: center;">
+                    <!-- MEJORA 2: BOTÓN DE REENVÍO INCORPORADO -->
+                    <button onclick="reenviarCorreoClaveTrainee(${tk.id})" title="Reenviar clave por correo" style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.9em;">
+                        ✉️ Reenviar
+                    </button>
+                    <!-- BOTÓN DE INACTIVAR EXISTENTE -->
                     <button onclick="alternarVigenciaClaveTrainee(${tk.id}, '${tk.status}')" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.9em;">
                         ${tk.status === 'ACTIVA' ? '🚫 Inactivar' : '✅ Activar'}
                     </button>
@@ -3075,6 +3083,32 @@ async function cargarCatalogoClavesTrainees() {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#cc0000;font-weight:bold;padding:15px;">Error de sincronización.</td></tr>';
     }
 }
+
+// 2. NUEVA FUNCIÓN ASÍNCRONA: Ejecuta la petición de reenvío vía API HTTP de Brevo
+async function reenviarCorreoClaveTrainee(id) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/trainee-keys/resend`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+
+        const data = await response.json();
+        alert(data.message);
+        
+    } catch (error) {
+        console.error('Error al solicitar reenvío de correo:', error);
+        alert('No se pudo establecer conexión para solicitar el reenvío.');
+    }
+}
+
+// 3. VINCULACIÓN MAESTRA GLOBAL (Obligatorio para que los clicks no truenen)
+window.reenviarCorreoClaveTrainee = reenviarCorreoClaveTrainee;
+
+
+
+
+
 
 // 3. ACCIÓN: Conmuta el estado de la clave (Inactivar/Activar) al dar clic al botón
 async function alternarVigenciaClaveTrainee(id, estadoActual) {
