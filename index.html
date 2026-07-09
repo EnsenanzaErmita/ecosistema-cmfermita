@@ -198,144 +198,94 @@
 /* =========================================================================
    ESTILOS INNOVADORES ORBITALES - PORTAL DE MEDICOS EN FORMACIÓN
    ========================================================================= */
+/* =========================================================================
+   ESTILOS PREMIUM FLUIDOS CON INTERACCIÓN INERCIAL (MEDICOS EN FORMACIÓN)
+   ========================================================================= */
 .universe-container {
     position: relative;
     width: 100%;
-    min-height: 480px;
-    background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
-    border-radius: 12px;
+    min-height: 520px;
+    background: radial-gradient(circle at 10% 20%, #f1f5f9 0%, #cbd5e1 90%);
+    border-radius: 16px;
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    perspective: 1000px; /* Habilita profundidad 3D en el contenedor */
 }
 
-.solar-system-view {
+.fluid-desktop-view {
     position: relative;
-    width: 600px;
-    height: 400px;
+    width: 100%;
+    height: 520px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Núcleo del Sistema */
-.sun-center {
+/* Tarjetas Fluidas Base en Escritorio */
+.desktop-fluid-card {
     position: absolute;
-    width: 90px;
-    height: 90px;
-    background: radial-gradient(circle, #1e3a8a 0%, #172554 100%);
-    border: 4px solid #b38e5d;
-    border-radius: 50%;
+    width: 240px;
+    height: 290px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    padding: 25px;
+    box-sizing: border-box;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    box-shadow: 0 0 25px rgba(30, 58, 138, 0.4);
-    z-index: 10;
-}
-
-/* Líneas elípticas de las órbitas */
-.orbit-path {
-    position: absolute;
-    border: 1.5px dashed rgba(30, 58, 138, 0.2);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.orbit-mip { width: 220px; height: 160px; animation: spinOrbit 12s linear infinite; }
-.orbit-pasante { width: 380px; height: 260px; animation: spinOrbit 20s linear infinite; }
-.orbit-residente { width: 540px; height: 360px; animation: spinOrbit 28s linear infinite; }
-
-/* Detener movimiento al pasar el mouse por la órbita */
-.orbit-path:hover {
-    animation-play-state: paused;
-    border-color: #1e3a8a;
-}
-
-/* Planetas / Opciones clicables */
-.planet {
-    position: absolute;
-    width: 65px;
-    height: 65px;
-    border-radius: 50%;
+    flex-direction: column;
+    justify-content: space-between;
     cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    font-size: 0.75em;
-    color: white;
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 15px 35px rgba(30, 58, 138, 0.08);
+    /* Transición suave para que la inercia del JavaScript responda con fluidez */
+    transition: transform 0.15s ease-out, box-shadow 0.3s ease, background 0.3s ease;
+    will-change: transform;
 }
 
-/* Contrarrestar la rotación de la órbita para mantener el texto del planeta derecho */
-.orbit-mip .planet { top: -32px; animation: keepTextUpright 12s linear infinite; }
-.orbit-pasante .planet { right: -32px; animation: keepTextUpright 20s linear infinite; }
-.orbit-residente .planet { bottom: -32px; animation: keepTextUpright 28s linear infinite; }
+/* Distribución inicial esparcida de manera elegante en la pantalla */
+.card-interactive-mip { left: 8%; top: 15%; border-top: 5px solid #3b82f6; }
+.card-interactive-pasante { left: 38%; top: 28%; border-top: 5px solid #a855f7; }
+.card-interactive-residente { right: 8%; top: 15%; border-top: 5px solid #f59e0b; }
 
-.orbit-path:hover .planet {
-    animation-play-state: paused;
+/* El núcleo central es solo informativo, no se mueve de forma brusca */
+.central-core {
+    left: 42%; top: 5%; width: 180px; height: auto; padding: 12px;
+    text-align: center; background: rgba(255, 255, 255, 0.4); border: 1px dashed rgba(30, 58, 138, 0.3);
+    pointer-events: none; border-radius: 30px; box-shadow: none;
 }
 
-.planet:hover {
-    transform: scale(1.25);
-    box-shadow: 0 0 15px rgba(0,0,0,0.25);
-    z-index: 100;
+/* Diseño interno de las tarjetas de alto impacto */
+.card-icon { font-size: 2em; margin-bottom: 5px; }
+.desktop-fluid-card h3 { margin: 0; font-size: 1.15em; color: #1e293b; line-height: 1.4; font-weight: 700; text-align: left; }
+.badge-trainee {
+    align-self: flex-start; background: rgba(30, 58, 138, 0.08); color: #1e3a8a;
+    font-size: 0.75em; font-weight: bold; padding: 4px 10px; border-radius: 6px; margin-top: 10px;
+}
+.card-action-hint { font-size: 0.85em; font-weight: bold; color: #b38e5d; text-align: right; margin-top: 15px; opacity: 0.7; transition: opacity 0.2s; }
+
+/* Efecto de brillo satinado al pasar el mouse por encima */
+.glow-effect {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at inherit, rgba(255,255,255,0.8) 0%, transparent 60%);
+    pointer-events: none; border-radius: 20px; opacity: 0; transition: opacity 0.3s;
 }
 
-/* Colores cósmicos de los planetas */
-.planet-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: 2px solid #93c5fd; }
-.planet-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); border: 2px solid #e9d5ff; }
-.planet-gold { background: linear-gradient(135deg, #f59e0b, #b45309); border: 2px solid #fde68a; }
-
-.planet-core { text-shadow: 0 1px 3px rgba(0,0,0,0.3); letter-spacing: 0.5px; }
-
-/* Tooltips explicativos de los planetas */
-.planet-tooltip {
-    position: absolute;
-    bottom: 80px;
-    background: #1e293b;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 11px;
-    width: 160px;
-    text-align: center;
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: 0.3s;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+/* Estados Hover dinámicos en Escritorio */
+.desktop-fluid-card:hover {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 30px 60px rgba(30, 58, 138, 0.18);
+    transform: scale(1.04) translateZ(20px) !important; /* El JavaScript respetará esta escala al superponer el hover */
+    z-index: 50;
 }
-.planet-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%; left: 50%;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: #1e293b;
-}
-.planet:hover .planet-tooltip {
-    opacity: 1;
-    transform: translateY(0);
-}
+.desktop-fluid-card:hover .card-action-hint { opacity: 1; color: #1e3a8a; }
 
-/* VISTA RECONVERTIDA PARA CELULARES (Layout Táctil Plano) */
+/* MÓVIL: SE QUEDA TU DISEÑO IMPECABLE ORIGINAL */
 .mobile-galaxy-view { display: none; width: 100%; padding: 15px; flex-direction: column; gap: 15px; }
-.mobile-planet-card {
-    background: white;
-    padding: 16px;
-    border-radius: 10px;
-    border-left: 6px solid #1e3a8a;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    cursor: pointer;
-    transition: 0.2s;
-}
+.mobile-planet-card { background: white; padding: 16px; border-radius: 10px; border-left: 6px solid #1e3a8a; box-shadow: 0 2px 6px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s; }
 .mobile-planet-card:active { transform: scale(0.98); background: #f8fafc; }
 .mobile-planet-card h4 { margin: 0 0 5px 0; color: #1e3a8a; font-size: 1.1em; }
 .mobile-planet-card p { margin: 0 0 10px 0; font-size: 0.85em; color: #555; text-align: left; padding: 0; }
@@ -345,19 +295,8 @@
 .card-purple { border-left-color: #a855f7; }
 .card-gold { border-left-color: #f59e0b; }
 
-/* ANIMACIONES MAESTRAS DE ROTACIÓN CSS */
-@keyframes spinOrbit {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(3deg); } /* Rotación ultra sutil de 3 grados para simular movimiento lento y elegante */
-}
-@keyframes keepTextUpright {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(-3deg); }
-}
-
-/* MEDIA QUERIES: OCULTAR SISTEMA SOLAR EN PANTALLAS PEQUEÑAS */
-@media (max-width: 768px) {
-    .solar-system-view { display: none; }
+@media (max-width: 900px) {
+    .fluid-desktop-view { display: none; }
     .mobile-galaxy-view { display: flex; }
     .universe-container { min-height: auto; background: transparent; box-shadow: none; padding: 0; }
 }
@@ -389,7 +328,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.3.0
+        v2.4.0
     </div>
 
 
@@ -1450,42 +1389,45 @@
         <div id="phrase-container-trainees" style="font-size: 1.1em; font-style: italic; color: #1e3a8a; margin-top: 8px; font-weight: 300; min-height: 2.2em; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-in-out;">"Cargando pensamiento institucional..."</div>
     </div>
 
-    <!-- CONTENEDOR MAESTRO DEL SISTEMA INTERACTIVO -->
-    <div class="universe-container">
+    <!-- CONTENEDOR MAESTRO REEDISEÑADO: INTERACCIÓN FLUIDA CON MOUSE -->
+    <div class="universe-container" id="universe-interactive-area">
         
-        <!-- VISTA ESCRITORIO: SISTEMA ORBITAL INTERACTIVO -->
-        <div class="solar-system-view">
-            <!-- Centro de control (El Sol) -->
-            <div class="sun-center">
-                <span style="font-size: 0.85em; font-weight: bold; color: white; display: block; line-height: 1.2;">NÚCLEO<br>MÉDICO</span>
+        <!-- VISTA ESCRITORIO: TARJETAS FLUIDAS CON FÍSICAS DE MOVIMIENTO -->
+        <div class="fluid-desktop-view">
+            <!-- Nodo Central Informativo sutil -->
+            <div class="desktop-fluid-card central-core" data-speed="0.01">
+                <span style="font-size: 0.8em; font-weight: bold; color: var(--azul-trainees); letter-spacing: 1px;">ELEGIR ADSCRIPCIÓN</span>
             </div>
 
-            <!-- Órbita 1: MIP'S -->
-            <div class="orbit-path orbit-mip">
-                <div class="planet planet-blue" onclick="abrirRegistroFormacion('MIP')">
-                    <div class="planet-core">MIP</div>
-                    <div class="planet-tooltip"><strong>Médicos Internos de Pregrado</strong><br>Bitácoras, rotaciones y documentos.</div>
-                </div>
+            <!-- Tarjeta Interactiva 1: MIP -->
+            <div class="desktop-fluid-card card-interactive-mip" data-speed="0.04" onclick="abrirRegistroFormacion('MIP')">
+                <div class="glow-effect"></div>
+                <div class="card-icon">📁</div>
+                <h3>Médicos Internos<br>de Pregrado</h3>
+                <span class="badge-trainee">MIP</span>
+                <div class="card-action-hint">Abrir Expediente ➔</div>
             </div>
 
-            <!-- Órbita 2: PASANTES -->
-            <div class="orbit-path orbit-pasante">
-                <div class="planet planet-purple" onclick="abrirRegistroFormacion('PASANTE')">
-                    <div class="planet-core">PASANTE</div>
-                    <div class="planet-tooltip"><strong>Pasantes en Servicio Social</strong><br>Programas comunitarios e informes mensuales.</div>
-                </div>
+            <!-- Tarjeta Interactiva 2: PASANTE -->
+            <div class="desktop-fluid-card card-interactive-pasante" data-speed="-0.03" onclick="abrirRegistroFormacion('PASANTE')">
+                <div class="glow-effect"></div>
+                <div class="card-icon">💼</div>
+                <h3>Médicos Pasantes<br>Servicio Social</h3>
+                <span class="badge-trainee">PASANTE</span>
+                <div class="card-action-hint">Abrir Informes ➔</div>
             </div>
 
-            <!-- Órbita 3: RESIDENTES -->
-            <div class="orbit-path orbit-residente">
-                <div class="planet planet-gold" onclick="abrirRegistroFormacion('RESIDENTE')">
-                    <div class="planet-core">RESIDENTE</div>
-                    <div class="planet-tooltip"><strong>Médicos Residentes</strong><br>Protocolos de investigación y guardias.</div>
-                </div>
+            <!-- Tarjeta Interactiva 3: RESIDENTE -->
+            <div class="desktop-fluid-card card-interactive-residente" data-speed="0.06" onclick="abrirRegistroFormacion('RESIDENTE')">
+                <div class="glow-effect"></div>
+                <div class="card-icon">🏛️</div>
+                <h3>Médicos Residentes<br>Especialidad</h3>
+                <span class="badge-trainee">RESIDENTE</span>
+                <div class="card-action-hint">Abrir Protocolos ➔</div>
             </div>
         </div>
 
-        <!-- VISTA MÓVIL: TARJETAS RESPONSIVAS FLUIDAS (Se activa por Media Queries) -->
+        <!-- VISTA MÓVIL: SE MANTIENE EL DISEÑO LIMPIO QUE YA TE GUSTÓ -->
         <div class="mobile-galaxy-view">
             <div class="mobile-planet-card card-blue" onclick="abrirRegistroFormacion('MIP')">
                 <h4>Médicos Internos (MIP)</h4>
@@ -3428,6 +3370,11 @@ async function procesarLoginTrainee(e) {
         // Ocultamos el contenedor general si es que aplica, y encendemos el sub-panel
         activarModulo('panel-medicos-formacion', null);
         
+        // 🚀 INYECCIÓN DEL MOTOR DINÁMICO: Enciende las físicas del mouse al entrar con éxito
+        if (typeof inicializarMovimientoMagneticoTrainees === 'function') {
+            inicializarMovimientoMagneticoTrainees();
+        }
+        
         // Escondemos la tarjeta de registro dinámico inferior para que aparezca limpia al iniciar
         document.getElementById('tarjeta-registro-trainee-container').style.display = 'none';
 
@@ -3436,6 +3383,8 @@ async function procesarLoginTrainee(e) {
         console.error('Error en procesarLoginTrainee:', error);
     }
 }
+
+
 
 // Acción dinámica: Muestra la tarjeta de registro específica de cada opción
 function abrirRegistroFormacion(categoria) {
@@ -3453,6 +3402,63 @@ function abrirRegistroFormacion(categoria) {
     // Pequeño scroll automático para que el usuario visualice el formulario de inmediato
     contenedor.scrollIntoView({ behavior: 'smooth' });
 }
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================================
+// MOTOR DE MOVIMIENTO MAGNÉTICO CON INERCIA PARA EL PORTAL DE TRAINEES
+// =========================================================================
+function inicializarMovimientoMagneticoTrainees() {
+    const contenedorArea = document.getElementById('universe-interactive-area');
+    const tarjetasEfecto = document.querySelectorAll('.desktop-fluid-card');
+    
+    if (!contenedorArea || tarjetasEfecto.length === 0) return;
+
+    // Escuchamos el movimiento del mouse sobre el contenedor
+    contenedorArea.addEventListener('mousemove', (event) => {
+        // Obtenemos las dimensiones físicas de la caja contenedora
+        const rect = contenedorArea.getBoundingClientRect();
+        
+        // Calculamos el centro matemático de la pantalla del portal
+        const centroX = rect.left + rect.width / 2;
+        const centroY = rect.top + rect.height / 2;
+        
+        // Calculamos la distancia del cursor respecto al centro (-1 a 1)
+        const deltaX = (event.clientX - centroX) / (rect.width / 2);
+        const deltaY = (event.clientY - centroY) / (rect.height / 2);
+
+        // Mover cada tarjeta de acuerdo a su atributo data-speed único
+        tarjetasEfecto.forEach(tarjeta => {
+            // Si el mouse está sobre la tarjeta, detenemos el cálculo de fondo
+            if (tarjeta.matches(':hover')) return;
+
+            const velocidad = parseFloat(tarjeta.getAttribute('data-speed')) || 0.05;
+            
+            // Calculamos los píxeles de desplazamiento sutiles
+            const moverPixelX = deltaX * (velocidad * 150);
+            const moverPixelY = deltaY * (velocidad * 150);
+
+            // Aplicamos la matriz de transformación por hardware
+            tarjeta.style.transform = `translate(${moverPixelX}px, ${moverPixelY}px)`;
+        });
+    });
+
+    // Evento de restauración cuando el cursor abandona el contenedor del portal
+    contenedorArea.addEventListener('mouseleave', () => {
+        tarjetasEfecto.forEach(tarjeta => {
+            tarjeta.style.transform = 'translate(0px, 0px)';
+        });
+    });
+}
+
 
 
 
