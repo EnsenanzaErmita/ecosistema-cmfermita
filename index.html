@@ -195,112 +195,6 @@
 
 
 
-/* =========================================================================
-   ESTILOS INNOVADORES ORBITALES - PORTAL DE MEDICOS EN FORMACIÓN
-   ========================================================================= */
-/* =========================================================================
-   ESTILOS PREMIUM FLUIDOS CON INTERACCIÓN INERCIAL (MEDICOS EN FORMACIÓN)
-   ========================================================================= */
-.universe-container {
-    position: relative;
-    width: 100%;
-    min-height: 520px;
-    background: radial-gradient(circle at 10% 20%, #f1f5f9 0%, #cbd5e1 90%);
-    border-radius: 16px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    perspective: 1000px; /* Habilita profundidad 3D en el contenedor */
-}
-
-.fluid-desktop-view {
-    position: relative;
-    width: 100%;
-    height: 520px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Tarjetas Fluidas Base en Escritorio */
-.desktop-fluid-card {
-    position: absolute;
-    width: 240px;
-    height: 290px;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 20px;
-    padding: 25px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    cursor: pointer;
-    box-shadow: 0 15px 35px rgba(30, 58, 138, 0.08);
-    /* Transición suave para que la inercia del JavaScript responda con fluidez */
-    transition: transform 0.15s ease-out, box-shadow 0.3s ease, background 0.3s ease;
-    will-change: transform;
-}
-
-/* Distribución inicial esparcida de manera elegante en la pantalla */
-.card-interactive-mip { left: 8%; top: 15%; border-top: 5px solid #3b82f6; }
-.card-interactive-pasante { left: 38%; top: 28%; border-top: 5px solid #a855f7; }
-.card-interactive-residente { right: 8%; top: 15%; border-top: 5px solid #f59e0b; }
-
-/* El núcleo central es solo informativo, no se mueve de forma brusca */
-.central-core {
-    left: 42%; top: 5%; width: 180px; height: auto; padding: 12px;
-    text-align: center; background: rgba(255, 255, 255, 0.4); border: 1px dashed rgba(30, 58, 138, 0.3);
-    pointer-events: none; border-radius: 30px; box-shadow: none;
-}
-
-/* Diseño interno de las tarjetas de alto impacto */
-.card-icon { font-size: 2em; margin-bottom: 5px; }
-.desktop-fluid-card h3 { margin: 0; font-size: 1.15em; color: #1e293b; line-height: 1.4; font-weight: 700; text-align: left; }
-.badge-trainee {
-    align-self: flex-start; background: rgba(30, 58, 138, 0.08); color: #1e3a8a;
-    font-size: 0.75em; font-weight: bold; padding: 4px 10px; border-radius: 6px; margin-top: 10px;
-}
-.card-action-hint { font-size: 0.85em; font-weight: bold; color: #b38e5d; text-align: right; margin-top: 15px; opacity: 0.7; transition: opacity 0.2s; }
-
-/* Efecto de brillo satinado al pasar el mouse por encima */
-.glow-effect {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at inherit, rgba(255,255,255,0.8) 0%, transparent 60%);
-    pointer-events: none; border-radius: 20px; opacity: 0; transition: opacity 0.3s;
-}
-
-/* Estados Hover dinámicos en Escritorio */
-.desktop-fluid-card:hover {
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 30px 60px rgba(30, 58, 138, 0.18);
-    transform: scale(1.04) translateZ(20px) !important; /* El JavaScript respetará esta escala al superponer el hover */
-    z-index: 50;
-}
-.desktop-fluid-card:hover .card-action-hint { opacity: 1; color: #1e3a8a; }
-
-/* MÓVIL: SE QUEDA TU DISEÑO IMPECABLE ORIGINAL */
-.mobile-galaxy-view { display: none; width: 100%; padding: 15px; flex-direction: column; gap: 15px; }
-.mobile-planet-card { background: white; padding: 16px; border-radius: 10px; border-left: 6px solid #1e3a8a; box-shadow: 0 2px 6px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s; }
-.mobile-planet-card:active { transform: scale(0.98); background: #f8fafc; }
-.mobile-planet-card h4 { margin: 0 0 5px 0; color: #1e3a8a; font-size: 1.1em; }
-.mobile-planet-card p { margin: 0 0 10px 0; font-size: 0.85em; color: #555; text-align: left; padding: 0; }
-.mobile-planet-card span { font-size: 0.8em; font-weight: bold; color: #b38e5d; display: block; text-align: right; }
-
-.card-blue { border-left-color: #3b82f6; }
-.card-purple { border-left-color: #a855f7; }
-.card-gold { border-left-color: #f59e0b; }
-
-@media (max-width: 900px) {
-    .fluid-desktop-view { display: none; }
-    .mobile-galaxy-view { display: flex; }
-    .universe-container { min-height: auto; background: transparent; box-shadow: none; padding: 0; }
-}
-
 
 
 
@@ -328,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.4.0
+        v2.5.0
     </div>
 
 
@@ -1376,89 +1270,58 @@
 <!-- ========================================================================= -->
 <!-- PANTALLA PRINCIPAL DE ADIESTRAMIENTO REEDISEÑADA (SISTEMA ORBITAL)       -->
 <!-- ========================================================================= -->
+<!-- ========================================================================= -->
+<!-- PANTALLA PRINCIPAL DE ADIESTRAMIENTO (DISEÑO ESTÁNDAR UNIFICADO)          -->
+<!-- ========================================================================= -->
 <div id="panel-medicos-formacion" class="view" style="display: none; padding: 20px;">
-    <!-- Barra superior ejecutiva azul marino -->
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #1e3a8a; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2 style="color: #1e3a8a; margin:0; font-family: 'Segoe UI', sans-serif;">Portal de Médicos en Formación</h2>
-        <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#98989a'">← Salir del Portal</button>
+    <!-- Barra superior con línea divisoria azul trainees -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--azul-trainees); margin-bottom: 20px; padding-bottom: 10px;">
+        <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Portal de Médicos en Formación</h2>
+        <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-trainees)'" onmouseout="this.style.background='#98989a'">← Salir del Portal</button>
     </div>
 
-    <!-- Integración del Hero institucional para respetar la identidad visual -->
-    <div class="teaching-hero" style="border-color: #1e3a8a; background: #f0f4f8;">
-        <h2 style="color: #1e3a8a; margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
-        <div id="phrase-container-trainees" style="font-size: 1.1em; font-style: italic; color: #1e3a8a; margin-top: 8px; font-weight: 300; min-height: 2.2em; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-in-out;">"Cargando pensamiento institucional..."</div>
+    <!-- Hero de Enseñanza y Calidad integrado con carrusel unificado -->
+    <div class="teaching-hero">
+        <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
+        <div id="phrase-container-trainees" style="font-size: 1.1em; font-style: italic; color: var(--dorado-calidad); margin-top: 8px; font-weight: 300; min-height: 2.2em; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-in-out;">"Cargando pensamiento institucional..."</div>
     </div>
 
-    <!-- CONTENEDOR MAESTRO REEDISEÑADO: INTERACCIÓN FLUIDA CON MOUSE -->
-    <div class="universe-container" id="universe-interactive-area">
+    <!-- GRID PRINCIPAL DE OPCIONES (MISMO ESTILO QUE COORDINACIÓN MÉDICA) -->
+    <div class="login-grid" style="margin-top: 20px;">
         
-        <!-- VISTA ESCRITORIO: TARJETAS FLUIDAS CON FÍSICAS DE MOVIMIENTO -->
-        <div class="fluid-desktop-view">
-            <!-- Nodo Central Informativo sutil -->
-            <div class="desktop-fluid-card central-core" data-speed="0.01">
-                <span style="font-size: 0.8em; font-weight: bold; color: var(--azul-trainees); letter-spacing: 1px;">ELEGIR ADSCRIPCIÓN</span>
-            </div>
-
-            <!-- Tarjeta Interactiva 1: MIP -->
-            <div class="desktop-fluid-card card-interactive-mip" data-speed="0.04" onclick="abrirRegistroFormacion('MIP')">
-                <div class="glow-effect"></div>
-                <div class="card-icon">📁</div>
-                <h3>Médicos Internos<br>de Pregrado</h3>
-                <span class="badge-trainee">MIP</span>
-                <div class="card-action-hint">Abrir Expediente ➔</div>
-            </div>
-
-            <!-- Tarjeta Interactiva 2: PASANTE -->
-            <div class="desktop-fluid-card card-interactive-pasante" data-speed="-0.03" onclick="abrirRegistroFormacion('PASANTE')">
-                <div class="glow-effect"></div>
-                <div class="card-icon">💼</div>
-                <h3>Médicos Pasantes<br>Servicio Social</h3>
-                <span class="badge-trainee">PASANTE</span>
-                <div class="card-action-hint">Abrir Informes ➔</div>
-            </div>
-
-            <!-- Tarjeta Interactiva 3: RESIDENTE -->
-            <div class="desktop-fluid-card card-interactive-residente" data-speed="0.06" onclick="abrirRegistroFormacion('RESIDENTE')">
-                <div class="glow-effect"></div>
-                <div class="card-icon">🏛️</div>
-                <h3>Médicos Residentes<br>Especialidad</h3>
-                <span class="badge-trainee">RESIDENTE</span>
-                <div class="card-action-hint">Abrir Protocolos ➔</div>
-            </div>
+        <!-- TARJETA A: MIP'S -->
+        <div class="card" style="border-top: 8px solid var(--azul-trainees);">
+            <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.50em; margin-top: 0;">Médicos Internos (MIP)</h3>
+            <p>Registro de adscripción, bitácora de rotación hospitalaria y entrega de documentos base de pregrado.</p>
+            <button onclick="abrirRegistroFormacion('MIP')" class="btn-save" style="background: var(--azul-trainees); color: white !important;">ABRIR REGISTRO MIP</button>
         </div>
 
-        <!-- VISTA MÓVIL: SE MANTIENE EL DISEÑO LIMPIO QUE YA TE GUSTÓ -->
-        <div class="mobile-galaxy-view">
-            <div class="mobile-planet-card card-blue" onclick="abrirRegistroFormacion('MIP')">
-                <h4>Médicos Internos (MIP)</h4>
-                <p>Rotación hospitalaria, bitácoras y carga de expedientes.</p>
-                <span>Tocar para abrir ➔</span>
-            </div>
-            <div class="mobile-planet-card card-purple" onclick="abrirRegistroFormacion('PASANTE')">
-                <h4>Pasantes Servicio Social</h4>
-                <p>Informes mensuales y programas de salud comunitaria.</p>
-                <span>Tocar para abrir ➔</span>
-            </div>
-            <div class="mobile-planet-card card-gold" onclick="abrirRegistroFormacion('RESIDENTE')">
-                <h4>Residentes Especialidad</h4>
-                <p>Control de guardias y protocolos de investigación clínica.</p>
-                <span>Tocar para abrir ➔</span>
-            </div>
+        <!-- TARJETA B: PASANTES -->
+        <div class="card" style="border-top: 8px solid var(--azul-trainees);">
+            <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.50em; margin-top: 0;">Médicos Pasantes</h3>
+            <p>Control de programas comunitarios, informes mensuales de actividades y validación académica.</p>
+            <button onclick="abrirRegistroFormacion('PASANTE')" class="btn-save" style="background: var(--azul-trainees); color: white !important;">ABRIR REGISTRO PASANTE</button>
+        </div>
+
+        <!-- TARJETA C: RESIDENTES -->
+        <div class="card" style="border-top: 8px solid var(--azul-trainees);">
+            <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.50em; margin-top: 0;">Médicos Residentes</h3>
+            <p>Control de protocolos de investigación clínica, asignación de guardias y bitácora de calidad.</p>
+            <button onclick="abrirRegistroFormacion('RESIDENTE')" class="btn-save" style="background: var(--azul-trainees); color: white !important;">ABRIR REGISTRO RESIDENTE</button>
         </div>
 
     </div>
 
-    <!-- TARJETA DE CARGA DINÁMICA DEBAJO DEL SISTEMA SOLAR -->
-    <div id="tarjeta-registro-trainee-container" style="display: none; margin-top: 40px; background: #fff; border: 1px solid #1e3a8a; border-top: 5px solid #1e3a8a; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-        <h3 id="titulo-dinamico-registro" style="color: #1e3a8a; margin-top: 0; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; text-transform: uppercase; font-family: sans-serif;">Formulario de Carga</h3>
+    <!-- TARJETA DE CARGA DINÁMICA DEBAJO DE LAS TARJETAS -->
+    <div id="tarjeta-registro-trainee-container" style="display: none; margin-top: 30px; background: #fff; border: 1px solid var(--azul-trainees); border-top: 5px solid var(--azul-trainees); padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <h3 id="titulo-dinamico-registro" style="color: var(--azul-trainees); margin-top: 0; border-bottom: 2px solid var(--azul-trainees); padding-bottom: 8px; text-transform: uppercase;">Formulario de Carga</h3>
         <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Complete sus datos de adscripción institucional. Los campos marcados con (*) son mandatorios.</p>
         
-        <div style="padding: 30px; background: #fbfbfb; border: 1px dashed #1e3a8a; text-align: center; color: #1e3a8a; border-radius: 4px; font-weight: bold;">
+        <div style="padding: 30px; background: #fdfdfd; border: 1px dashed #ccc; text-align: center; color: #777; border-radius: 4px; font-weight: bold;">
             📋 Formulario de Registro Listo para Modelar los Campos de Carga de Archivos
         </div>
     </div>
 </div>
-
 
 
 
@@ -3370,11 +3233,6 @@ async function procesarLoginTrainee(e) {
         // Ocultamos el contenedor general si es que aplica, y encendemos el sub-panel
         activarModulo('panel-medicos-formacion', null);
         
-        // 🚀 INYECCIÓN DEL MOTOR DINÁMICO: Enciende las físicas del mouse al entrar con éxito
-        if (typeof inicializarMovimientoMagneticoTrainees === 'function') {
-            inicializarMovimientoMagneticoTrainees();
-        }
-        
         // Escondemos la tarjeta de registro dinámico inferior para que aparezca limpia al iniciar
         document.getElementById('tarjeta-registro-trainee-container').style.display = 'none';
 
@@ -3411,53 +3269,6 @@ function abrirRegistroFormacion(categoria) {
 
 
 
-
-
-// =========================================================================
-// MOTOR DE MOVIMIENTO MAGNÉTICO CON INERCIA PARA EL PORTAL DE TRAINEES
-// =========================================================================
-function inicializarMovimientoMagneticoTrainees() {
-    const contenedorArea = document.getElementById('universe-interactive-area');
-    const tarjetasEfecto = document.querySelectorAll('.desktop-fluid-card');
-    
-    if (!contenedorArea || tarjetasEfecto.length === 0) return;
-
-    // Escuchamos el movimiento del mouse sobre el contenedor
-    contenedorArea.addEventListener('mousemove', (event) => {
-        // Obtenemos las dimensiones físicas de la caja contenedora
-        const rect = contenedorArea.getBoundingClientRect();
-        
-        // Calculamos el centro matemático de la pantalla del portal
-        const centroX = rect.left + rect.width / 2;
-        const centroY = rect.top + rect.height / 2;
-        
-        // Calculamos la distancia del cursor respecto al centro (-1 a 1)
-        const deltaX = (event.clientX - centroX) / (rect.width / 2);
-        const deltaY = (event.clientY - centroY) / (rect.height / 2);
-
-        // Mover cada tarjeta de acuerdo a su atributo data-speed único
-        tarjetasEfecto.forEach(tarjeta => {
-            // Si el mouse está sobre la tarjeta, detenemos el cálculo de fondo
-            if (tarjeta.matches(':hover')) return;
-
-            const velocidad = parseFloat(tarjeta.getAttribute('data-speed')) || 0.05;
-            
-            // Calculamos los píxeles de desplazamiento sutiles
-            const moverPixelX = deltaX * (velocidad * 150);
-            const moverPixelY = deltaY * (velocidad * 150);
-
-            // Aplicamos la matriz de transformación por hardware
-            tarjeta.style.transform = `translate(${moverPixelX}px, ${moverPixelY}px)`;
-        });
-    });
-
-    // Evento de restauración cuando el cursor abandona el contenedor del portal
-    contenedorArea.addEventListener('mouseleave', () => {
-        tarjetasEfecto.forEach(tarjeta => {
-            tarjeta.style.transform = 'translate(0px, 0px)';
-        });
-    });
-}
 
 
 
