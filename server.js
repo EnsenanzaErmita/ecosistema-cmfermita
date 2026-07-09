@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.3.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.0.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -731,7 +731,7 @@ app.delete('/api/users/:id', (req, res) => {
 
 
 
-// ENDPOINT 1: Generar clave aleatoria (CON VALIDACIÓN DE CORREO ÚNICO) y enviarla por correo
+// ENDPOINT 1: Generar clave aleatoria (CON VALIDACIÓN DE CORREO ÚNICO) y enviarla por correo (CON BOTÓN DE ACCESO DIRECTO)
 app.post('/api/trainee-keys/generate', (req, res) => {
     const { email } = req.body;
 
@@ -741,7 +741,7 @@ app.post('/api/trainee-keys/generate', (req, res) => {
 
     const emailTrim = email.trim().toLowerCase();
 
-    // 🔍 REQUERIMIENTO 1: VALIDACIÓN DE CORREO EXISTENTE
+    // VALIDACIÓN DE CORREO EXISTENTE
     const sqlCheck = 'SELECT id, access_key FROM trainee_access_keys WHERE email = ?';
     pool.query(sqlCheck, [emailTrim], (errCheck, resultsCheck) => {
         if (errCheck) {
@@ -749,21 +749,18 @@ app.post('/api/trainee-keys/generate', (req, res) => {
             return res.status(500).json({ message: 'Error interno al validar el correo en el servidor.' });
         }
 
-        // Si el correo ya tiene una clave asignada, bloqueamos la generación
         if (resultsCheck && resultsCheck.length > 0) {
             return res.status(400).json({ 
                 message: `El correo electrónico [${emailTrim}] ya se encuentra registrado con la clave: ${resultsCheck[0].access_key}. Utilice la opción de reenvío si es necesario.` 
             });
         }
 
-        // Si el correo está limpio, procedemos a calcular la clave de 8 caracteres
         const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let claveGenerada = 'CMF-';
         for (let i = 0; i < 6; i++) {
             claveGenerada += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
         }
 
-        // Guardamos el registro en Clever Cloud
         const sqlInsert = 'INSERT INTO trainee_access_keys (email, access_key) VALUES (?, ?)';
         pool.query(sqlInsert, [emailTrim, claveGenerada], (err, result) => {
             if (err) {
@@ -771,11 +768,10 @@ app.post('/api/trainee-keys/generate', (req, res) => {
                 return res.status(500).json({ message: 'No se pudo registrar la clave en el servidor.' });
             }
 
-            // Despachamos el correo por Brevo
             const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
             sendSmtpEmail.subject = "🏛️ Clave de Acceso Institucional - Médicos en Formación";
             sendSmtpEmail.htmlContent = `
-                <div style="font-family: sans-serif; max-width: 500px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
+                <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
                     <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
                         <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
                         <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad</p>
@@ -788,6 +784,17 @@ app.post('/api/trainee-keys/generate', (req, res) => {
                             <span style="font-size: 0.8em; color: #666; display: block; font-weight: bold; text-transform: uppercase;">Su Clave Privada de Acceso:</span>
                             <strong style="font-size: 1.6em; color: #611232; letter-spacing: 2px; font-family: monospace; display: block; margin-top: 5px;">${claveGenerada}</strong>
                         </div>
+
+                        <div style="background: #fbf8f3; border: 1px solid #e1d3bf; padding: 15px; border-radius: 6px; margin: 20px 0; text-align: center;">
+                            <h4 style="color: #611232; margin: 0 0 8px 0; font-size: 0.95em; letter-spacing: 0.5px;">🌐 DIRECCIÓN DE INGRESO</h4>
+                            <p style="margin: 0 0 12px 0; font-size: 0.85em; color: #4b5563;">
+                                Utilice su clave autorizada pulsando el siguiente botón o ingresando a la liga oficial del proyecto:
+                            </p>
+                            <a href="https://onrender.com" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                Ingresar al Ecosistema Ermita
+                            </a>
+                        </div>
+
                         <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
                             *Esta clave es estrictamente personal e intransferible. Estará vigente durante el periodo de prestación de sus servicios institucionales en la clínica.
                         </p>
@@ -847,7 +854,7 @@ app.put('/api/trainee-keys/:id/toggle', (req, res) => {
 
 
 
-// 🚀 REQUERIMIENTO 2: ENDPOINT 4 - Reenviar por correo una clave que ya existe
+// ENDPOINT 4: Reenviar por correo una clave que ya existe (INCLUYE ENLACE DE ACCESO DIRECTO)
 app.post('/api/trainee-keys/resend', (req, res) => {
     const { id } = req.body;
 
@@ -855,7 +862,6 @@ app.post('/api/trainee-keys/resend', (req, res) => {
         return res.status(400).json({ message: 'El identificador del registro es mandatorio.' });
     }
 
-    // Buscamos los datos actuales del registro
     const sqlFind = 'SELECT email, access_key FROM trainee_access_keys WHERE id = ?';
     pool.query(sqlFind, [id], (errFind, results) => {
         if (errFind || !results || results.length === 0) {
@@ -864,11 +870,10 @@ app.post('/api/trainee-keys/resend', (req, res) => {
 
         const trainee = results[0];
 
-        // Reensamblamos el formato de correo oficial con la misma clave histórica
         const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
         sendSmtpEmail.subject = "🏛️ REENVÍO: Clave de Acceso Institucional - Médicos en Formación";
         sendSmtpEmail.htmlContent = `
-            <div style="font-family: sans-serif; max-width: 500px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
+            <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
                 <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
                     <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
                     <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad (Recordatorio)</p>
@@ -881,6 +886,18 @@ app.post('/api/trainee-keys/resend', (req, res) => {
                         <span style="font-size: 0.8em; color: #666; display: block; font-weight: bold; text-transform: uppercase;">Su Clave de Acceso Vigente:</span>
                         <strong style="font-size: 1.6em; color: #611232; letter-spacing: 2px; font-family: monospace; display: block; margin-top: 5px;">${trainee.access_key}</strong>
                     </div>
+
+                    <!-- SECCIÓN CON ENLACE DE ACCESO DIRECTO EN REENVÍO -->
+                    <div style="background: #fbf8f3; border: 1px solid #e1d3bf; padding: 15px; border-radius: 6px; margin: 20px 0; text-align: center;">
+                        <h4 style="color: #611232; margin: 0 0 8px 0; font-size: 0.95em; letter-spacing: 0.5px;">🌐 DIRECCIÓN DE INGRESO</h4>
+                        <p style="margin: 0 0 12px 0; font-size: 0.85em; color: #4b5563;">
+                            Utilice su clave autorizada pulsando el siguiente botón o ingresando a la liga oficial del proyecto:
+                        </p>
+                        <a href="https://onrender.com" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            Ingresar al Ecosistema Ermita
+                        </a>
+                    </div>
+
                     <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
                         *Si usted no solicitó este reenvío, por favor haga caso omiso de este mensaje o comuníquese con el Coordinador de Enseñanza.
                     </p>
