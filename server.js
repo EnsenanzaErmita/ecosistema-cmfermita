@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.0.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.1.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -778,7 +778,7 @@ app.post('/api/trainee-keys/generate', (req, res) => {
                     </div>
                     <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
                         <p>Estimado(a) Médico en Formación (MIP, Pasante o Residente):</p>
-                        <p>Se ha generado su credencial de acceso para ingresar a las plataformas digitales de control clínico del ecosistema Ermita:</p>
+                        <p>Se ha generado su CLAVE de acceso para ingresar a la plataforma digital de la C.M.F. Ermita:</p>
                         
                         <div style="background: white; border-left: 5px solid #611232; padding: 15px; margin: 20px 0; text-align: center; border-radius: 0 4px 4px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                             <span style="font-size: 0.8em; color: #666; display: block; font-weight: bold; text-transform: uppercase;">Su Clave Privada de Acceso:</span>
@@ -786,12 +786,12 @@ app.post('/api/trainee-keys/generate', (req, res) => {
                         </div>
 
                         <div style="background: #fbf8f3; border: 1px solid #e1d3bf; padding: 15px; border-radius: 6px; margin: 20px 0; text-align: center;">
-                            <h4 style="color: #611232; margin: 0 0 8px 0; font-size: 0.95em; letter-spacing: 0.5px;">🌐 DIRECCIÓN DE INGRESO</h4>
+                            <h4 style="color: #611232; margin: 0 0 8px 0; font-size: 0.95em; letter-spacing: 0.5px;">🌐 URL DE PÁGINA DIGITAL</h4>
                             <p style="margin: 0 0 12px 0; font-size: 0.85em; color: #4b5563;">
-                                Utilice su clave autorizada pulsando el siguiente botón o ingresando a la liga oficial del proyecto:
+                                Ingrese a la página digital de la C.M.F Ertmita pulsando el siguiente botón y posteriormente ingrese su CLAVE autorizada:
                             </p>
-                            <a href="https://onrender.com" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                Ingresar al Ecosistema Ermita
+                            <a href="https://ensenanzaermita.github.io/Encuestas-Ermita-Salud-Mental/" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                Ingresar a la Plataforma Digital
                             </a>
                         </div>
 
