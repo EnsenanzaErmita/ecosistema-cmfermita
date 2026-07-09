@@ -492,7 +492,7 @@ app.put('/api/office-changes/:id', (req, res) => {
                             Con el objetivo de seguir mejorando la calidad en la atención de nuestra unidad médica, le solicitamos de la manera más atenta apoyarnos a responder una breve encuesta de Adicciones.
                         </p>
                         <!-- BOTÓN BLINDADO CON ATRIBUTOS DE SEGURIDAD PARA ENLACES -->
-                        <a href="https://encuestas-ermita-salud-mental.onrender.com/" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <a href="https://ecosistema-cmfermita.onrender.com/" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             Responder Encuesta de Adicciones
                         </a>
                     </div>
@@ -769,7 +769,7 @@ app.post('/api/trainee-keys/generate', (req, res) => {
             }
 
             const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-            sendSmtpEmail.subject = "🏛️ Clave de Acceso Institucional - Médicos en Formación";
+            sendSmtpEmail.subject = "🏛️ Clave de Acceso Institucional - Personal en Formación - C.M.F. Ermita";
             sendSmtpEmail.htmlContent = `
                 <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
                     <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
@@ -777,7 +777,7 @@ app.post('/api/trainee-keys/generate', (req, res) => {
                         <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad</p>
                     </div>
                     <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
-                        <p>Estimado(a) Médico en Formación (MIP, Pasante o Residente):</p>
+                        <p>Estimado(a) Personal en Formación (MIP, Pasante o Residente):</p>
                         <p>Se ha generado su CLAVE de acceso para ingresar a la plataforma digital de la C.M.F. Ermita:</p>
                         
                         <div style="background: white; border-left: 5px solid #611232; padding: 15px; margin: 20px 0; text-align: center; border-radius: 0 4px 4px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
@@ -871,7 +871,7 @@ app.post('/api/trainee-keys/resend', (req, res) => {
         const trainee = results[0];
 
         const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-        sendSmtpEmail.subject = "🏛️ REENVÍO: Clave de Acceso Institucional - Médicos en Formación";
+        sendSmtpEmail.subject = "🏛️ REENVÍO: Clave de Acceso Institucional - Personal en Formación - C.M.F Ermita";
         sendSmtpEmail.htmlContent = `
             <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
                 <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
@@ -879,7 +879,7 @@ app.post('/api/trainee-keys/resend', (req, res) => {
                     <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad (Recordatorio)</p>
                 </div>
                 <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
-                    <p>Estimado(a) Médico en Formación (MIP, Pasante o Residente):</p>
+                    <p>Estimado(a) Personal en Formación (MIP, Pasante o Residente):</p>
                     <p>A solicitud de la administración, le reenviamos su clave vigente de acceso para el ecosistema clínico Ermita:</p>
                     
                     <div style="background: white; border-left: 5px solid #611232; padding: 15px; margin: 20px 0; text-align: center; border-radius: 0 4px 4px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
@@ -893,7 +893,7 @@ app.post('/api/trainee-keys/resend', (req, res) => {
                         <p style="margin: 0 0 12px 0; font-size: 0.85em; color: #4b5563;">
                             Utilice su clave autorizada pulsando el siguiente botón o ingresando a la liga oficial del proyecto:
                         </p>
-                        <a href="https://onrender.com" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <a href="https://ecosistema-cmfermita.onrender.com/" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.9em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             Ingresar al Ecosistema Ermita
                         </a>
                     </div>

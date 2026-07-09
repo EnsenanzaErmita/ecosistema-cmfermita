@@ -42,7 +42,34 @@
         
         /* LOGIN GRID - 4 SECCIONES */
         .login-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .card { padding: 25px; border: 1px solid #ddd; border-radius: 8px; background: #fff; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s; }
+
+        .card { 
+    padding: 25px; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    background: #fff; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    transition: transform 0.2s; 
+    min-height: 280px; /* Asegura un tamaño uniforme mínimo para todas las tarjetas */
+    height: auto; /* Permite que la tarjeta se estire si agregas más texto a futuro */
+    box-sizing: border-box; /* Evita que el padding altere las dimensiones reales */
+}
+
+
+
+.card p {
+    font-size: 0.85em; 
+    text-align: center;
+    color: #555;
+    margin-top: 10px;
+    margin-bottom: auto; /* 💡 TRUCO CLAVE: Empuja magnéticamente al botón hacia la parte inferior de la tarjeta */
+    padding-bottom: 15px;
+}
+
+
+
         .card:hover { transform: translateY(-5px); }
         .card h3 { margin-top: 0; font-size: 1.2em; border-bottom: 2px solid var(--gris-claro); padding-bottom: 10px; }
         
@@ -205,14 +232,14 @@
 
                 <!-- TARJETA 1: COORDINACIÓN MÉDICA (ENTRADA CON LOGIN) -->
                 <div class="card card-coord">
-                    <h3 style="color: #800080; text-align: center; font-size: 2.50em;">Coordinación Médica</h3>
+                    <h3 style="color: #800080; text-align: center; font-size: 1.50em;">Coordinación Médica</h3>
                     <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para el Servicio de Coordinación Médica de la C.M.F. Ermita.</p>
                     <button class="btn-save" style="background: #800080; color: white !important;" onclick="entrar('COORDINACIÓN MÉDICA')">ACCESO COORDINACIÓN MÉDICA</button>
                 </div>
 
                 <!-- TARJETA 2: DERECHOHABIENTES (ACCESO DIRECTO SIN LOGUEO, COLOR VERDE ISSSTE) -->
                 <div class="card card-patient" style="border-top: 8px solid var(--guinda) !important;">
-                    <h3 style="color: var(--guinda); margin: 0 0 10px 0; text-align: center; font-size: 2.50em;">Derechohabientes</h3>
+                    <h3 style="color: var(--guinda); margin: 0 0 10px 0; text-align: center; font-size: 1.50em;">Derechohabientes</h3>
                     <p style="font-size: 0.85em; text-align: center;">Trámites, solicitudes y gestión de servicios para pacientes de la C.M.F. Ermita.</p>
                     <!-- Al darle click, salta directo a su panel independiente -->
                     <button class="btn-save" style="background: var(--guinda); color: white !important;" onclick="activarModulo('panel-derechohabientes', this)">ACCESO DERECHOHABIENTES</button>
@@ -221,7 +248,7 @@
 
 <!-- NUEVA TARJETA: ACCESO ADMINISTRADOR -->
 <div class="card card-admin" style="border-top: 8px solid var(--azul-admin);">
-    <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 2.50em; text-align: center;">Panel de Administración</h3>
+    <h3 style="color: #374151; margin: 0 0 10px 0; font-size: 1.50em; text-align: center;">Panel de Administración</h3>
     <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Control global de seguridad, roles, auditoría y usuarios maestros.</p>
     <button class="btn-save" style="background: #374151; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;" onclick="entrar('ADMINISTRADOR')">ACCESO ADMINISTRADOR</button>
 </div>
@@ -232,7 +259,7 @@
 
 <!-- NUEVA TARJETA PÚBLICA: ACCESO MÉDICOS EN FORMACIÓN -->
 <div class="card card-trainees" style="border-top: 8px solid var(--azul-trainees);">
-    <h3 style="color: #1e3a8a; margin: 0 0 10px 0; font-size: 2.50em; text-align: center;">MIP'S, Pasantes y Residentes</h3>
+    <h3 style="color: #1e3a8a; margin: 0 0 10px 0; font-size: 1.50em; text-align: center;">MIP'S, Pasantes y Residentes</h3>
     <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Acceso exclusivo para el personal médico en formación mediante clave digital autorizada.</p>
     <button class="btn-save" style="background: #1e3a8a; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;" onclick="abrirLoginTrainees()">INGRESAR CREDENCIAL</button>
 </div>
