@@ -188,10 +188,191 @@
 
 
 
+
+
+
+
+
+
+
+/* =========================================================================
+   ESTILOS INNOVADORES ORBITALES - PORTAL DE MEDICOS EN FORMACIÓN
+   ========================================================================= */
+.universe-container {
+    position: relative;
+    width: 100%;
+    min-height: 480px;
+    background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.solar-system-view {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Núcleo del Sistema */
+.sun-center {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(circle, #1e3a8a 0%, #172554 100%);
+    border: 4px solid #b38e5d;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(30, 58, 138, 0.4);
+    z-index: 10;
+}
+
+/* Líneas elípticas de las órbitas */
+.orbit-path {
+    position: absolute;
+    border: 1.5px dashed rgba(30, 58, 138, 0.2);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.orbit-mip { width: 220px; height: 160px; animation: spinOrbit 12s linear infinite; }
+.orbit-pasante { width: 380px; height: 260px; animation: spinOrbit 20s linear infinite; }
+.orbit-residente { width: 540px; height: 360px; animation: spinOrbit 28s linear infinite; }
+
+/* Detener movimiento al pasar el mouse por la órbita */
+.orbit-path:hover {
+    animation-play-state: paused;
+    border-color: #1e3a8a;
+}
+
+/* Planetas / Opciones clicables */
+.planet {
+    position: absolute;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.75em;
+    color: white;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Contrarrestar la rotación de la órbita para mantener el texto del planeta derecho */
+.orbit-mip .planet { top: -32px; animation: keepTextUpright 12s linear infinite; }
+.orbit-pasante .planet { right: -32px; animation: keepTextUpright 20s linear infinite; }
+.orbit-residente .planet { bottom: -32px; animation: keepTextUpright 28s linear infinite; }
+
+.orbit-path:hover .planet {
+    animation-play-state: paused;
+}
+
+.planet:hover {
+    transform: scale(1.25);
+    box-shadow: 0 0 15px rgba(0,0,0,0.25);
+    z-index: 100;
+}
+
+/* Colores cósmicos de los planetas */
+.planet-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: 2px solid #93c5fd; }
+.planet-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); border: 2px solid #e9d5ff; }
+.planet-gold { background: linear-gradient(135deg, #f59e0b, #b45309); border: 2px solid #fde68a; }
+
+.planet-core { text-shadow: 0 1px 3px rgba(0,0,0,0.3); letter-spacing: 0.5px; }
+
+/* Tooltips explicativos de los planetas */
+.planet-tooltip {
+    position: absolute;
+    bottom: 80px;
+    background: #1e293b;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    width: 160px;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: 0.3s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.planet-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1e293b;
+}
+.planet:hover .planet-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* VISTA RECONVERTIDA PARA CELULARES (Layout Táctil Plano) */
+.mobile-galaxy-view { display: none; width: 100%; padding: 15px; flex-direction: column; gap: 15px; }
+.mobile-planet-card {
+    background: white;
+    padding: 16px;
+    border-radius: 10px;
+    border-left: 6px solid #1e3a8a;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    cursor: pointer;
+    transition: 0.2s;
+}
+.mobile-planet-card:active { transform: scale(0.98); background: #f8fafc; }
+.mobile-planet-card h4 { margin: 0 0 5px 0; color: #1e3a8a; font-size: 1.1em; }
+.mobile-planet-card p { margin: 0 0 10px 0; font-size: 0.85em; color: #555; text-align: left; padding: 0; }
+.mobile-planet-card span { font-size: 0.8em; font-weight: bold; color: #b38e5d; display: block; text-align: right; }
+
+.card-blue { border-left-color: #3b82f6; }
+.card-purple { border-left-color: #a855f7; }
+.card-gold { border-left-color: #f59e0b; }
+
+/* ANIMACIONES MAESTRAS DE ROTACIÓN CSS */
+@keyframes spinOrbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(3deg); } /* Rotación ultra sutil de 3 grados para simular movimiento lento y elegante */
+}
+@keyframes keepTextUpright {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-3deg); }
+}
+
+/* MEDIA QUERIES: OCULTAR SISTEMA SOLAR EN PANTALLAS PEQUEÑAS */
+@media (max-width: 768px) {
+    .solar-system-view { display: none; }
+    .mobile-galaxy-view { display: flex; }
+    .universe-container { min-height: auto; background: transparent; box-shadow: none; padding: 0; }
+}
+
+
+
+
+
+
+
+
+
+
+
 </style>
-
-
-
 
 
 </head>
@@ -208,7 +389,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.1.0
+        v2.3.0
     </div>
 
 
@@ -1253,45 +1434,84 @@
 <!-- ========================================================================= -->
 <!-- PANTALLA PRINCIPAL DE ADIESTRAMIENTO (MIP'S, PASANTES Y RESIDENTES)       -->
 <!-- ========================================================================= -->
-<div id="panel-medicos-formacion" class="view" style="display: none; padding: 20px; font-family: sans-serif;">
+<!-- ========================================================================= -->
+<!-- PANTALLA PRINCIPAL DE ADIESTRAMIENTO REEDISEÑADA (SISTEMA ORBITAL)       -->
+<!-- ========================================================================= -->
+<div id="panel-medicos-formacion" class="view" style="display: none; padding: 20px;">
+    <!-- Barra superior ejecutiva azul marino -->
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #1e3a8a; margin-bottom: 20px; padding-bottom: 10px;">
         <h2 style="color: #1e3a8a; margin:0; font-family: 'Segoe UI', sans-serif;">Portal de Médicos en Formación</h2>
-        <button onclick="activarModulo('panel-principal', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">← Salir del Portal</button>
+        <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#98989a'">← Salir del Portal</button>
     </div>
 
-    <!-- REJILLA CON LAS 3 TARJETAS SEPARADAS SOLICITADAS -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 10px;">
+    <!-- Integración del Hero institucional para respetar la identidad visual -->
+    <div class="teaching-hero" style="border-color: #1e3a8a; background: #f0f4f8;">
+        <h2 style="color: #1e3a8a; margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
+        <div id="phrase-container-trainees" style="font-size: 1.1em; font-style: italic; color: #1e3a8a; margin-top: 8px; font-weight: 300; min-height: 2.2em; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-in-out;">"Cargando pensamiento institucional..."</div>
+    </div>
+
+    <!-- CONTENEDOR MAESTRO DEL SISTEMA INTERACTIVO -->
+    <div class="universe-container">
         
-        <!-- TARJETA A: MIP'S -->
-        <div style="border: 1px solid #1e3a8a; background: #f0f4f8; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <h3 style="color: #1e3a8a; margin-top: 0;">Médicos Internos de Pregrado (MIP)</h3>
-            <p style="font-size: 0.85em; color: #555; margin-bottom: 15px;">Registro de adscripción, bitácora de rotación hospitalaria y entrega de documentos base.</p>
-            <button onclick="abrirRegistroFormacion('MIP')" style="background: #1e3a8a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Abrir Registro MIP</button>
+        <!-- VISTA ESCRITORIO: SISTEMA ORBITAL INTERACTIVO -->
+        <div class="solar-system-view">
+            <!-- Centro de control (El Sol) -->
+            <div class="sun-center">
+                <span style="font-size: 0.85em; font-weight: bold; color: white; display: block; line-height: 1.2;">NÚCLEO<br>MÉDICO</span>
+            </div>
+
+            <!-- Órbita 1: MIP'S -->
+            <div class="orbit-path orbit-mip">
+                <div class="planet planet-blue" onclick="abrirRegistroFormacion('MIP')">
+                    <div class="planet-core">MIP</div>
+                    <div class="planet-tooltip"><strong>Médicos Internos de Pregrado</strong><br>Bitácoras, rotaciones y documentos.</div>
+                </div>
+            </div>
+
+            <!-- Órbita 2: PASANTES -->
+            <div class="orbit-path orbit-pasante">
+                <div class="planet planet-purple" onclick="abrirRegistroFormacion('PASANTE')">
+                    <div class="planet-core">PASANTE</div>
+                    <div class="planet-tooltip"><strong>Pasantes en Servicio Social</strong><br>Programas comunitarios e informes mensuales.</div>
+                </div>
+            </div>
+
+            <!-- Órbita 3: RESIDENTES -->
+            <div class="orbit-path orbit-residente">
+                <div class="planet planet-gold" onclick="abrirRegistroFormacion('RESIDENTE')">
+                    <div class="planet-core">RESIDENTE</div>
+                    <div class="planet-tooltip"><strong>Médicos Residentes</strong><br>Protocolos de investigación y guardias.</div>
+                </div>
+            </div>
         </div>
 
-        <!-- TARJETA B: PASANTES -->
-        <div style="border: 1px solid #1e3a8a; background: #f0f4f8; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <h3 style="color: #1e3a8a; margin-top: 0;">Médicos Pasantes en Servicio Social</h3>
-            <p style="font-size: 0.85em; color: #555; margin-bottom: 15px;">Control de programas comunitarios, informes mensuales y validación académica.</p>
-            <button onclick="abrirRegistroFormacion('PASANTE')" style="background: #1e3a8a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Abrir Registro Pasante</button>
-        </div>
-
-        <!-- TARJETA C: RESIDENTES -->
-        <div style="border: 1px solid #1e3a8a; background: #f0f4f8; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-            <h3 style="color: #1e3a8a; margin-top: 0;">Médicos Residentes (Especialidad)</h3>
-            <p style="font-size: 0.85em; color: #555; margin-bottom: 15px;">Control de protocolos de investigación, asignación de guardias y bitácora de calidad.</p>
-            <button onclick="abrirRegistroFormacion('RESIDENTE')" style="background: #1e3a8a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Abrir Registro Residente</button>
+        <!-- VISTA MÓVIL: TARJETAS RESPONSIVAS FLUIDAS (Se activa por Media Queries) -->
+        <div class="mobile-galaxy-view">
+            <div class="mobile-planet-card card-blue" onclick="abrirRegistroFormacion('MIP')">
+                <h4>Médicos Internos (MIP)</h4>
+                <p>Rotación hospitalaria, bitácoras y carga de expedientes.</p>
+                <span>Tocar para abrir ➔</span>
+            </div>
+            <div class="mobile-planet-card card-purple" onclick="abrirRegistroFormacion('PASANTE')">
+                <h4>Pasantes Servicio Social</h4>
+                <p>Informes mensuales y programas de salud comunitaria.</p>
+                <span>Tocar para abrir ➔</span>
+            </div>
+            <div class="mobile-planet-card card-gold" onclick="abrirRegistroFormacion('RESIDENTE')">
+                <h4>Residentes Especialidad</h4>
+                <p>Control de guardias y protocolos de investigación clínica.</p>
+                <span>Tocar para abrir ➔</span>
+            </div>
         </div>
 
     </div>
 
-    <!-- TARJETA REGISTRO DINÁMICA (Se activa al picar cualquiera de las 3 opciones de arriba) -->
-    <div id="tarjeta-registro-trainee-container" style="display: none; margin-top: 30px; background: #fff; border: 1px solid #1e3a8a; border-top: 5px solid #1e3a8a; padding: 25px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-        <h3 id="titulo-dinamico-registro" style="color: #1e3a8a; margin-top: 0; border-bottom: 2px solid #1e3a8a; padding-bottom: 5px; text-transform: uppercase;">Formulario de Carga</h3>
+    <!-- TARJETA DE CARGA DINÁMICA DEBAJO DEL SISTEMA SOLAR -->
+    <div id="tarjeta-registro-trainee-container" style="display: none; margin-top: 40px; background: #fff; border: 1px solid #1e3a8a; border-top: 5px solid #1e3a8a; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <h3 id="titulo-dinamico-registro" style="color: #1e3a8a; margin-top: 0; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; text-transform: uppercase; font-family: sans-serif;">Formulario de Carga</h3>
         <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Complete sus datos de adscripción institucional. Los campos marcados con (*) son mandatorios.</p>
         
-        <!-- Aquí irá tu formulario interno para recopilar los datos y subir archivos en los próximos pasos -->
-        <div style="padding: 30px; background: #fdfdfd; border: 1px dashed #ccc; text-align: center; color: #777; border-radius: 4px; font-weight: bold;">
+        <div style="padding: 30px; background: #fbfbfb; border: 1px dashed #1e3a8a; text-align: center; color: #1e3a8a; border-radius: 4px; font-weight: bold;">
             📋 Formulario de Registro Listo para Modelar los Campos de Carga de Archivos
         </div>
     </div>
@@ -2615,26 +2835,30 @@ let _indiceFraseActual = 0;
 
 function iniciarCarruselPensamientos() {
     const contenedor = document.getElementById('phrase-container');
-    if (!contenedor) return;
+    const contenedorTrainees = document.getElementById('phrase-container-trainees');
+    if (!contenedor && !contenedorTrainees) return;
+
+    const actualizarTexto = (txt) => {
+        if (contenedor) contenedor.innerText = txt;
+        if (contenedorTrainees) contenedorTrainees.innerText = txt;
+    };
 
     // Colocamos la primera frase de inmediato al cargar la página
-    contenedor.innerText = FRASES_INSTITUCIONALES[_indiceFraseActual];
+    actualizarTexto(FRASES_INSTITUCIONALES[_indiceFraseActual]);
 
-    // Configurar temporizador automático cada 7 segundos
     setInterval(() => {
-        // PASO 1: Desvanecer la frase actual (Opacidad a cero)
-        contenedor.style.opacity = 0;
+        if (contenedor) contenedor.style.opacity = 0;
+        if (contenedorTrainees) contenedorTrainees.style.opacity = 0;
 
-        // PASO 2: Esperar a que termine el desvanecimiento para cambiar el texto (0.8 segundos)
         setTimeout(() => {
             _indiceFraseActual = (_indiceFraseActual + 1) % FRASES_INSTITUCIONALES.length;
-            contenedor.innerText = FRASES_INSTITUCIONALES[_indiceFraseActual];
+            actualizarTexto(FRASES_INSTITUCIONALES[_indiceFraseActual]);
             
-            // PASO 3: Aparecer la nueva frase con suavidad (Opacidad a uno)
-            contenedor.style.opacity = 1;
+            if (contenedor) contenedor.style.opacity = 1;
+            if (contenedorTrainees) contenedorTrainees.style.opacity = 1;
         }, 800); 
 
-    }, 7000); // 7000 milisegundos = 7 segundos por frase
+    }, 7000); 
 }
 
 
