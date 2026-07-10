@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v3.0.0
+        v3.1.0
     </div>
 
 
@@ -1141,72 +1141,99 @@
 <div id="panel-control-usuarios" class="view" style="display: none; padding: 20px;">
     <!-- Barra de Navegación Superior -->
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #b38e5d; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2 style="color: #374151; margin:0; font-family: 'Segoe UI', sans-serif;">Administración del Personal y Privilegios</h2>
+        <h2 style="color: #374151; margin:0; font-family: 'Segoe UI', sans-serif;">Administración del Personal, Roles y Servicios</h2>
         <button onclick="activarModulo('panel-administrador', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-admin)'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
     </div>
 
-    <!-- Rejilla de las 2 Tarjetas con Formularios Incorporados -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; align-items: start;">
+    <!-- REJILLA ADAPTATIVA DE 3 COLUMNAS SIMÉTRICAS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: start;">
         
-        <!-- TARJETA 1: REGISTRO DE SERVICIOS (ROLES) -->
-        <div style="background: #fdf2f4; border: 1px solid rgba(97, 18, 50, 0.15); border-top: 5px solid #611232; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-            <h3 style="color: #611232; margin-top:0; border-bottom: 2px solid #611232; padding-bottom:5px;">1. Registro de Servicios (Roles)</h3>
-            <form id="form-registro-rol" onsubmit="guardarRolNube(event)" style="margin-top: 15px;">
+        <!-- TARJETA 1: REGISTRO DE SERVICIOS (NUEVA ADSCRIPCIÓN) -->
+        <div style="background: #f0fdf4; border: 1px solid rgba(21, 128, 61, 0.15); border-top: 5px solid #15803d; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <h3 style="color: #15803d; margin-top:0; border-bottom: 2px solid #15803d; padding-bottom:5px;">1. Registro de Servicios</h3>
+            <form id="form-registro-servicio" onsubmit="guardarServicioNube(event)" style="margin-top: 15px;">
                 <div style="margin-bottom: 12px;">
-                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#611232; margin-bottom:4px;">Nombre del Rol de Servicio:</label>
-                    <input type="text" id="adm-role-name" required placeholder="Ej. ENFERMERÍA, VIGILANCIA, FARMACIA" style="width:100%; padding:8px; border:1px solid #611232; border-radius:4px; box-sizing:border-box; text-transform:uppercase; outline:none;">
+                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#15803d; margin-bottom:4px;">Nombre del Servicio:</label>
+                    <input type="text" id="adm-service-name" required placeholder="Ej. CONSULTA EXTERNA, URGENCIAS, FARMACIA" style="width:100%; padding:8px; border:1px solid #15803d; border-radius:4px; box-sizing:border-box; text-transform:uppercase; outline:none;">
                 </div>
                 <div style="margin-bottom: 12px;">
-                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#611232; margin-bottom:4px;">Descripción de Funciones:</label>
-                    <input type="text" id="adm-role-desc" placeholder="Descripción breve del alcance del usuario" style="width:100%; padding:8px; border:1px solid #611232; border-radius:4px; box-sizing:border-box; text-transform:uppercase; outline:none;">
+                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#15803d; margin-bottom:4px;">Descripción de Área:</label>
+                    <input type="text" id="adm-service-desc" placeholder="Alcance o ubicación física" style="width:100%; padding:8px; border:1px solid #15803d; border-radius:4px; box-sizing:border-box; text-transform:uppercase; outline:none;">
+                </div>
+                <button type="submit" style="background:#15803d; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer; width:100%;">GUARDAR NUEVO SERVICIO</button>
+            </form>
+
+            <table id="tabla-adm-servicios" style="width:100%; border-collapse:collapse; margin-top:20px; background:white; font-size:0.85em;">
+                <thead>
+                    <tr style="background:#15803d; color:white;">
+                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">ID</th>
+                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Servicio</th>
+                        <th style="padding:8px; border:1px solid #ddd; text-align:center;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- TARJETA 2: REGISTRO DE ROLES (MANTENIDO) -->
+        <div style="background: #fdf2f4; border: 1px solid rgba(97, 18, 50, 0.15); border-top: 5px solid #611232; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <h3 style="color: #611232; margin-top:0; border-bottom: 2px solid #611232; padding-bottom:5px;">2. Registro de Privilegios (Roles)</h3>
+            <form id="form-registro-rol" onsubmit="guardarRolNube(event)" style="margin-top: 15px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#611232; margin-bottom:4px;">Nombre del Rol de Privilegio:</label>
+                    <input type="text" id="adm-role-name" required placeholder="Ej. MÉDICO, ENFERMERÍA, ADMINISTRATIVO" style="width:100%; padding:8px; border:1px solid #611232; border-radius:4px; box-sizing:border-box; text-transform:uppercase; outline:none;">
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#611232; margin-bottom:4px;">Alcance del Rol:</label>
+                    <input type="text" id="adm-role-desc" placeholder="Descripción de permisos" style="width:100%; padding:8px; border:1px solid #611232; border-radius:4px; box-sizing:border-box; text-transform:uppercase; outline:none;">
                 </div>
                 <button type="submit" style="background:#611232; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer; width:100%;">GUARDAR NUEVO ROL</button>
             </form>
 
-            <!-- Tabla de Roles Existentes -->
             <table id="tabla-adm-roles" style="width:100%; border-collapse:collapse; margin-top:20px; background:white; font-size:0.85em;">
                 <thead>
                     <tr style="background:#611232; color:white;">
                         <th style="padding:8px; border:1px solid #ddd; text-align:left;">ID</th>
-                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Rol (Servicio)</th>
-                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Descripción de Rol (Servicio)</th>
-			<th style="padding:8px; border:1px solid #ddd; text-align:center;">Acción</th> <!-- COLUMNA INYECTADA -->
+                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Rol</th>
+                        <th style="padding:8px; border:1px solid #ddd; text-align:center;">Acción</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
 
-        <!-- TARJETA 2: REGISTRO DE USUARIOS -->
+        <!-- TARJETA 3: REGISTRO DE USUARIOS MAESTRO (INTEGRADO DE FORMA CRUZADA) -->
         <div style="background: #f3f4f6; border: 1px solid #d1d5db; border-top: 5px solid #374151; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-            <h3 style="color: #374151; margin-top:0; border-bottom: 2px solid #374151; padding-bottom:5px;">2. Registro de Usuarios</h3>
+            <h3 style="color: #374151; margin-top:0; border-bottom: 2px solid #374151; padding-bottom:5px;">3. Vinculación de Cuentas (Usuarios)</h3>
             <form id="form-registro-usuario" onsubmit="guardarUsuarioNube(event)" style="margin-top: 15px;">
-                <div style="margin-bottom: 12px;">
-                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Nombre de Usuario (Identificador):</label>
-                    <input type="text" id="adm-user-name" required placeholder="Ej. ZAMUDIO_MED" style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; text-transform:uppercase; outline:none;">
+                <div style="margin-bottom: 10px;">
+                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Nombre de Usuario:</label>
+                    <input type="text" id="adm-user-name" required placeholder="Ej. ALEJANDRO_MED" style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; text-transform:uppercase; outline:none;">
                 </div>
-                <div style="margin-bottom: 12px;">
-                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Contraseña de Acceso:</label>
-                    <input type="text" id="adm-user-pass" required placeholder="Clave alfanumérica privada" style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; outline:none;">
+                <div style="margin-bottom: 10px;">
+                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Contraseña:</label>
+                    <input type="text" id="adm-user-pass" required placeholder="Clave privada" style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; outline:none;">
                 </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Asignar Privilegio (Rol):</label>
+                    <select id="adm-user-role" required style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; background:white; outline:none;"></select>
+                </div>
+                <!-- 🚀 NUEVA CAJA DE SELECCIÓN INYECTADA DE FORMA RELACIONAL -->
                 <div style="margin-bottom: 12px;">
-                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Asignar Rol de Acceso (Servicio):</label>
-                    <!-- SELECT RELACIONAL ALIMENTADO DE LA NUEVA TABLA ROLES -->
-                    <select id="adm-user-role" required style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; background:white; outline:none;">
-                        <option value="" disabled selected>Cargando roles disponibles...</option>
+                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Asignar Adscripción (Servicio / Área):</label>
+                    <select id="adm-user-service" required style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; background:white; outline:none;">
+                        <option value="" disabled selected>Cargando servicios...</option>
                     </select>
                 </div>
                 <button type="submit" style="background:#374151; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer; width:100%;">GUARDAR NUEVO USUARIO</button>
             </form>
 
-            <!-- Tabla de Usuarios Activos -->
             <table id="tabla-adm-usuarios" style="width:100%; border-collapse:collapse; margin-top:20px; background:white; font-size:0.85em;">
                 <thead>
                     <tr style="background:#374151; color:white;">
-                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">ID</th>
                         <th style="padding:8px; border:1px solid #ddd; text-align:left;">Usuario</th>
-                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Rol de Acceso</th>
-			<th style="padding:8px; border:1px solid #ddd; text-align:center;">Acción</th> <!-- COLUMNA INYECTADA -->
+                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Rol / Servicio</th>
+                        <th style="padding:8px; border:1px solid #ddd; text-align:center;">Acción</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
