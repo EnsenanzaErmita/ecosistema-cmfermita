@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.6.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 3.0.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -114,47 +114,46 @@ app.post('/api/auth/login', (req, res) => {
 
 // RUTA API: Obtener toda la plantilla con los nombres separados
 app.get('/api/doctors', (req, res) => {
-    const sql = 'SELECT id, rfc, first_name, last_name_paternal, last_name_maternal, name, shift, category, created_at FROM employees ORDER BY last_name_paternal ASC, first_name ASC';
+    // 🚀 INYECCIÓN: Agregamos la columna 'employee_number' a la consulta SELECT
+    const sql = 'SELECT id, rfc, employee_number, first_name, last_name_paternal, last_name_maternal, name, shift, category, created_at FROM employees ORDER BY last_name_paternal ASC, first_name ASC';
     
     pool.query(sql, (err, results) => {
         if (err) {
-            console.error('Error al consultar plantilla:', err);
+            console.error('Error al consultar plantilla en Clever Cloud:', err);
             return res.status(500).json({ message: 'Error al obtener los datos de la base de datos.' });
         }
         res.status(200).json(results);
     });
 });
 
+
 // RUTA API: Registrar personal con nombre desglosado
+
+
 app.post('/api/doctors', (req, res) => {
-    const { rfc, firstName, lastNamePaternal, lastNameMaternal, shift, category } = req.body;
+    // 1. Recibimos el nuevo campo desde el frontend
+    const { rfc, employeeNumber, firstName, lastNamePaternal, lastNameMaternal, shift, category } = req.body;
     
-    if (!rfc || !firstName || !lastNamePaternal) {
-        return res.status(400).json({ message: 'El RFC, Nombre y Apellido Paterno son obligatorios.' });
+    if (!rfc || !employeeNumber || !firstName || !lastNamePaternal) {
+        return res.status(400).json({ message: 'El RFC, Número de Empleado, Nombre y Apellido Paterno son obligatorios.' });
     }
 
-    const checkSql = 'SELECT * FROM employees WHERE rfc = ?';
-    pool.query(checkSql, [rfc], (err, results) => {
+    // 2. Agregamos el campo a tu consulta INSERT
+    const nameCompleto = `${lastNamePaternal} ${lastNameMaternal || ''} ${firstName}`.trim().toUpperCase();
+    const insertSql = 'INSERT INTO employees (rfc, employee_number, first_name, last_name_paternal, last_name_maternal, name, shift, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    
+    pool.query(insertSql, [rfc.trim().toUpperCase(), employeeNumber.trim().toUpperCase(), firstName, lastNamePaternal, lastNameMaternal || '', nameCompleto, shift || 'Matutino', category || 'médico'], (err, result) => {
         if (err) {
-            console.error('Error al buscar duplicado:', err);
-            return res.status(500).json({ message: 'Error interno en el servidor.' });
+            console.error('Error al insertar registro:', err);
+            return res.status(500).json({ message: 'No se pudieron guardar los datos en el servidor.' });
         }
-        if (results && results.length > 0) {
-            return res.status(400).json({ message: 'Este número de empleado ya se encuentra registrado.' });
-        }
-
-        const nameCompleto = `${lastNamePaternal} ${lastNameMaternal || ''} ${firstName}`.trim().toUpperCase();
-
-        const insertSql = 'INSERT INTO employees (rfc, first_name, last_name_paternal, last_name_maternal, name, shift, category) VALUES (?, ?, ?, ?, ?, ?, ?)';
-        pool.query(insertSql, [rfc, firstName, lastNamePaternal, lastNameMaternal || '', nameCompleto, shift || 'Matutino', category || 'médico'], (err, result) => {
-            if (err) {
-                console.error('Error al insertar registro:', err);
-                return res.status(500).json({ message: 'No se pudieron guardar los datos en el servidor.' });
-            }
-            res.status(201).json({ message: 'Personal registrado correctamente.' });
-        });
+        res.status(201).json({ message: 'Personal registrado correctamente.' });
     });
 });
+
+
+
+
 
 // RUTA API: Eliminar personal de la plantilla por su número de empleado (RFC)
 app.delete('/api/doctors/:rfc', (req, res) => {

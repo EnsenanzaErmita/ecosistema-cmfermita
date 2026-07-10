@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.0.0
+        v3.0.0
     </div>
 
 
@@ -348,8 +348,9 @@
             <!-- Barra superior con línea divisoria dorada -->
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #b38e5d; margin-bottom: 20px; padding-bottom: 10px;">
                 <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Módulo de Control de Personal</h2>
-                <!-- Botón para regresar al menú de coordinación principal -->
-                <button onclick="activarModulo('panel-coordinacion', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#b38e5d'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
+                
+                <!-- 🚀 OPTIMIZACIÓN: El botón ahora evalúa la sesión activa en el localStorage para saber a dónde regresar -->
+                <button onclick="const user = JSON.parse(localStorage.getItem('usuarioLogueado')); const rNormal = user && user.roleName ? user.roleName.toUpperCase() : ''; if(rNormal.includes('ADMIN')) { activarModulo('panel-administrador', this); } else { activarModulo('panel-coordinacion', this); }" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#b38e5d'" onmouseout="this.style.background='#98989a'">← Volver al Panel</button>
             </div>
 
             <!-- Encabezado del Bloque en Color Dorado de Calidad -->
@@ -364,21 +365,31 @@
                 <form id="form-registro-personal" onsubmit="guardarPersonalNube(event)">
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
                         <div>
-                            <label for="per-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">RFC / Número de Empleado:</label>
-                            <input type="text" id="per-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
+                            <!-- 🟢 MODIFICADO: Label adaptado para indicar claramente el Número de Empleado -->
+                            <label for="per-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">RFC / Número de Empleado (Llave Única):</label>
+                            <input type="text" id="per-rfc" required placeholder="Ej. ABCD123456XYZ o No. Empleado" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
+
+
+
 			<div>
-			    <label for="per-firstname" style="color: var(--guinda); font-weight: bold;">Nombre(s):</label>
-			    <input type="text" id="per-firstname" required placeholder="Ej. Manuel Alejandro">
+			    <label for="per-number" style="color: #611232; font-weight: bold;">Número de Empleado (*):</label>
+			    <input type="text" id="per-number" required placeholder="Ej. 20261105">
 			</div>
-			<div>
-			    <label for="per-paternal" style="color: var(--guinda); font-weight: bold;">Apellido Paterno:</label>
-			    <input type="text" id="per-paternal" required placeholder="Ej. González">
-			</div>
-			<div>
-			    <label for="per-maternal" style="color: var(--guinda); font-weight: bold;">Apellido Materno:</label>
-			    <input type="text" id="per-maternal" placeholder="Ej. Zamudio">
-			</div>
+
+
+                        <div>
+                            <label for="per-firstname" style="color: var(--guinda); font-weight: bold;">Nombre(s):</label>
+                            <input type="text" id="per-firstname" required placeholder="Ej. Manuel Alejandro">
+                        </div>
+                        <div>
+                            <label for="per-paternal" style="color: var(--guinda); font-weight: bold;">Apellido Paterno:</label>
+                            <input type="text" id="per-paternal" required placeholder="Ej. González">
+                        </div>
+                        <div>
+                            <label for="per-maternal" style="color: var(--guinda); font-weight: bold;">Apellido Materno:</label>
+                            <input type="text" id="per-maternal" placeholder="Ej. Zamudio">
+                        </div>
                         <div>
                             <label for="per-shift" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Turno:</label>
                             <select id="per-shift" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
@@ -413,7 +424,9 @@
                     <thead>
                         <tr style="background: #611232; color: white;">
                             <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">ID</th>
+                            <!-- 🟢 MODIFICADO: Encabezado unificado de la tabla para reflejar el Número de Empleado -->
                             <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">RFC</th>
+			    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">No. Empleado</th>
                             <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Nombre</th>
                             <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Turno</th>
                             <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Categoría</th>
@@ -1023,6 +1036,20 @@
             <p>Alta de personal interno, asignación de claves privadas y control relacional de roles institucionales.</p>
             <button onclick="activarModulo('panel-control-usuarios', this); deInmediatoCargarRolesYUsuarios();" class="btn-save" style="background: #374151; color: white !important;">GESTIONAR USUARIOS Y ROLES</button>
         </div>
+
+
+
+
+
+        <!-- NUEVA TARJETA: ALTA DE EMPLEADOS DIRECTA (ADMIN) -->
+        <div class="card" style="border-top: 8px solid #374151; background: #f9fafb; text-align: center;">
+            <h3 style="color: #374151; margin-top: 0; font-size: 1.50em;">Alta de Empleados</h3>
+            <p>Registro directo de personal médico, enfermería y administrativos en la plantilla general del sistema.</p>
+            <button onclick="activarModulo('modulo-personal', this)" class="btn-save" style="background: #374151; color: white !important;">ABRIR FORMULARIO DE ALTA</button>
+        </div>
+
+
+
         
         <!-- TARJETA 2: GESTIÓN DE MÉDICOS EN FORMACIÓN (MIP'S, PASANTES, RESIDENTES) -->
         <div class="card" style="border-top: 8px solid #7c3aed; background: #faf5ff; text-align: center;">
@@ -1709,11 +1736,14 @@ function cerrarLogin() {
 
     // ALTA: Registra un nuevo empleado en la base de datos
 
+
+
 async function guardarPersonalNube(event) {
     event.preventDefault();
 
-    // Captura de los 3 nuevos campos individuales
+    // Captura del RFC, el nuevo Número de Empleado y los campos individuales desglosados
     const rfc = document.getElementById('per-rfc').value.trim().toUpperCase();
+    const employeeNumber = document.getElementById('per-number').value.trim().toUpperCase(); // 🚀 NUEVO CAMPO CAPTURADO
     const firstName = document.getElementById('per-firstname').value.trim().toUpperCase();
     const lastNamePaternal = document.getElementById('per-paternal').value.trim().toUpperCase();
     const lastNameMaternal = document.getElementById('per-maternal').value.trim().toUpperCase();
@@ -1726,13 +1756,14 @@ async function guardarPersonalNube(event) {
         const response = await fetch(urlServidor, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rfc, firstName, lastNamePaternal, lastNameMaternal, shift, category })
+            // 🚀 INYECCIÓN: Agregamos employeeNumber al cuerpo JSON que viaja a Render
+            body: JSON.stringify({ rfc, employeeNumber, firstName, lastNamePaternal, lastNameMaternal, shift, category })
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            alert('¡Personal registrado exitosamente con desglose de nombre!');
+            alert('¡Personal registrado exitosamente con desglose de nombre y número de empleado!');
             document.getElementById('form-registro-personal').reset(); 
             cargarListaPersonalNube(); 
         } else {
@@ -1743,6 +1774,8 @@ async function guardarPersonalNube(event) {
         alert('No se pudo conectar con el servidor.');
     }
 }
+
+
 
 async function cargarListaPersonalNube() {
     const tbody = document.querySelector('#tabla-personal-usuarios tbody');
@@ -1758,22 +1791,30 @@ async function cargarListaPersonalNube() {
         tbody.innerHTML = ''; 
 
         if (personal.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #888; padding: 20px;">No hay personal registrado.</td></tr>`;
+            // 🟢 MODIFICADO: Ajustado colspan a 8
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #888; padding: 20px;">No hay personal registrado.</td></tr>`;
             return;
         }
 
         personal.forEach(emp => {
             const fecha = emp.created_at ? new Date(emp.created_at).toLocaleString() : 'N/A';
             
-            // Presentamos el nombre ordenado de forma elegante: Apellidos, Nombres
+            // Presentamos el nombre ordenado de forma elegante: Apellidos, Nombres [1]
             const nombreMostrar = emp.last_name_paternal 
                 ? `${emp.last_name_paternal} ${emp.last_name_maternal || ''}, ${emp.first_name}` 
-                : emp.name; // Si es un registro viejo que no tiene desglose, usa el campo plano anterior
+                : emp.name; // Soporte para registros viejos sin desglose [1]
+
+            // 🚀 SOPORTE DE CONTROL: Si es un registro viejo que no tiene número de empleado, muestra N/A
+            const numeroEmpMostrar = emp.employee_number ? emp.employee_number : 'N/A';
 
             const fila = document.createElement('tr');
             fila.innerHTML = `
                 <td style="padding: 12px; border: 1px solid #ddd;"><strong>${emp.id}</strong></td>
-                <td style="padding: 12px; border: 1px solid #ddd;">${emp.rfc}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase;">${emp.rfc}</td>
+                
+                <!-- 🚀 NUEVA CELDA DINÁMICA INYECTADA EN LA FILA -->
+                <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase; font-weight: bold; color: #374151;">${numeroEmpMostrar}</td>
+                
                 <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase;">${nombreMostrar}</td>
                 <td style="padding: 12px; border: 1px solid #ddd;">${emp.shift}</td>
                 <td style="padding: 12px; border: 1px solid #ddd;"><span class="badge" style="background:#e0f2fe; color:#0369a1; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em;">${emp.category}</span></td>
@@ -1786,7 +1827,8 @@ async function cargarListaPersonalNube() {
         });
     } catch (error) {
         console.error('Error al cargar la plantilla de personal:', error);
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos.</td></tr>`;
+        // 🟢 MODIFICADO: Ajustado colspan a 8
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos.</td></tr>`;
     }
 }
 
