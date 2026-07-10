@@ -1019,6 +1019,9 @@
 <!-- ========================================================================= -->
 <!-- PANTALLA PRINCIPAL DEL ADMINISTRADOR MAESTRO                              -->
 <!-- ========================================================================= -->
+<!-- ========================================================================= -->
+<!-- PANTALLA PRINCIPAL DEL ADMINISTRADOR MAESTRO                              -->
+<!-- ========================================================================= -->
 <div id="panel-administrador" class="view" style="display: none; padding: 20px;">
     <!-- Barra superior ejecutiva -->
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #374151; margin-bottom: 20px; padding-bottom: 10px;">
@@ -1026,27 +1029,25 @@
         <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-admin)'" onmouseout="this.style.background='#98989a'">← Volver al Menú Principal</button>
     </div>
 
-    <!-- 🟢 AQUÍ INICIA LA REJILLA DE COLUMNAS -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+    <!-- REJILLA DE DISEÑO (GRID): CONTENEDOR DE LAS TARJETA MAESTRAS -->
+    <div class="login-grid" style="margin-top: 20px;">
         
-        <!-- TARJETA 1: GESTIÓN DE USUARIOS -->
-        <div style="border: 1px solid #374151; background: #f9fafb; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); text-align: center;">
-            <h3 style="color: #374151; margin-top: 0;">Administración de Usuarios</h3>
-            <p style="font-size: 0.85em; color: #555; margin-bottom: 20px;">Alta de personal interno, asignación de claves y control relacional de roles.</p>
-            <button onclick="activarModulo('panel-control-usuarios', this); deInmediatoCargarRolesYUsuarios();" style="background: #374151; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Gestionar Usuarios y Roles</button>
+        <!-- TARJETA 1: ADMINISTRACIÓN DE USUARIOS -->
+        <div class="card" style="border-top: 8px solid #374151; background: #f9fafb; text-align: center;">
+            <h3 style="color: #374151; margin-top: 0; font-size: 1.50em;">Administración de Usuarios</h3>
+            <p>Alta de personal interno, asignación de claves privadas y control relacional de roles institucionales.</p>
+            <button onclick="activarModulo('panel-control-usuarios', this); deInmediatoCargarRolesYUsuarios();" class="btn-save" style="background: #374151; color: white !important;">GESTIONAR USUARIOS Y ROLES</button>
         </div>
         
-        <!-- TARJETA 2: GESTIÓN DE MEDICOS EN FORMACIÓN (MOVIDA AQUÍ ADENTRO PARA ALINEARSE) -->
-        <div style="border: 1px solid #7c3aed; background: #faf5ff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); text-align: center;">
-            <h3 style="color: #7c3aed; margin-top: 0;">MIP'S, Pasantes y Residentes</h3>
-            <p style="font-size: 0.85em; color: #555; margin-bottom: 20px;">Generación de claves de acceso digital por correo electrónico y control de vigencias del personal.</p>
-            <button onclick="activarModulo('panel-control-trainees', this); cargarCatalogoClavesTrainees();" style="background: #7c3aed; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Generación de Claves Internas</button>
+        <!-- TARJETA 2: GESTIÓN DE MÉDICOS EN FORMACIÓN (MIP'S, PASANTES, RESIDENTES) -->
+        <div class="card" style="border-top: 8px solid #7c3aed; background: #faf5ff; text-align: center;">
+            <h3 style="color: #7c3aed; margin-top: 0; font-size: 1.50em;">MIP'S, Pasantes y Residentes</h3>
+            <p>Generación de claves de acceso digital por correo electrónico y control de vigencias del personal.</p>
+            <button onclick="activarModulo('panel-control-trainees', this); cargarCatalogoClavesTrainees();" class="btn-save" style="background: #7c3aed; color: white !important;">GENERACIÓN DE CLAVES INTERNAS</button>
         </div>
 
-    </div> <!-- 🟢 EL CIERRE DE LA REJILLA AHORA QUEDA AQUÍ ABAJO ABARCANDO AMBAS TARJETAS -->
-
-</div>
-
+    </div> <!-- Cierre legítimo de la rejilla (grid) de dos columnas -->
+</div> <!-- Cierre absoluto de la pantalla id="panel-administrador" -->
 
 
 
