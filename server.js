@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 3.0.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.0.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -75,11 +75,13 @@ app.post('/api/auth/login', (req, res) => {
     const passTrim = password.trim();
 
     // Consulta relacional unificando la tabla users con la de roles mediante INNER JOIN
+// Reemplaza la consulta SQL dentro de app.get('/api/users') por esta:
     const sql = `
-        SELECT u.id, u.username, u.password, u.role_id, r.role_name 
-        FROM users u
-        LEFT JOIN roles r ON u.role_id = r.id
-        WHERE u.username = ?
+        SELECT u.id, u.username, u.role_id, r.role_name, u.service_id, s.service_name, u.created_at 
+        FROM users u 
+        LEFT JOIN roles r ON u.role_id = r.id 
+        LEFT JOIN services s ON u.service_id = s.id
+        ORDER BY u.username ASC
     `;
 
     pool.query(sql, [userUpper], (err, results) => {
@@ -629,10 +631,12 @@ app.delete('/api/roles/:id', (req, res) => {
 
 // ENDPOINT 3: Obtener todos los usuarios (Con JOIN para ver el nombre de su rol)
 app.get('/api/users', (req, res) => {
+// Reemplaza la consulta SQL dentro de app.get('/api/users') por esta:
     const sql = `
-        SELECT u.id, u.username, u.role_id, r.role_name, u.created_at 
+        SELECT u.id, u.username, u.role_id, r.role_name, u.service_id, s.service_name, u.created_at 
         FROM users u 
         LEFT JOIN roles r ON u.role_id = r.id 
+        LEFT JOIN services s ON u.service_id = s.id
         ORDER BY u.username ASC
     `;
     pool.query(sql, (err, results) => {
@@ -649,7 +653,8 @@ app.get('/api/users', (req, res) => {
 
 // ENDPOINT 4: Registrar un nuevo Usuario del Sistema
 app.post('/api/users', (req, res) => {
-    const { username, password, roleId } = req.body;
+    // En tu app.post('/api/users') y app.put('/api/users/:id') recibe y mapea:
+    const { username, password, roleId, serviceId } = req.body;
 
     if (!username || !password || !roleId) {
         return res.status(400).json({ message: 'Nombre de usuario, contraseña y rol son obligatorios.' });
@@ -659,7 +664,9 @@ app.post('/api/users', (req, res) => {
     // Nota: Mantenemos almacenamiento directo en texto plano como solicitaste para tus pruebas de desarrollo
     const passTrim = password.trim(); 
 
-    const sql = 'INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)';
+    // E inserta/actualiza en la consulta:
+    const sql = 'INSERT INTO users (username, password, role_id, service_id) VALUES (?, ?, ?, ?)';
+    // Pasando en el arreglo de variables: [userUpper, passTrim, parseInt(roleId), serviceId ? parseInt(serviceId) : null]
     pool.query(sql, [userUpper, passTrim, parseInt(roleId)], (err, result) => {
         if (err) {
             console.error('Error al insertar usuario en Clever Cloud:', err);
@@ -676,11 +683,15 @@ app.post('/api/users', (req, res) => {
 
 
 
-// ENDPOINT BACKEND: Actualizar las credenciales o rol de un Usuario existente (Edición)
+
+// ENDPOINT BACKEND: Actualizar las credenciales, rol o servicio de un Usuario existente (Edición)
+// ENDPOINT BACKEND: Actualizar las credenciales, rol o servicio de un Usuario existente (Edición)
 app.put('/api/users/:id', (req, res) => {
     const { id } = req.params;
-    const { username, password, roleId } = req.body;
+    const { username, password, roleId, serviceId } = req.body;
 
+    // Nota: Dejamos serviceId fuera de esta validación obligatoria porque un usuario 
+    // podría quedar temporalmente "SIN SERVICIO ASIGNADO" (con valor NULL)
     if (!username || !password || !roleId) {
         return res.status(400).json({ message: 'Nombre de usuario, contraseña y rol son obligatorios.' });
     }
@@ -688,10 +699,19 @@ app.put('/api/users/:id', (req, res) => {
     const userUpper = username.trim().toUpperCase();
     const passTrim = password.trim();
 
-    const sql = 'UPDATE users SET username = ?, password = ?, role_id = ? WHERE id = ?';
-    pool.query(sql, [userUpper, passTrim, parseInt(roleId), id], (err, result) => {
+    // 🚀 CORREGIDO: Agregamos "service_id = ?" a la instrucción SQL de actualización
+    const sql = 'UPDATE users SET username = ?, password = ?, role_id = ?, service_id = ? WHERE id = ?';
+    
+    // 🚀 CORREGIDO: Inyectamos serviceId (convertido a entero o pasándole null si viene vacío) y el id de la URL
+    pool.query(sql, [
+        userUpper, 
+        passTrim, 
+        parseInt(roleId), 
+        serviceId ? parseInt(serviceId) : null, 
+        id
+    ], (err, result) => {
         if (err) {
-            console.error('Error al actualizar usuario en Clever Cloud:', err);
+            console.error('Error al actualizar usuario relacional en Clever Cloud:', err);
             if (err.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ message: 'Ese nombre de usuario ya está ocupado por otra cuenta.' });
             }
@@ -700,6 +720,9 @@ app.put('/api/users/:id', (req, res) => {
         res.status(200).json({ message: 'Usuario del sistema actualizado correctamente.' });
     });
 });
+
+
+
 
 // ENDPOINT BACKEND: Eliminar un Usuario de la Base de Datos
 app.delete('/api/users/:id', (req, res) => {
@@ -969,6 +992,29 @@ app.post('/api/trainee-auth/login', (req, res) => {
 
 
 
+
+app.get('/api/services', (req, res) => {
+    pool.query('SELECT id, service_name, description FROM services ORDER BY service_name ASC', (err, results) => {
+        if (err) return res.status(500).json({ message: 'Error al consultar servicios.' });
+        res.status(200).json(results);
+    });
+});
+
+app.post('/api/services', (req, res) => {
+    const { serviceName, description } = req.body;
+    if (!serviceName) return res.status(400).json({ message: 'El nombre del servicio es obligatorio.' });
+    pool.query('INSERT INTO services (service_name, description) VALUES (?, ?)', [serviceName.trim().toUpperCase(), description ? description.trim().toUpperCase() : 'N/A'], (err) => {
+        if (err) return res.status(500).json({ message: 'No se pudo guardar el servicio.' });
+        res.status(201).json({ message: 'Servicio registrado correctamente.' });
+    });
+});
+
+app.delete('/api/services/:id', (req, res) => {
+    pool.query('DELETE FROM services WHERE id = ?', [req.params.id], (err) => {
+        if (err) return res.status(500).json({ message: 'Error al eliminar el servicio.' });
+        res.status(200).json({ message: 'Servicio eliminado correctamente.' });
+    });
+});
 
 
 
