@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.0.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.2.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -64,6 +64,9 @@ pool.getConnection((err, connection) => {
 // =========================================================================
 
 // RUTA API POST: Validación de usuarios y roles unificada (REEMPLAZO ASOCIADO A ROLES)
+// =========================================================================
+// RUTA API POST: VALIDACIÓN DE CREDENCIALES CORREGIDA Y BLINDADA
+// =========================================================================
 app.post('/api/auth/login', (req, res) => {
     const { username, password } = req.body;
 
@@ -74,14 +77,13 @@ app.post('/api/auth/login', (req, res) => {
     const userUpper = username.trim().toUpperCase();
     const passTrim = password.trim();
 
-    // Consulta relacional unificando la tabla users con la de roles mediante INNER JOIN
-// Reemplaza la consulta SQL dentro de app.get('/api/users') por esta:
+    // 🏛️ REPARACIÓN: Agregamos u.password al SELECT y la cláusula WHERE condicional
     const sql = `
-        SELECT u.id, u.username, u.role_id, r.role_name, u.service_id, s.service_name, u.created_at 
+        SELECT u.id, u.username, u.password, u.role_id, r.role_name, u.service_id, s.service_name, u.created_at 
         FROM users u 
         LEFT JOIN roles r ON u.role_id = r.id 
         LEFT JOIN services s ON u.service_id = s.id
-        ORDER BY u.username ASC
+        WHERE BINARY u.username = ?
     `;
 
     pool.query(sql, [userUpper], (err, results) => {
@@ -90,13 +92,15 @@ app.post('/api/auth/login', (req, res) => {
             return res.status(500).json({ message: 'Error interno en el servidor al procesar el ingreso.' });
         }
 
+        // Si el usuario específico no existe en los registros de la base de datos
         if (!results || results.length === 0) {
             return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas.' });
         }
 
-        const usuarioEncontrado = results[0]; // Extraemos de forma segura el registro
+        // Extraemos de forma segura el registro único filtrado
+        const usuarioEncontrado = results[0]; 
 
-        // Validación de coincidencia de contraseña en desarrollo
+        // 🔐 VALIDACIÓN REPARADA: Evaluamos caracteres en texto plano contra Clever Cloud
         if (usuarioEncontrado.password !== passTrim) {
             return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas.' });
         }
@@ -113,6 +117,7 @@ app.post('/api/auth/login', (req, res) => {
         });
     });
 });
+
 
 // RUTA API: Obtener toda la plantilla con los nombres separados
 app.get('/api/doctors', (req, res) => {
