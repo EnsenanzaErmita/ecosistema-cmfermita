@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.5.0
+        v1.6.0
     </div>
 
 
@@ -366,7 +366,7 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
                         <div>
                             <!-- 🟢 MODIFICADO: Label adaptado para indicar claramente el Número de Empleado -->
-                            <label for="per-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">RFC / Número de Empleado (Llave Única):</label>
+                            <label for="per-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">RFC:</label>
                             <input type="text" id="per-rfc" required placeholder="Ej. ABCD123456XYZ o No. Empleado" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
                         </div>
 
@@ -399,19 +399,30 @@
                                 <option value="Jornada Acumulada">Jornada Acumulada</option>
                             </select>
                         </div>
-                        <div>
-                            <label for="per-category" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Categoría / Rol:</label>
-                            <select id="per-category" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
-                                <option value="médico">Médico</option>
-                                <option value="enfermería">Enfermería</option>
-                                <option value="trabajosocial">Trabajo Social</option>
-                                <option value="archivo">Archivo Clínico</option>
-                                <option value="administrativo">Administrativo</option>
-                            </select>
-                        </div>
+
+
+
+<div>
+    <label for="per-category" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Rol:</label>
+    <select id="per-category" required style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
+        <option value="" disabled selected>Cargando roles...</option>
+    </select>
+</div>
+
+<!-- 🚀 SE AGREGA EL SELECT DE SERVICIO: Captura el NOMBRE visible (Texto plano) -->
+<div>
+    <label for="per-service" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">Servicio:</label>
+    <select id="per-service" required style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white;">
+        <option value="" disabled selected>Cargando áreas...</option>
+    </select>
+</div>
+
+
+
+
                         <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
                             <!-- Botón de Envío en Color Dorado de Calidad -->
-                            <button type="submit" style="background-color: #b38e5d; color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#611232'" onmouseout="this.style.backgroundColor='#b38e5d'">REGISTRAR EN CLEVER CLOUD</button>
+                            <button type="submit" style="background-color: #b38e5d; color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#611232'" onmouseout="this.style.backgroundColor='#b38e5d'">REGISTRAR NUEVO EMPLEADO</button>
                         </div>
                     </div>
                 </form>
@@ -422,18 +433,19 @@
                 <h4 style="color: #611232; margin: 0 0 12px 0; font-family: 'Segoe UI', sans-serif; font-size: 1.1em; border-left: 4px solid #b38e5d; padding-left: 8px;">Plantilla de Personal Registrado (employees)</h4>
                 <table id="tabla-personal-usuarios" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden;">
                     <thead>
-                        <tr style="background: #611232; color: white;">
-                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">ID</th>
-                            <!-- 🟢 MODIFICADO: Encabezado unificado de la tabla para reflejar el Número de Empleado -->
-                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">RFC</th>
-			    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">No. Empleado</th>
-                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Nombre</th>
-                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Turno</th>
-                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Categoría</th>
-                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Fecha Registro (created_at)</th>
-                            <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Acciones</th>
-                        </tr>
-                    </thead>
+    			<tr style="background: #611232; color: white;">
+        		    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">ID</th>
+        		    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">RFC</th>
+        		    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">No. Empleado</th>
+        		    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Nombre</th>
+        		    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Turno</th>
+        		    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Categoría</th>
+        		    <!-- 🚀 NUEVA COLUMNA VISUAL INYECTADA -->
+        		    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">SERVICIO / ÁREA</th>
+        		    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Fecha Registro (created_at)</th>
+        		    <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Acciones</th>
+    			</tr>
+		    </thead>
                     <tbody>
                         <tr>
                             <td colspan="7" style="text-align: center; color: #888; padding: 20px;">Cargando datos desde la base de datos de Clever Cloud...</td>
@@ -1771,14 +1783,15 @@ function cerrarLogin() {
 async function guardarPersonalNube(event) {
     event.preventDefault();
 
-    // Captura del RFC, el nuevo Número de Empleado y los campos individuales desglosados
     const rfc = document.getElementById('per-rfc').value.trim().toUpperCase();
-    const employeeNumber = document.getElementById('per-number').value.trim().toUpperCase(); // 🚀 NUEVO CAMPO CAPTURADO
+    const employeeNumber = document.getElementById('per-number').value.trim().toUpperCase(); 
     const firstName = document.getElementById('per-firstname').value.trim().toUpperCase();
     const lastNamePaternal = document.getElementById('per-paternal').value.trim().toUpperCase();
     const lastNameMaternal = document.getElementById('per-maternal').value.trim().toUpperCase();
     const shift = document.getElementById('per-shift').value;
     const category = document.getElementById('per-category').value;
+    // 🚀 OBTENEMOS EL TEXTO DEL NOMBRE DEL SERVICIO (VARCHAR COMPATIBLE)
+    const serviceName = document.getElementById('per-service').value;
 
     const urlServidor = `${BASE_URL}/api/doctors`;
 
@@ -1786,14 +1799,14 @@ async function guardarPersonalNube(event) {
         const response = await fetch(urlServidor, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // 🚀 INYECCIÓN: Agregamos employeeNumber al cuerpo JSON que viaja a Render
-            body: JSON.stringify({ rfc, employeeNumber, firstName, lastNamePaternal, lastNameMaternal, shift, category })
+            // Enviamos serviceName como texto plano
+            body: JSON.stringify({ rfc, employeeNumber, firstName, lastNamePaternal, lastNameMaternal, shift, category, serviceName })
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            alert('¡Personal registrado exitosamente con desglose de nombre y número de empleado!');
+            alert('¡Personal registrado exitosamente con adscripción de área congelada!');
             document.getElementById('form-registro-personal').reset(); 
             cargarListaPersonalNube(); 
         } else {
@@ -1807,47 +1820,64 @@ async function guardarPersonalNube(event) {
 
 
 
+// CORREGIDO: Alimenta los selectores del formulario con los Roles y Servicios vigentes de Clever Cloud
+// CORREGIDO: Alimenta selectores mandando nombres en texto plano (Evita amarres relacionales)
 async function cargarListaPersonalNube() {
     const tbody = document.querySelector('#tabla-personal-usuarios tbody');
+    const selectCat = document.getElementById('per-category');
+    const selectServ = document.getElementById('per-service');
     if (!tbody) return;
 
-    const urlServidor = `${BASE_URL}/api/doctors`;
-
     try {
-        const response = await fetch(urlServidor);
+        // 1. Cargar catálogo de Roles vigentes
+        const resRoles = await fetch(`${BASE_URL}/api/roles`);
+        const roles = await resRoles.json();
+        if (selectCat) {
+            selectCat.innerHTML = '<option value="" disabled selected>-- Seleccione Categoría --</option>' +
+                roles.map(r => `<option value="${r.role_name.toLowerCase()}">${r.role_name}</option>`).join('');
+        }
+
+        // 2. Cargar catálogo de Servicios vigentes 
+        const resServices = await fetch(`${BASE_URL}/api/services`);
+        const servicios = await resServices.json();
+        if (selectServ) {
+            // 🚀 ESTRATEGIA: Colocamos s.service_name en el VALUE para recuperar la cadena de texto limpia
+            selectServ.innerHTML = '<option value="" disabled selected>-- Seleccione Área --</option>' +
+                servicios.map(s => `<option value="${s.service_name}">${s.service_name}</option>`).join('');
+        }
+
+        // 3. Renderizar la tabla de personal
+        const response = await fetch(`${BASE_URL}/api/doctors`);
         if (!response.ok) throw new Error('Error al obtener datos');
         
         const personal = await response.json();
         tbody.innerHTML = ''; 
 
         if (personal.length === 0) {
-            // 🟢 MODIFICADO: Ajustado colspan a 8
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #888; padding: 20px;">No hay personal registrado.</td></tr>`;
+            // 🏛️ CORREGIDO: Ajustado colspan a 9 por la nueva columna de servicio
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #888; padding: 20px;">No hay personal registrado.</td></tr>`;
             return;
         }
 
         personal.forEach(emp => {
             const fecha = emp.created_at ? new Date(emp.created_at).toLocaleString() : 'N/A';
-            
-            // Presentamos el nombre ordenado de forma elegante: Apellidos, Nombres [1]
             const nombreMostrar = emp.last_name_paternal 
                 ? `${emp.last_name_paternal} ${emp.last_name_maternal || ''}, ${emp.first_name}` 
-                : emp.name; // Soporte para registros viejos sin desglose [1]
-
-            // 🚀 SOPORTE DE CONTROL: Si es un registro viejo que no tiene número de empleado, muestra N/A
+                : emp.name;
             const numeroEmpMostrar = emp.employee_number ? emp.employee_number : 'N/A';
 
             const fila = document.createElement('tr');
             fila.innerHTML = `
                 <td style="padding: 12px; border: 1px solid #ddd;"><strong>${emp.id}</strong></td>
                 <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase;">${emp.rfc}</td>
-                
-                <!-- 🚀 NUEVA CELDA DINÁMICA INYECTADA EN LA FILA -->
                 <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase; font-weight: bold; color: #374151;">${numeroEmpMostrar}</td>
-                
                 <td style="padding: 12px; border: 1px solid #ddd; text-transform: uppercase;">${nombreMostrar}</td>
                 <td style="padding: 12px; border: 1px solid #ddd;">${emp.shift}</td>
-                <td style="padding: 12px; border: 1px solid #ddd;"><span class="badge" style="background:#e0f2fe; color:#0369a1; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em;">${emp.category}</span></td>
+                <td style="padding: 12px; border: 1px solid #ddd;"><span class="badge" style="background:#e0f2fe; color:#0369a1; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; text-transform: uppercase;">${emp.category}</span></td>
+                
+                <!-- 🚀 NUEVA CELDA DINÁMICA: Muestra el servicio independiente en texto plano -->
+                <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold; color: #15803d; text-transform: uppercase;">${emp.service || 'N/A'}</td>
+                
                 <td style="padding: 12px; border: 1px solid #ddd; font-size: 0.85em; color: #555;">${fecha}</td>
                 <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
                     <button onclick="eliminarPersonalNube('${emp.rfc}')" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
@@ -1857,8 +1887,8 @@ async function cargarListaPersonalNube() {
         });
     } catch (error) {
         console.error('Error al cargar la plantilla de personal:', error);
-        // 🟢 MODIFICADO: Ajustado colspan a 8
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos.</td></tr>`;
+        // 🏛️ CORREGIDO: Ajustado colspan a 9 por la nueva columna de servicio
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #cc0000; font-weight:bold; padding: 20px;">Error al conectar con la base de datos.</td></tr>`;
     }
 }
 

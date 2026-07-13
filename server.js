@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.5.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.6.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -121,8 +121,8 @@ app.post('/api/auth/login', (req, res) => {
 
 // RUTA API: Obtener toda la plantilla con los nombres separados
 app.get('/api/doctors', (req, res) => {
-    // 🚀 INYECCIÓN: Agregamos la columna 'employee_number' a la consulta SELECT
-    const sql = 'SELECT id, rfc, employee_number, first_name, last_name_paternal, last_name_maternal, name, shift, category, created_at FROM employees ORDER BY last_name_paternal ASC, first_name ASC';
+    // 🚀 INYECCIÓN: Traemos la columna 'service' desde Clever Cloud
+    const sql = 'SELECT id, rfc, employee_number, first_name, last_name_paternal, last_name_maternal, name, shift, category, service, created_at FROM employees ORDER BY last_name_paternal ASC, first_name ASC';
     
     pool.query(sql, (err, results) => {
         if (err) {
@@ -137,21 +137,32 @@ app.get('/api/doctors', (req, res) => {
 // RUTA API: Registrar personal con nombre desglosado
 
 
+// ENDPOINT: REGISTRAR PERSONAL CON COLUMNA DE SERVICIO INDEPENDIENTE (TEXTO PLANO)
 app.post('/api/doctors', (req, res) => {
-    // 1. Recibimos el nuevo campo desde el frontend
-    const { rfc, employeeNumber, firstName, lastNamePaternal, lastNameMaternal, shift, category } = req.body;
+    const { rfc, employeeNumber, firstName, lastNamePaternal, lastNameMaternal, shift, category, serviceName } = req.body;
     
-    if (!rfc || !employeeNumber || !firstName || !lastNamePaternal) {
-        return res.status(400).json({ message: 'El RFC, Número de Empleado, Nombre y Apellido Paterno son obligatorios.' });
+    if (!rfc || !employeeNumber || !firstName || !lastNamePaternal || !category || !serviceName) {
+        return res.status(400).json({ message: 'RFC, Número de Empleado, Nombre, Apellido, Rol y Servicio son obligatorios.' });
     }
 
-    // 2. Agregamos el campo a tu consulta INSERT
     const nameCompleto = `${lastNamePaternal} ${lastNameMaternal || ''} ${firstName}`.trim().toUpperCase();
-    const insertSql = 'INSERT INTO employees (rfc, employee_number, first_name, last_name_paternal, last_name_maternal, name, shift, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
     
-    pool.query(insertSql, [rfc.trim().toUpperCase(), employeeNumber.trim().toUpperCase(), firstName, lastNamePaternal, lastNameMaternal || '', nameCompleto, shift || 'Matutino', category || 'médico'], (err, result) => {
+    // 🏛️ INYECCIÓN: Agregamos la columna 'service' al final del INSERT INTO
+    const insertSql = 'INSERT INTO employees (rfc, employee_number, first_name, last_name_paternal, last_name_maternal, name, shift, category, service) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    
+    pool.query(insertSql, [
+        rfc.trim().toUpperCase(), 
+        employeeNumber.trim().toUpperCase(), 
+        firstName.trim().toUpperCase(), 
+        lastNamePaternal.trim().toUpperCase(), 
+        lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '', 
+        nameCompleto, 
+        shift || 'Matutino', 
+        category.trim().toUpperCase(),
+        serviceName.trim().toUpperCase() // 🚀 Se guarda como texto desacoplado para permitir borrar el catálogo original sin bloqueos
+    ], (err, result) => {
         if (err) {
-            console.error('Error al insertar registro:', err);
+            console.error('Error al insertar registro en employees con columna service:', err);
             return res.status(500).json({ message: 'No se pudieron guardar los datos en el servidor.' });
         }
         res.status(201).json({ message: 'Personal registrado correctamente.' });
