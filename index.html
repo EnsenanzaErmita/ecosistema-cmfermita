@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.6.0
+        v1.7.0
     </div>
 
 
@@ -277,6 +277,16 @@
     <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Acceso exclusivo para el personal médico en formación mediante clave digital autorizada.</p>
     <button class="btn-save" style="background: #1e3a8a; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;" onclick="abrirLoginTrainees()">INGRESAR CREDENCIAL</button>
 </div>
+
+
+
+<!-- NUEVA TARJETA: ACCESO A MEDICINA PREVENTIVA -->
+<div class="card card-patient" style="border-top: 8px solid var(--verde-issste) !important;">
+    <h3 style="color: var(--verde-issste); margin: 0 0 10px 0; text-align: center; font-size: 1.50em;">Medicina Preventiva</h3>
+    <p style="font-size: 0.85em; text-align: center;">Acceso exclusivo para el personal maestro y empleados adscritos a Salud Pública y Medicina Preventiva.</p>
+    <button class="btn-save" style="background: var(--verde-issste); color: white !important;" onclick="entrar('MEDICINA PREVENTIVA')">ACCESO MEDICINA PREVENTIVA</button>
+</div>
+
 
 
 
@@ -1591,6 +1601,112 @@
 
 
 
+<!-- ========================================================================================================================================================= -->
+<!--                                                                    MEDICINA PREVENTIVA                                                                    -->
+<!-- ========================================================================================================================================================= -->
+
+
+
+
+
+
+<!-- ========================================================================= -->
+<!-- VISTA A: PANEL DE MEDICINA PREVENTIVA (MENÚ INTERMEDIO)                   -->
+<!-- ========================================================================= -->
+<div id="panel-medicina-preventiva" class="view" style="display: none; padding: 20px;">
+    <!-- Barra superior ejecutiva Verde ISSSTE -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
+        <h2 style="color: var(--verde-issste); margin:0; font-family: 'Segoe UI', sans-serif;">Módulo de Medicina Preventiva</h2>
+        <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Cerrar Sesión</button>
+    </div>
+
+    <div class="teaching-hero" style="border-color: var(--verde-issste);">
+        <h2 style="color: var(--verde-issste); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Servicio de Salud Pública y Prevención</h2>
+        <div style="font-size: 1.1em; font-style: italic; color: var(--verde-issste); margin-top: 8px; font-weight: 300;">"Prevenir es proteger el futuro de nuestra derechohabiencia"</div>
+    </div>
+
+    <!-- REJILLA DE OPCIONES -->
+    <div class="login-grid" style="margin-top: 20px;">
+        <!-- TARJETA: REGISTRO DE PACIENTES -->
+        <div class="card" style="border-top: 8px solid var(--verde-issste); text-align: center;">
+            <h3 style="color: var(--verde-issste); margin-top: 0; font-size: 1.50em;">Registro de Pacientes</h3>
+            <p>Alta de derechohabientes en programas de vacunación, detección oportuna y seguimiento crónico-degenerativo.</p>
+            <button onclick="activarModulo('modulo-registro-pacientes-preventiva', this)" class="btn-save" style="background: var(--verde-issste); color: white !important;">ABRIR FORMULARIO DE REGISTRO</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- VISTA B: FORMULARIO DE ALTA DE PACIENTES PREVENTIVA                       -->
+<!-- ========================================================================= -->
+<div id="modulo-registro-pacientes-preventiva" class="view" style="display: none;">
+    <!-- Barra superior -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
+        <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Control de Medicina Preventiva</h2>
+        <button onclick="activarModulo('panel-medicina-preventiva', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">← Volver al Panel</button>
+    </div>
+
+    <!-- Encabezado -->
+    <div style="background-color: var(--verde-issste); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
+        <span style="font-weight: bold; font-size: 1.2em;">Formulario de Registro de Pacientes</span>
+        <span style="text-align: right; font-size: 0.85em;">Programa de Detección Oportuna 📑</span>
+    </div>
+    
+    <!-- Cuerpo del Formulario -->
+    <div style="background: #f0fdf4; border-left: 5px solid var(--verde-issste); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <form id="form-paciente-preventiva" onsubmit="guardarPacientePreventivaNube(event)">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                <div>
+                    <label for="prev-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">RFC del Paciente (*):</label>
+                    <input type="text" id="prev-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-curp" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">CURP del Paciente (*):</label>
+                    <input type="text" id="prev-curp" required placeholder="Ej. AAAA000000HHHHHH00" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-firstname" style="color: var(--verde-issste); font-weight: bold;">Nombre(s) (*):</label>
+                    <input type="text" id="prev-firstname" required placeholder="Ej. María Luisa" style="border-color: var(--verde-issste); text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-paternal" style="color: var(--verde-issste); font-weight: bold;">Apellido Paterno (*):</label>
+                    <input type="text" id="prev-paternal" required placeholder="Ej. Mendoza" style="border-color: var(--verde-issste); text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-maternal" style="color: var(--verde-issste); font-weight: bold;">Apellido Materno:</label>
+                    <input type="text" id="prev-maternal" placeholder="Ej. Solís" style="border-color: var(--verde-issste); text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-age" style="color: var(--verde-issste); font-weight: bold;">Edad (*):</label>
+                    <input type="number" id="prev-age" required min="0" max="120" placeholder="Años cumplidos" style="border-color: var(--verde-issste);">
+                </div>
+                <div>
+                    <label for="prev-phone" style="color: var(--verde-issste); font-weight: bold;">Teléfono (*):</label>
+                    <input type="tel" id="prev-phone" required placeholder="Ej. 5512345678" style="border-color: var(--verde-issste);">
+                </div>
+                <div>
+                    <label for="prev-email" style="color: var(--verde-issste); font-weight: bold;">Correo Electrónico (*):</label>
+                    <input type="email" id="prev-email" required placeholder="ejemplo@correo.com" style="border-color: var(--verde-issste);">
+                </div>
+                <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
+                    <button type="submit" style="background-color: var(--verde-issste); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">REGISTRAR PACIENTE EN LA NUBE</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1658,7 +1774,6 @@ async function procesarLogin(e) {
     const passVal = document.getElementById('login-password').value.trim();
 
     try {
-        // 1. Conectamos con tu nueva API unificada en Render
         const response = await fetch(`${BASE_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1671,40 +1786,56 @@ async function procesarLogin(e) {
         cerrarLogin();
         alert(`¡Acceso concedido correctamente!\nBienvenido: ${data.user.username}\nRol: ${data.user.roleName}`);
 
-        // Guardamos los datos del usuario activo en la memoria local por seguridad
+        // Guardamos los datos del usuario activo en la memoria local
         localStorage.setItem('usuarioLogueado', JSON.stringify(data.user));
 
-        // Oculta la raíz del login por completo
         const sectionLogin = document.getElementById('section-login');
         if (sectionLogin) {
             sectionLogin.classList.remove('active-view');
             sectionLogin.style.display = 'none';
         }
 
-        // 🔍 NORMALIZACIÓN: Pasamos el rol a mayúsculas para evitar fallas por acentos o espacios
         const rolNormalizado = data.user.roleName ? data.user.roleName.trim().toUpperCase() : '';
+        
+        // 🚀 CRITERIO DE ACCESO ADAPTATIVO: Evaluamos si cumple con las condiciones para ingresar a Medicina Preventiva
+        // Nota: Agregamos soporte para evaluar si viene de la tarjeta de Preventiva
+        if (moduloDestino === 'MEDICINA PREVENTIVA') {
+            // Buscamos si el usuario es ADMIN, o tiene el ROL de Medicina Preventiva, o es un empleado con ese servicio asignado
+            if (rolNormalizado === 'ADMINISTRADOR' || rolNormalizado === 'ADMIN' || rolNormalizado === 'MEDICINA PREVENTIVA') {
+                const panelPrev = document.getElementById('panel-medicina-preventiva');
+                if (panelPrev) {
+                    panelPrev.classList.add('active-view');
+                    panelPrev.style.display = 'block';
+                }
+                return; // Cortamos el flujo con éxito
+            } else {
+                // Si no cumple, lo rebotamos por seguridad regresándolo al login
+                alert('Acceso Denegado:\nSu cuenta no cuenta con privilegios de rol o adscripción para el área de Medicina Preventiva.');
+                if (sectionLogin) {
+                    sectionLogin.classList.add('active-view');
+                    sectionLogin.style.display = 'block';
+                }
+                return;
+            }
+        }
 
-        // 🎛️ REGLA INSTITUCIONAL DE CONTROL DE ACCESOS Y PANELES (YA ADMITE TU ROL 'ADMIN')
+        // Flujos tradicionales del resto de páneles
         if (rolNormalizado === 'ADMINISTRADOR' || rolNormalizado === 'ADMIN') {
-            // Si el rol es ADMINISTRADOR o ADMIN, encendemos el Panel Maestro
             const panelAdmin = document.getElementById('panel-administrador');
             if (panelAdmin) {
                 panelAdmin.classList.add('active-view');
                 panelAdmin.style.display = 'block';
             }
         } else if (rolNormalizado === 'COORDINACIÓN MÉDICA' || rolNormalizado === 'COORDINACION MEDICA' || rolNormalizado === 'COORDINACIÓN' || rolNormalizado === 'COORDINACION') {
-            // Si es COORDINADOR, lo mandamos al panel tradicional de coordinación médica
             const panelCoord = document.getElementById('panel-coordinacion');
             if (panelCoord) {
                 panelCoord.classList.add('active-view');
                 panelCoord.style.display = 'block';
             }
-            // Lanzamos la consulta de notificaciones en segundo plano
             if (typeof actualizarBurbujaNotificaciones === 'function') {
                 actualizarBurbujaNotificaciones();
             }
         } else {
-            // Cualquier otro rol de servicio (médicos o personal base)
             alert(`Aviso de Seguridad:\nSu rol (${rolNormalizado}) cuenta con permisos vigentes, pero su panel de vista rápida se encuentra en proceso de asignación.`);
         }
 
@@ -3430,11 +3561,55 @@ async function guardarServicioNube(event) {
 
 
 
+// Función para procesar el envío del nuevo formulario de medicina preventiva
+async function guardarPacientePreventivaNube(event) {
+    event.preventDefault();
+
+    const rfc = document.getElementById('prev-rfc').value.trim().toUpperCase();
+    const curp = document.getElementById('prev-curp').value.trim().toUpperCase();
+    const firstName = document.getElementById('prev-firstname').value.trim().toUpperCase();
+    const lastNamePaternal = document.getElementById('prev-paternal').value.trim().toUpperCase();
+    const lastNameMaternal = document.getElementById('prev-maternal').value.trim().toUpperCase();
+    const age = document.getElementById('prev-age').value;
+    const phone = document.getElementById('prev-phone').value.trim();
+    const email = document.getElementById('prev-email').value.trim();
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/preventive-patients`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rfc, curp, firstName, lastNamePaternal, lastNameMaternal, age: parseInt(age), phone, email })
+        });
+
+        if (response.ok) {
+            alert('¡Paciente registrado con éxito en el programa de Medicina Preventiva!');
+            document.getElementById('form-paciente-preventiva').reset();
+        } else {
+            const data = await response.json();
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error al registrar paciente:', error);
+        alert('No se pudo establecer conexión con el servidor.');
+    }
+}
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+    // Vinculación al alcance global
+    window.guardarPacientePreventivaNube = guardarPacientePreventivaNube;
 
 
     // Vinculación explícita al contexto global

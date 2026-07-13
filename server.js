@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.6.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.7.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1032,6 +1032,67 @@ app.delete('/api/services/:id', (req, res) => {
         res.status(200).json({ message: 'Servicio eliminado correctamente.' });
     });
 });
+
+
+
+
+
+
+
+
+// =========================================================================
+// MÓDULO MEDICINA PREVENTIVA: REGISTRO DE PACIENTES EN LA NUBE
+// =========================================================================
+app.post('/api/preventive-patients', (req, res) => {
+    const { rfc, curp, firstName, lastNamePaternal, lastNameMaternal, age, phone, email } = req.body;
+
+    // Validación obligatoria en el backend
+    if (!rfc || !curp || !firstName || !lastNamePaternal || !age || !phone || !email) {
+        return res.status(400).json({ message: 'Todos los campos marcados con (*) son obligatorios para el registro clínico.' });
+    }
+
+    // Limpieza de datos y estandarización a mayúsculas
+    const rfcUpper = rfc.trim().toUpperCase();
+    const curpUpper = curp.trim().toUpperCase();
+    const nameUpper = firstName.trim().toUpperCase();
+    const paternalUpper = lastNamePaternal.trim().toUpperCase();
+    const maternalUpper = lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '';
+
+    const sql = `
+        INSERT INTO preventive_patients 
+        (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, phone, email) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    pool.query(sql, [
+        rfcUpper, 
+        curpUpper, 
+        nameUpper, 
+        paternalUpper, 
+        maternalUpper, 
+        parseInt(age), 
+        phone.trim(), 
+        email.trim().toLowerCase()
+    ], (err, result) => {
+        if (err) {
+            console.error('Error al registrar paciente en Medicina Preventiva:', err);
+            
+            // Control inteligente si el paciente ya fue registrado previamente en el programa
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ message: 'Este paciente (RFC o CURP) ya se encuentra dado de alta en el programa de Medicina Preventiva.' });
+            }
+            return res.status(500).json({ message: 'Error interno en el servidor al intentar guardar el expediente.' });
+        }
+        res.status(201).json({ message: 'Expediente clínico preventivo guardado correctamente.' });
+    });
+});
+
+
+
+
+
+
+
 
 
 
