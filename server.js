@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.8.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.10.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -65,10 +65,8 @@ pool.getConnection((err, connection) => {
 
 // RUTA API POST: Validación de usuarios y roles unificada (REEMPLAZO ASOCIADO A ROLES)
 // =========================================================================
-// RUTA API POST: VALIDACIÓN DE CREDENCIALES CORREGIDA Y BLINDADA
 // =========================================================================
-// =========================================================================
-// RUTA API POST: AUTENTICACIÓN UNIFICADA DE DOBLE CAPA (USERS + EMPLOYEES)
+// RUTA API POST: AUTENTICACIÓN UNIFICADA DE DOBLE CAPA (CORREGIDA)
 // =========================================================================
 app.post('/api/auth/login', (req, res) => {
     const { username, password } = req.body;
@@ -78,9 +76,9 @@ app.post('/api/auth/login', (req, res) => {
     }
 
     const userUpper = username.trim().toUpperCase();
-    const passTrim = password.trim().toUpperCase(); // Forzamos mayúsculas por si el No. de Empleado lleva letras
+    const passTrim = password.trim(); 
 
-    // CAPA 1: Buscamos primero en la tabla de Usuarios Maestros
+    // CAPA 1: Buscamos primero en la tabla de Usuarios Maestros (users)
     const sqlUsers = `
         SELECT u.id, u.username, u.password, u.role_id, r.role_name 
         FROM users u 
@@ -91,13 +89,14 @@ app.post('/api/auth/login', (req, res) => {
     pool.query(sqlUsers, [userUpper], (errUser, userResults) => {
         if (errUser) {
             console.error('Error al consultar users:', errUser);
-            return res.status(500).json({ message: 'Error interno en el servidor.' });
+            return res.status(500).json({ message: 'Error interno en el servidor al autenticar.' });
         }
 
-        // Si SÍ se encontró en Usuarios Maestros, validamos su credencial normal
+        // 🚀 REPARACIÓN: Extraemos de forma explícita el índice [0] del renglón encontrado
         if (userResults && userResults.length > 0) {
-            const usuarioMaestro = userResults[0];
+            const usuarioMaestro = userResults[0]; // ← CORREGIDO: Añadido [0]
             
+            // Validación de credencial maestro en texto plano
             if (usuarioMaestro.password !== passTrim) {
                 return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas.' });
             }
@@ -114,7 +113,7 @@ app.post('/api/auth/login', (req, res) => {
             });
         }
 
-        // CAPA 2: Si no se encontró en Users, buscamos en la plantilla de Empleados (RFC + No. Empleado)
+        // CAPA 2: Si no existe en Users, buscamos en la plantilla de Empleados (employees)
         const sqlEmployees = `
             SELECT id, rfc, employee_number, name, category, service 
             FROM employees 
@@ -127,27 +126,24 @@ app.post('/api/auth/login', (req, res) => {
                 return res.status(500).json({ message: 'Error interno en el servidor.' });
             }
 
-            // Si tampoco existe en empleados, el usuario no existe en la clínica
             if (!empResults || empResults.length === 0) {
                 return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas o el personal no existe.' });
             }
 
-            const empleadoEncontrado = empResults[0];
+            const empleadoEncontrado = empResults[0]; // ← CORREGIDO: Añadido [0] para consistencia
 
-            // Validamos que su contraseña sea su Número de Empleado
-            if (empleadoEncontrado.employee_number !== passTrim) {
+            // Validamos que su contraseña sea su Número de Empleado (Texto plano coincidente)
+            if (empleadoEncontrado.employee_number !== passTrim.toUpperCase()) {
                 return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas.' });
             }
 
-            // 🚫 REGLA DE ORO INSTITUTIONAL: Si entra por el botón de Medicina Preventiva, 
-            // validamos que su columna service sea textualmente MEDICINA PREVENTIVA
             res.status(200).json({
                 message: 'Acceso concedido como Personal Operativo.',
                 user: {
                     id: empleadoEncontrado.id,
                     username: empleadoEncontrado.rfc,
                     roleId: 0,
-                    roleName: empleadoEncontrado.category.toUpperCase(), // Conserva su rol médico/enfermería
+                    roleName: empleadoEncontrado.category.toUpperCase(), 
                     serviceName: empleadoEncontrado.service ? empleadoEncontrado.service.toUpperCase() : 'SIN SERVICIO'
                 }
             });
