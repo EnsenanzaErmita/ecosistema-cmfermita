@@ -2747,13 +2747,19 @@ function rechazarAvisoDerechohabiente() {
 
 // FUNCIÓN CORREGIDA SIN ESPACIOS NI DUPLICADOS
 // 1. MODIFICACIÓN EN FUNCIÓN MATRIZ (AGREGADO DE BOTONES Y COLSPAN)
+// FUNCIÓN UNIFICADA: Descarga y renderiza Roles, Usuarios y Servicios desde Clever Cloud
 async function deInmediatoCargarRolesYUsuarios() {
     const selectRol = document.getElementById('adm-user-role');
-    const selectRolModal = document.getElementById('modal-user-role'); // Selector del modal
+    const selectRolModal = document.getElementById('modal-user-role'); 
     const tbodyRoles = document.querySelector('#tabla-adm-roles tbody');
     const tbodyUsuarios = document.querySelector('#tabla-adm-usuarios tbody');
+    // 🚀 NUEVO COMPONENTE: Capturamos el contenedor de la tabla de servicios
+    const tbodyServicios = document.querySelector('#tabla-adm-servicios tbody');
 
     try {
+        // ==========================================
+        // PARTE A: CARGAR Y RENDERIZAR ROLES
+        // ==========================================
         const resRoles = await fetch(`${BASE_URL}/api/roles`);
         const roles = await resRoles.json();
         
@@ -2774,18 +2780,19 @@ async function deInmediatoCargarRolesYUsuarios() {
             });
         }
 
-        // Alimentamos los 2 selectores (formulario y modal)
         const opcionesRolesHtml = '<option value="" disabled selected>-- Seleccione Rol de Servicio --</option>' + 
             roles.map(r => `<option value="${r.id}">${r.role_name}</option>`).join('');
         
         if (selectRol) selectRol.innerHTML = opcionesRolesHtml;
         if (selectRolModal) selectRolModal.innerHTML = opcionesRolesHtml;
 
+        // ==========================================
+        // PARTE B: CARGAR Y RENDERIZAR USUARIOS
+        // ==========================================
         const resUsers = await fetch(`${BASE_URL}/api/users`);
         const usuarios = await resUsers.json();
 
         if (tbodyUsuarios) {
-            // CORREGIDO: Incrementado colspan a 4 por los nuevos botones
             tbodyUsuarios.innerHTML = usuarios.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:#888;padding:10px;">Sin usuarios registrados.</td></tr>' : '';
             usuarios.forEach(u => {
                 tbodyUsuarios.innerHTML += `
@@ -2798,7 +2805,6 @@ async function deInmediatoCargarRolesYUsuarios() {
                             </span>
                         </td>
                         <td style="padding:6px; border:1px solid #ddd; text-align:center;">
-                            <!-- BOTONES INYECTADOS EN USUARIOS -->
                             <button onclick="editarUsuarioNube(${u.id}, '${u.username}', ${u.role_id || 0})" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db; padding:2px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Editar</button>
                             <button onclick="eliminarUsuarioNube(${u.id})" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:2px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
                         </td>
@@ -2806,8 +2812,51 @@ async function deInmediatoCargarRolesYUsuarios() {
                 `;
             });
         }
+
+        // ==========================================
+        // 🚀 PARTE C: NUEVA INYECCIÓN DINÁMICA DE SERVICIOS
+        // ==========================================
+        if (tbodyServicios) {
+            const resServices = await fetch(`${BASE_URL}/api/services`);
+            const servicios = await resServices.json();
+
+            tbodyServicios.innerHTML = servicios.length === 0 ? '<tr><td colspan="3" style="text-align:center;color:#888;padding:10px;">Sin servicios registrados.</td></tr>' : '';
+            
+            servicios.forEach(s => {
+                tbodyServicios.innerHTML += `
+                    <tr>
+                        <td style="padding:6px; border:1px solid #ddd;"><strong>${s.id}</strong></td>
+                        <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#15803d; text-transform:uppercase;">${s.service_name}</td>
+                        <td style="padding:6px; border:1px solid #ddd; text-align:center;">
+                            <!-- Botón de borrado directo compatible con tu backend app.delete('/api/services/:id') -->
+                            <button onclick="eliminarServicioNube(${s.id})" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:2px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
     } catch (error) {
         console.error('Error crítico al sincronizar panel de seguridad:', error);
+    }
+}
+
+// 🚀 NUEVA FUNCIÓN COMPLEMENTARIA: Permite dar de baja un servicio desde la tabla
+async function eliminarServicioNube(id) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este servicio del catálogo clínico?')) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/services/${id}`, { method: 'DELETE' });
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('Servicio removido correctamente de Clever Cloud.');
+            deInmediatoCargarRolesYUsuarios(); // Recarga automática
+        } else {
+            alert('Error al eliminar: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error de red al intentar eliminar el servicio:', error);
     }
 }
 
@@ -3346,6 +3395,9 @@ async function guardarServicioNube(event) {
 
 
 
+    // Vinculación explícita al contexto global
+    window.deInmediatoCargarRolesYUsuarios = deInmediatoCargarRolesYUsuarios;
+    window.eliminarServicioNube = eliminarServicioNube;
 
 
 
