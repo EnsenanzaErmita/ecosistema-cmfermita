@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.8.0
+        v1.9.0
     </div>
 
 
@@ -1352,11 +1352,136 @@
 
 
 
+
+
+
+<!-- ========================================================================================================================================================= -->
+<!--                                                                    MEDICINA PREVENTIVA                                                                    -->
+<!-- ========================================================================================================================================================= -->
+
+
+
+
+
+
+<!-- ========================================================================= -->
+<!-- VISTA A: PANEL DE MEDICINA PREVENTIVA (MENÚ INTERMEDIO)                   -->
+<!-- ========================================================================= -->
+<div id="panel-medicina-preventiva" class="view" style="display: none; padding: 20px;">
+    <!-- Barra superior ejecutiva Verde ISSSTE -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
+        <h2 style="color: var(--verde-issste); margin:0; font-family: 'Segoe UI', sans-serif;">Módulo de Medicina Preventiva</h2>
+        <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Cerrar Sesión</button>
+    </div>
+
+    <div class="teaching-hero" style="border-color: var(--verde-issste);">
+        <h2 style="color: var(--verde-issste); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Servicio de Salud Pública y Prevención</h2>
+        <div style="font-size: 1.1em; font-style: italic; color: var(--verde-issste); margin-top: 8px; font-weight: 300;">"Prevenir es proteger el futuro de nuestra derechohabiencia"</div>
+    </div>
+
+    <!-- REJILLA DE OPCIONES -->
+    <div class="login-grid" style="margin-top: 20px;">
+        <!-- TARJETA: REGISTRO DE PACIENTES -->
+        <div class="card" style="border-top: 8px solid var(--verde-issste); text-align: center;">
+            <h3 style="color: var(--verde-issste); margin-top: 0; font-size: 1.50em;">Registro de Pacientes</h3>
+            <p>Alta de derechohabientes en programas de vacunación, detección oportuna y seguimiento crónico-degenerativo.</p>
+            <button onclick="activarModulo('modulo-registro-pacientes-preventiva', this)" class="btn-save" style="background: var(--verde-issste); color: white !important;">ABRIR FORMULARIO DE REGISTRO</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- VISTA B: FORMULARIO DE ALTA DE PACIENTES PREVENTIVA                       -->
+<!-- ========================================================================= -->
+<div id="modulo-registro-pacientes-preventiva" class="view" style="display: none;">
+    <!-- Barra superior -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
+        <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Control de Medicina Preventiva</h2>
+        <button onclick="activarModulo('panel-medicina-preventiva', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">← Volver al Panel</button>
+    </div>
+
+    <!-- Encabezado -->
+    <div style="background-color: var(--verde-issste); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
+        <span style="font-weight: bold; font-size: 1.2em;">Formulario de Registro de Pacientes</span>
+        <span style="text-align: right; font-size: 0.85em;">Programa de Detección Oportuna 📑</span>
+    </div>
+    
+    <!-- Cuerpo del Formulario -->
+    <div style="background: #f0fdf4; border-left: 5px solid var(--verde-issste); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <form id="form-paciente-preventiva" onsubmit="guardarPacientePreventivaNube(event)">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                <div>
+                    <label for="prev-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">RFC del Paciente (*):</label>
+                    <input type="text" id="prev-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-curp" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">CURP del Paciente (*):</label>
+                    <input type="text" id="prev-curp" required placeholder="Ej. AAAA000000HHHHHH00" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-firstname" style="color: var(--verde-issste); font-weight: bold;">Nombre(s) (*):</label>
+                    <input type="text" id="prev-firstname" required placeholder="Ej. María Luisa" style="border-color: var(--verde-issste); text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-paternal" style="color: var(--verde-issste); font-weight: bold;">Apellido Paterno (*):</label>
+                    <input type="text" id="prev-paternal" required placeholder="Ej. Mendoza" style="border-color: var(--verde-issste); text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-maternal" style="color: var(--verde-issste); font-weight: bold;">Apellido Materno:</label>
+                    <input type="text" id="prev-maternal" placeholder="Ej. Solís" style="border-color: var(--verde-issste); text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-age" style="color: var(--verde-issste); font-weight: bold;">Edad (*):</label>
+                    <input type="number" id="prev-age" required min="0" max="120" placeholder="Años cumplidos" style="border-color: var(--verde-issste);">
+                </div>
+                <div>
+                    <label for="prev-phone" style="color: var(--verde-issste); font-weight: bold;">Teléfono (*):</label>
+                    <input type="tel" id="prev-phone" required placeholder="Ej. 5512345678" style="border-color: var(--verde-issste);">
+                </div>
+                <div>
+                    <label for="prev-email" style="color: var(--verde-issste); font-weight: bold;">Correo Electrónico (*):</label>
+                    <input type="email" id="prev-email" required placeholder="ejemplo@correo.com" style="border-color: var(--verde-issste);">
+                </div>
+                <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
+                    <button type="submit" style="background-color: var(--verde-issste); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">REGISTRAR PACIENTE EN LA NUBE</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+
  <!-- Busca el cierre de tu último panel (el de médicos en formación) -->
     </div> <!-- Fin de panel-medicos-formacion -->
 
     <!-- 🟢 INYECTA ESTA ETIQUETA AQUÍ PARA CERRAR LA SECCIÓN PRINCIPAL DE LA PÁGINA -->
     </div> <!-- Cierre legítimo de class="main-content" o class="container" -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <footer>
     <p>&copy; 2026 Todos los derechos reservados</p>
@@ -1599,102 +1724,6 @@
 
 
 
-
-
-<!-- ========================================================================================================================================================= -->
-<!--                                                                    MEDICINA PREVENTIVA                                                                    -->
-<!-- ========================================================================================================================================================= -->
-
-
-
-
-
-
-<!-- ========================================================================= -->
-<!-- VISTA A: PANEL DE MEDICINA PREVENTIVA (MENÚ INTERMEDIO)                   -->
-<!-- ========================================================================= -->
-<div id="panel-medicina-preventiva" class="view" style="display: none; padding: 20px;">
-    <!-- Barra superior ejecutiva Verde ISSSTE -->
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
-        <h2 style="color: var(--verde-issste); margin:0; font-family: 'Segoe UI', sans-serif;">Módulo de Medicina Preventiva</h2>
-        <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Cerrar Sesión</button>
-    </div>
-
-    <div class="teaching-hero" style="border-color: var(--verde-issste);">
-        <h2 style="color: var(--verde-issste); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Servicio de Salud Pública y Prevención</h2>
-        <div style="font-size: 1.1em; font-style: italic; color: var(--verde-issste); margin-top: 8px; font-weight: 300;">"Prevenir es proteger el futuro de nuestra derechohabiencia"</div>
-    </div>
-
-    <!-- REJILLA DE OPCIONES -->
-    <div class="login-grid" style="margin-top: 20px;">
-        <!-- TARJETA: REGISTRO DE PACIENTES -->
-        <div class="card" style="border-top: 8px solid var(--verde-issste); text-align: center;">
-            <h3 style="color: var(--verde-issste); margin-top: 0; font-size: 1.50em;">Registro de Pacientes</h3>
-            <p>Alta de derechohabientes en programas de vacunación, detección oportuna y seguimiento crónico-degenerativo.</p>
-            <button onclick="activarModulo('modulo-registro-pacientes-preventiva', this)" class="btn-save" style="background: var(--verde-issste); color: white !important;">ABRIR FORMULARIO DE REGISTRO</button>
-        </div>
-    </div>
-</div>
-
-<!-- ========================================================================= -->
-<!-- VISTA B: FORMULARIO DE ALTA DE PACIENTES PREVENTIVA                       -->
-<!-- ========================================================================= -->
-<div id="modulo-registro-pacientes-preventiva" class="view" style="display: none;">
-    <!-- Barra superior -->
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
-        <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Control de Medicina Preventiva</h2>
-        <button onclick="activarModulo('panel-medicina-preventiva', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">← Volver al Panel</button>
-    </div>
-
-    <!-- Encabezado -->
-    <div style="background-color: var(--verde-issste); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
-        <span style="font-weight: bold; font-size: 1.2em;">Formulario de Registro de Pacientes</span>
-        <span style="text-align: right; font-size: 0.85em;">Programa de Detección Oportuna 📑</span>
-    </div>
-    
-    <!-- Cuerpo del Formulario -->
-    <div style="background: #f0fdf4; border-left: 5px solid var(--verde-issste); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        <form id="form-paciente-preventiva" onsubmit="guardarPacientePreventivaNube(event)">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
-                <div>
-                    <label for="prev-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">RFC del Paciente (*):</label>
-                    <input type="text" id="prev-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
-                </div>
-                <div>
-                    <label for="prev-curp" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">CURP del Paciente (*):</label>
-                    <input type="text" id="prev-curp" required placeholder="Ej. AAAA000000HHHHHH00" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
-                </div>
-                <div>
-                    <label for="prev-firstname" style="color: var(--verde-issste); font-weight: bold;">Nombre(s) (*):</label>
-                    <input type="text" id="prev-firstname" required placeholder="Ej. María Luisa" style="border-color: var(--verde-issste); text-transform: uppercase;">
-                </div>
-                <div>
-                    <label for="prev-paternal" style="color: var(--verde-issste); font-weight: bold;">Apellido Paterno (*):</label>
-                    <input type="text" id="prev-paternal" required placeholder="Ej. Mendoza" style="border-color: var(--verde-issste); text-transform: uppercase;">
-                </div>
-                <div>
-                    <label for="prev-maternal" style="color: var(--verde-issste); font-weight: bold;">Apellido Materno:</label>
-                    <input type="text" id="prev-maternal" placeholder="Ej. Solís" style="border-color: var(--verde-issste); text-transform: uppercase;">
-                </div>
-                <div>
-                    <label for="prev-age" style="color: var(--verde-issste); font-weight: bold;">Edad (*):</label>
-                    <input type="number" id="prev-age" required min="0" max="120" placeholder="Años cumplidos" style="border-color: var(--verde-issste);">
-                </div>
-                <div>
-                    <label for="prev-phone" style="color: var(--verde-issste); font-weight: bold;">Teléfono (*):</label>
-                    <input type="tel" id="prev-phone" required placeholder="Ej. 5512345678" style="border-color: var(--verde-issste);">
-                </div>
-                <div>
-                    <label for="prev-email" style="color: var(--verde-issste); font-weight: bold;">Correo Electrónico (*):</label>
-                    <input type="email" id="prev-email" required placeholder="ejemplo@correo.com" style="border-color: var(--verde-issste);">
-                </div>
-                <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
-                    <button type="submit" style="background-color: var(--verde-issste); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">REGISTRAR PACIENTE EN LA NUBE</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 
 
 
