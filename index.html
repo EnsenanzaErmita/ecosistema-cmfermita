@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.4.0
+        v1.5.0
     </div>
 
 
@@ -1206,25 +1206,26 @@
         <div style="background: #f3f4f6; border: 1px solid #d1d5db; border-top: 5px solid #374151; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
             <h3 style="color: #374151; margin-top:0; border-bottom: 2px solid #374151; padding-bottom:5px;">3. Vinculación de Cuentas (Usuarios)</h3>
             <form id="form-registro-usuario" onsubmit="guardarUsuarioNube(event)" style="margin-top: 15px;">
-                <div style="margin-bottom: 10px;">
-                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Nombre de Usuario:</label>
-                    <input type="text" id="adm-user-name" required placeholder="Ej. ALEJANDRO_MED" style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; text-transform:uppercase; outline:none;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Contraseña:</label>
-                    <input type="text" id="adm-user-pass" required placeholder="Clave privada" style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; outline:none;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Asignar Privilegio (Rol):</label>
-                    <select id="adm-user-role" required style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; background:white; outline:none;"></select>
-                </div>
-                <!-- 🚀 NUEVA CAJA DE SELECCIÓN INYECTADA DE FORMA RELACIONAL -->
-                <div style="margin-bottom: 12px;">
-                    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Asignar Adscripción (Servicio / Área):</label>
-                    <select id="adm-user-service" required style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; background:white; outline:none;">
-                        <option value="" disabled selected>Cargando servicios...</option>
-                    </select>
-                </div>
+
+
+<div style="margin-bottom: 10px;">
+    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Nombre de Usuario:</label>
+    <input type="text" id="adm-user-name" required placeholder="Ej. ALEJANDRO_MED" style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; text-transform:uppercase; outline:none;">
+</div>
+
+<div style="margin-bottom: 10px;">
+    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Contraseña:</label>
+    <input type="text" id="adm-user-pass" required placeholder="Clave privada" style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; outline:none;">
+</div>
+
+<div style="margin-bottom: 10px;">
+    <label style="display:block; font-size:0.85em; font-weight:bold; color:#374151; margin-bottom:4px;">Asignar Privilegio (Rol):</label>
+    <select id="adm-user-role" required style="width:100%; padding:8px; border:1px solid #374151; border-radius:4px; box-sizing:border-box; background:white; outline:none;"></select>
+</div>
+
+<!-- 🚀 SE REMOVIÓ LA CAJA DE ADSCRIPCIÓN YA QUE LOS USUARIOS MAESTROS NO LLEVAN SERVICIO EN LA TABLA USERS -->
+
+
                 <button type="submit" style="background:#374151; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold; cursor:pointer; width:100%;">GUARDAR NUEVO USUARIO</button>
             </form>
 
@@ -2871,7 +2872,7 @@ async function eliminarServicioNube(id) {
 }
 
 
-// DISPARADOR USUARIO: Envía las credenciales y la llave foránea del rol seleccionado
+// CORREGIDO: Envío estricto de credenciales maestros sin mapear servicios
 async function guardarUsuarioNube(event) {
     event.preventDefault();
 
@@ -2883,6 +2884,7 @@ async function guardarUsuarioNube(event) {
         const response = await fetch(`${BASE_URL}/api/users`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            // 🚀 MANDAMOS SOLO LOS 3 CAMPOS MAESTROS
             body: JSON.stringify({ username, password, roleId })
         });
 
@@ -2899,6 +2901,7 @@ async function guardarUsuarioNube(event) {
         alert('No se pudo establecer conexión para guardar el usuario.');
     }
 }
+
 
 
 // FUNCIÓN AUXILIAR: Cierra la ventana emergente de gestión de usuarios
@@ -3407,7 +3410,7 @@ async function guardarServicioNube(event) {
     // Vinculación explícita al contexto global
     window.deInmediatoCargarRolesYUsuarios = deInmediatoCargarRolesYUsuarios;
     window.eliminarServicioNube = eliminarServicioNube;
-
+    window.guardarUsuarioNube = guardarUsuarioNube;
 
 
     // 🚀 MANDATORIO: Aseguramos su exposición global para que el formulario la reconozca al hacer submit

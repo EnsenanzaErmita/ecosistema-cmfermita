@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.4.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.5.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -656,22 +656,23 @@ app.get('/api/users', (req, res) => {
 
 
 
-// ENDPOINT 4: Registrar un nuevo Usuario del Sistema
+// =========================================================================
+// ENDPOINT 4: REGISTRAR UN NUEVO USUARIO MAESTRO (CORREGIDO SIN SERVICIO)
+// =========================================================================
 app.post('/api/users', (req, res) => {
-    // En tu app.post('/api/users') y app.put('/api/users/:id') recibe y mapea:
-    const { username, password, roleId, serviceId } = req.body;
+    const { username, password, roleId } = req.body;
 
     if (!username || !password || !roleId) {
         return res.status(400).json({ message: 'Nombre de usuario, contraseña y rol son obligatorios.' });
     }
 
     const userUpper = username.trim().toUpperCase();
-    // Nota: Mantenemos almacenamiento directo en texto plano como solicitaste para tus pruebas de desarrollo
     const passTrim = password.trim(); 
 
-    // E inserta/actualiza en la consulta:
-    const sql = 'INSERT INTO users (username, password, role_id, service_id) VALUES (?, ?, ?, ?)';
-    // Pasando en el arreglo de variables: [userUpper, passTrim, parseInt(roleId), serviceId ? parseInt(serviceId) : null]
+    // 🏛️ REGLA: Insertamos estrictamente 3 campos (username, password, role_id)
+    const sql = 'INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)';
+    
+    // Pasamos exactamente las 3 variables correspondientes a los 3 signos de interrogación
     pool.query(sql, [userUpper, passTrim, parseInt(roleId)], (err, result) => {
         if (err) {
             console.error('Error al insertar usuario en Clever Cloud:', err);
