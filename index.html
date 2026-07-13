@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.2.0
+        v1.3.0
     </div>
 
 
@@ -1231,10 +1231,12 @@
             <table id="tabla-adm-usuarios" style="width:100%; border-collapse:collapse; margin-top:20px; background:white; font-size:0.85em;">
                 <thead>
                     <tr style="background:#374151; color:white;">
-                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Usuario</th>
-                        <th style="padding:8px; border:1px solid #ddd; text-align:left;">Rol / Servicio</th>
-                        <th style="padding:8px; border:1px solid #ddd; text-align:center;">Acción</th>
-                    </tr>
+            		<!-- 🏛️ AJUSTE DE COLUMNAS REALES CORRESPONDIENTES A LOS DATOS DE CLEVER CLOUD -->
+            		<th style="padding:8px; border:1px solid #ddd; text-align:left;">ID</th>
+            		<th style="padding:8px; border:1px solid #ddd; text-align:left;">USUARIO</th>
+            		<th style="padding:8px; border:1px solid #ddd; text-align:left;">ROL</th>
+            		<th style="padding:8px; border:1px solid #ddd; text-align:center;">ACCIÓN</th>
+        	    </tr>
                 </thead>
                 <tbody></tbody>
             </table>
@@ -3293,6 +3295,44 @@ function abrirRegistroFormacion(categoria) {
 
 
 
+// CORREGIDO: Mapeo exacto de variables con el endpoint POST /api/services del backend
+async function guardarServicioNube(event) {
+    event.preventDefault();
+
+    const nameInput = document.getElementById('adm-service-name');
+    const descInput = document.getElementById('adm-service-desc');
+
+    if (!nameInput) return;
+
+    // Extraemos los textos de forma limpia y segura
+    const serviceName = nameInput.value.trim().toUpperCase();
+    const description = descInput && descInput.value.trim() !== "" ? descInput.value.trim().toUpperCase() : "N/A";
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/services`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // 🚀 ENLACE EXACTO: Enviamos "serviceName" en lugar de "service_name" o variables genéricas
+            body: JSON.stringify({ serviceName, description })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('¡Nuevo servicio registrado con éxito en Clever Cloud!');
+            if (document.getElementById('form-registro-servicio')) {
+                document.getElementById('form-registro-servicio').reset();
+            }
+            // Recargamos el panel de control relacional para actualizar selects y tablas
+            deInmediatoCargarRolesYUsuarios();
+        } else {
+            alert('Error del servidor: ' + (data.message || 'No se pudo guardar el servicio.'));
+        }
+    } catch (error) {
+        console.error('Error de red al registrar servicio:', error);
+        alert('No se pudo establecer conexión con el servidor para guardar el servicio.');
+    }
+}
 
 
 
@@ -3309,12 +3349,8 @@ function abrirRegistroFormacion(categoria) {
 
 
 
-
-
-
-
-
-
+    // 🚀 MANDATORIO: Aseguramos su exposición global para que el formulario la reconozca al hacer submit
+    window.guardarServicioNube = guardarServicioNube;
     // =========================================================================
     // VINCULACIÓN GLOBAL: MÓDULO DE MIP'S, PASANTES Y RESIDENTES
     // =========================================================================
