@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.7.0
+        v1.8.0
     </div>
 
 
@@ -1734,31 +1734,30 @@
 function entrar(rol) {
     const rolUpper = rol.trim().toUpperCase();
 
-    // Validamos que el botón invoque a cualquiera de los dos perfiles autorizados
-    if (rolUpper === 'COORDINACIÓN MÉDICA' || rolUpper === 'COORDINACION' || rolUpper === 'ADMINISTRADOR' || rolUpper === 'ADMIN') {
+    // 🚀 CORREGIDO: Agregamos MEDICINA PREVENTIVA para que solicite usuario y contraseña en pantalla
+    if (rolUpper === 'COORDINACIÓN MÉDICA' || rolUpper === 'COORDINACION' || rolUpper === 'ADMINISTRADOR' || rolUpper === 'ADMIN' || rolUpper === 'MEDICINA PREVENTIVA') {
         
-        // Estandarizamos el nombre del destino para la sesión
         moduloDestino = (rolUpper === 'COORDINACION') ? 'COORDINACIÓN MÉDICA' : rolUpper;
         if (moduloDestino === 'ADMIN') moduloDestino = 'ADMINISTRADOR';
         
-        // Limpiamos los cuadros de texto del modal flotante por seguridad
         document.getElementById('login-username').value = '';
         document.getElementById('login-password').value = '';
 
-        // Adaptamos dinámicamente los títulos del Modal según la tarjeta que presionaron
+        // Adaptamos dinámicamente los títulos según el botón pulsado
         if (moduloDestino === 'ADMINISTRADOR') {
             document.getElementById('login-title').innerText = 'Control del Administrador';
             document.getElementById('login-subtitle').innerText = 'Acceso restringido para el Administrador Maestro';
+        } else if (moduloDestino === 'MEDICINA PREVENTIVA') {
+            document.getElementById('login-title').innerText = 'Medicina Preventiva';
+            document.getElementById('login-subtitle').innerText = 'Ingrese Usuario (RFC) y Clave de Acceso';
         } else {
             document.getElementById('login-title').innerText = 'Coordinación Médica';
             document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
         }
 
-        // Encendemos la ventana modal flotante de inicio de sesión
         document.getElementById('login-modal').style.display = 'flex';
 
     } else {
-        // Flujo secundario para accesos directos sin contraseña (ej. derechohabientes)
         document.getElementById('section-login').classList.remove('active-view');
         const targetPanel = document.getElementById(`panel-${rol.toLowerCase()}`);
         if (targetPanel) targetPanel.classList.add('active-view');
@@ -1783,10 +1782,40 @@ async function procesarLogin(e) {
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || 'Error al validar las credenciales.');
 
-        cerrarLogin();
-        alert(`¡Acceso concedido correctamente!\nBienvenido: ${data.user.username}\nRol: ${data.user.roleName}`);
+        const rolNormalizado = data.user.roleName ? data.user.roleName.trim().toUpperCase() : '';
+        const servicioNormalizado = data.user.serviceName ? data.user.serviceName.trim().toUpperCase() : '';
 
-        // Guardamos los datos del usuario activo en la memoria local
+        // 🚀 REGLA DE CONTROL PARA EL BOTÓN DE MEDICINA PREVENTIVA
+        if (moduloDestino === 'MEDICINA PREVENTIVA') {
+            // Permitimos el paso si es: ADMIN, o tiene ROL de Medicina Preventiva, o es Empleado del SERVICIO Medicina Preventiva
+            if (rolNormalizado === 'ADMINISTRADOR' || rolNormalizado === 'ADMIN' || rolNormalizado === 'MEDICINA PREVENTIVA' || servicioNormalizado === 'MEDICINA PREVENTIVA') {
+                
+                cerrarLogin();
+                alert(`¡Acceso Concedido!\nBienvenido al Módulo de Salud Pública.\nIdentificador: ${data.user.username}`);
+                
+                localStorage.setItem('usuarioLogueado', JSON.stringify(data.user));
+
+                // Apagamos la raíz del login y encendemos el panel intermedio de preventiva
+                const sectionLogin = document.getElementById('section-login');
+                if (sectionLogin) {
+                    sectionLogin.classList.remove('active-view');
+                    sectionLogin.style.display = 'none';
+                }
+
+                const panelPrev = document.getElementById('panel-medicina-preventiva');
+                if (panelPrev) {
+                    panelPrev.classList.add('active-view');
+                    panelPrev.style.display = 'block';
+                }
+                return; // Concluye con éxito
+            } else {
+                throw new Error('Acceso Denegado:\nSu cuenta no cuenta con el Rol o la Adscripción requerida para el área de Medicina Preventiva.');
+            }
+        }
+
+        // Flujos tradicionales para los otros botones
+        cerrarLogin();
+        alert(`¡Acceso concedido correctamente!\nBienvenido: ${data.user.username}`);
         localStorage.setItem('usuarioLogueado', JSON.stringify(data.user));
 
         const sectionLogin = document.getElementById('section-login');
@@ -1795,31 +1824,6 @@ async function procesarLogin(e) {
             sectionLogin.style.display = 'none';
         }
 
-        const rolNormalizado = data.user.roleName ? data.user.roleName.trim().toUpperCase() : '';
-        
-        // 🚀 CRITERIO DE ACCESO ADAPTATIVO: Evaluamos si cumple con las condiciones para ingresar a Medicina Preventiva
-        // Nota: Agregamos soporte para evaluar si viene de la tarjeta de Preventiva
-        if (moduloDestino === 'MEDICINA PREVENTIVA') {
-            // Buscamos si el usuario es ADMIN, o tiene el ROL de Medicina Preventiva, o es un empleado con ese servicio asignado
-            if (rolNormalizado === 'ADMINISTRADOR' || rolNormalizado === 'ADMIN' || rolNormalizado === 'MEDICINA PREVENTIVA') {
-                const panelPrev = document.getElementById('panel-medicina-preventiva');
-                if (panelPrev) {
-                    panelPrev.classList.add('active-view');
-                    panelPrev.style.display = 'block';
-                }
-                return; // Cortamos el flujo con éxito
-            } else {
-                // Si no cumple, lo rebotamos por seguridad regresándolo al login
-                alert('Acceso Denegado:\nSu cuenta no cuenta con privilegios de rol o adscripción para el área de Medicina Preventiva.');
-                if (sectionLogin) {
-                    sectionLogin.classList.add('active-view');
-                    sectionLogin.style.display = 'block';
-                }
-                return;
-            }
-        }
-
-        // Flujos tradicionales del resto de páneles
         if (rolNormalizado === 'ADMINISTRADOR' || rolNormalizado === 'ADMIN') {
             const panelAdmin = document.getElementById('panel-administrador');
             if (panelAdmin) {
@@ -1836,7 +1840,7 @@ async function procesarLogin(e) {
                 actualizarBurbujaNotificaciones();
             }
         } else {
-            alert(`Aviso de Seguridad:\nSu rol (${rolNormalizado}) cuenta con permisos vigentes, pero su panel de vista rápida se encuentra en proceso de asignación.`);
+            alert(`Aviso de Seguridad:\nSu rol (${rolNormalizado}) cuenta con permisos vigentes, pero su panel se encuentra en proceso de asignación.`);
         }
 
     } catch (error) {

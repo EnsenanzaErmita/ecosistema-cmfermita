@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.7.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.8.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -67,56 +67,94 @@ pool.getConnection((err, connection) => {
 // =========================================================================
 // RUTA API POST: VALIDACIÓN DE CREDENCIALES CORREGIDA Y BLINDADA
 // =========================================================================
+// =========================================================================
+// RUTA API POST: AUTENTICACIÓN UNIFICADA DE DOBLE CAPA (USERS + EMPLOYEES)
+// =========================================================================
 app.post('/api/auth/login', (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-        return res.status(400).json({ message: 'El nombre de usuario y la contraseña son obligatorios.' });
+        return res.status(400).json({ message: 'El usuario y la contraseña son obligatorios.' });
     }
 
     const userUpper = username.trim().toUpperCase();
-    const passTrim = password.trim();
+    const passTrim = password.trim().toUpperCase(); // Forzamos mayúsculas por si el No. de Empleado lleva letras
 
-    // 🏛️ REPARACIÓN: Agregamos u.password al SELECT y la cláusula WHERE condicional
-    const sql = `
-        SELECT u.id, u.username, u.password, u.role_id, r.role_name, u.service_id, s.service_name, u.created_at 
+    // CAPA 1: Buscamos primero en la tabla de Usuarios Maestros
+    const sqlUsers = `
+        SELECT u.id, u.username, u.password, u.role_id, r.role_name 
         FROM users u 
         LEFT JOIN roles r ON u.role_id = r.id 
-        LEFT JOIN services s ON u.service_id = s.id
-        WHERE BINARY u.username = ?
+        WHERE u.username = ?
     `;
 
-    pool.query(sql, [userUpper], (err, results) => {
-        if (err) {
-            console.error('Error al autenticar usuario en Clever Cloud:', err);
-            return res.status(500).json({ message: 'Error interno en el servidor al procesar el ingreso.' });
+    pool.query(sqlUsers, [userUpper], (errUser, userResults) => {
+        if (errUser) {
+            console.error('Error al consultar users:', errUser);
+            return res.status(500).json({ message: 'Error interno en el servidor.' });
         }
 
-        // Si el usuario específico no existe en los registros de la base de datos
-        if (!results || results.length === 0) {
-            return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas.' });
-        }
-
-        // Extraemos de forma segura el registro único filtrado
-        const usuarioEncontrado = results[0]; 
-
-        // 🔐 VALIDACIÓN REPARADA: Evaluamos caracteres en texto plano contra Clever Cloud
-        if (usuarioEncontrado.password !== passTrim) {
-            return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas.' });
-        }
-
-        // Devolvemos el formato JSON legítimo que tu función procesarLogin del frontend necesita leer
-        res.status(200).json({
-            message: 'Acceso concedido.',
-            user: {
-                id: usuarioEncontrado.id,
-                username: usuarioEncontrado.username,
-                roleId: usuarioEncontrado.role_id,
-                roleName: usuarioEncontrado.role_name || 'SIN ROL ASIGNADO'
+        // Si SÍ se encontró en Usuarios Maestros, validamos su credencial normal
+        if (userResults && userResults.length > 0) {
+            const usuarioMaestro = userResults[0];
+            
+            if (usuarioMaestro.password !== passTrim) {
+                return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas.' });
             }
+
+            return res.status(200).json({
+                message: 'Acceso concedido como Usuario Maestro.',
+                user: {
+                    id: usuarioMaestro.id,
+                    username: usuarioMaestro.username,
+                    roleId: usuarioMaestro.role_id,
+                    roleName: usuarioMaestro.role_name || 'SIN ROL ASIGNADO',
+                    serviceName: 'ADMINISTRACIÓN GENERAL'
+                }
+            });
+        }
+
+        // CAPA 2: Si no se encontró en Users, buscamos en la plantilla de Empleados (RFC + No. Empleado)
+        const sqlEmployees = `
+            SELECT id, rfc, employee_number, name, category, service 
+            FROM employees 
+            WHERE rfc = ?
+        `;
+
+        pool.query(sqlEmployees, [userUpper], (errEmp, empResults) => {
+            if (errEmp) {
+                console.error('Error al consultar employees:', errEmp);
+                return res.status(500).json({ message: 'Error interno en el servidor.' });
+            }
+
+            // Si tampoco existe en empleados, el usuario no existe en la clínica
+            if (!empResults || empResults.length === 0) {
+                return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas o el personal no existe.' });
+            }
+
+            const empleadoEncontrado = empResults[0];
+
+            // Validamos que su contraseña sea su Número de Empleado
+            if (empleadoEncontrado.employee_number !== passTrim) {
+                return res.status(401).json({ message: 'Las credenciales introducidas son incorrectas.' });
+            }
+
+            // 🚫 REGLA DE ORO INSTITUTIONAL: Si entra por el botón de Medicina Preventiva, 
+            // validamos que su columna service sea textualmente MEDICINA PREVENTIVA
+            res.status(200).json({
+                message: 'Acceso concedido como Personal Operativo.',
+                user: {
+                    id: empleadoEncontrado.id,
+                    username: empleadoEncontrado.rfc,
+                    roleId: 0,
+                    roleName: empleadoEncontrado.category.toUpperCase(), // Conserva su rol médico/enfermería
+                    serviceName: empleadoEncontrado.service ? empleadoEncontrado.service.toUpperCase() : 'SIN SERVICIO'
+                }
+            });
         });
     });
 });
+
 
 
 // RUTA API: Obtener toda la plantilla con los nombres separados
