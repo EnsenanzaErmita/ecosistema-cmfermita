@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.3.0
+        v2.4.0
     </div>
 
 
@@ -3739,35 +3739,43 @@ let _modoEdicionActivo = false;
 // =========================================================================
 // ALGORITMO RENAPO OFICIAL: CÁLCULO DE EDAD EXACTO EN EL AÑO 2026
 // =========================================================================
+// =========================================================================
+// ALGORITMO RENAPO BLINDADO: CÁLCULO DE EDAD CORREGIDO (18 CARACTERES)
+// =========================================================================
 async function evaluarCurpPreventiva(curpVal) {
     const curp = curpVal.trim().toUpperCase();
+    
+    // 🚀 REGLA DE ORO 1: Detiene la ejecución si la CURP está incompleta. Evita el cálculo erróneo de 116 años.
     if (curp.length !== 18) return;
 
-    // Desglose de cadenas de texto de la CURP
-    const añoDigitos = curp.substring(4, 6);   
-    const mesDigitos = curp.substring(6, 8);   
-    const diaDigitos = curp.substring(8, 10);  
+    // Extracción de sub-cadenas de la CURP
+    const añoDigitos = curp.substring(4, 6);   // Ej: "10"
+    const mesDigitos = curp.substring(6, 8);   // Ej: "03"
+    const diaDigitos = curp.substring(8, 10);  // Ej: "15"
     
-    // Regla Oficial RENAPO: Si el caracter 17 es una letra (A-Z) nació a partir del 2000
+    // 🚀 REGLA DE ORO 2: Identificación de siglo robusta combinando Caracter 17 y rango lógico del año 2026
     const caracter17 = curp.charAt(16);
-    const siglo = (isNaN(caracter17)) ? "20" : "19";
-    const añoNacimiento = parseInt(siglo + añoDigitos); 
+    let siglo = "19"; 
     
-    // Creamos los objetos Date para la resta matemática precisa
+    // Si la posición 17 es una letra, o si los dígitos son menores o iguales a 26 (año actual), es Siglo XXI
+    if (isNaN(caracter17) || parseInt(añoDigitos) <= 26) {
+        siglo = "20"; 
+    }
+    
+    const añoNacimiento = parseInt(siglo + añoDigitos); // "20" + "10" = 2010
+    
+    // Objetos Date para cálculo exacto (Fecha actual del sistema: 14 de Julio de 2026)
     const fechaNacimiento = new Date(añoNacimiento, parseInt(mesDigitos) - 1, parseInt(diaDigitos));
-    
-    // 📅 FIJADO: Fecha actual del sistema (14 de Julio de 2026)
     const fechaActual = new Date(2026, 6, 14); 
     
     let edadCalculada = fechaActual.getFullYear() - fechaNacimiento.getFullYear();
     const diferenciaMeses = fechaActual.getMonth() - fechaNacimiento.getMonth();
     
-    // Restamos un año si no ha pasado su fecha de cumpleaños en el año corriente
     if (diferenciaMeses < 0 || (diferenciaMeses === 0 && fechaActual.getDate() < fechaNacimiento.getDate())) {
         edadCalculada--; 
     }
 
-    // Inyectamos el valor calculado en el input de pantalla
+    // Inyectamos el valor real corregido (Para "10" calculará 16 años en este 2026)
     document.getElementById('prev-age').value = edadCalculada;
     _esMenorDeEdad = edadCalculada <= 17;
 
@@ -3775,12 +3783,11 @@ async function evaluarCurpPreventiva(curpVal) {
     const modalAuditoria = document.getElementById('modalAuditoria');
 
     try {
-        // Petición de búsqueda inteligente a Render
         const response = await fetch(`${BASE_URL}/api/preventive-patients/search/${curp}`);
         const data = await response.json();
 
         if (data.found) {
-            // 🏛️ CASO A: PACIENTE ENCONTRADO -> BLOQUEAR INPUTS Y SOLICITAR EDICIÓN
+            // CASO A: PACIENTE ENCONTRADO
             if (cuerpoModal && modalAuditoria) {
                 cuerpoModal.innerHTML = `
                     <div style="text-align: center; font-family: sans-serif;">
@@ -3795,7 +3802,6 @@ async function evaluarCurpPreventiva(curpVal) {
                 modalAuditoria.style.display = 'flex';
             }
 
-            // Rellenar formulario automáticamente con los datos congelados
             document.getElementById('prev-rfc').value = data.patient.rfc;
             document.getElementById('prev-firstname').value = data.patient.first_name;
             document.getElementById('prev-paternal').value = data.patient.last_name_paternal;
@@ -3805,12 +3811,9 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('prev-age').value = data.patient.age;
 
             _esMenorDeEdad = data.patient.age <= 17;
-            
-            // Forzar bloqueo operativo para evitar duplicidades accidentales
             alternarBloqueoCamposPreventiva(true);
             _modoEdicionActivo = false;
             
-            // Inyectamos dinámicamente el botón de "Modificar Datos"
             const contenedorBtnEditar = document.getElementById('container-boton-editar');
             if (contenedorBtnEditar) {
                 contenedorBtnEditar.innerHTML = '<button type="button" onclick="habilitarModoEdicionPreventiva()" style="background-color: #d97706; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase; font-size: 0.9em;">⚙ Modificar Datos</button>';
@@ -3819,7 +3822,7 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('btn-submit-preventiva').innerText = "ACTUALIZAR EXPEDIENTE";
 
         } else {
-            // CASO B: PACIENTE NO ENCONTRADO -> CAPTURA MANUAL LIBRE
+            // CASO B: PACIENTE NO ENCONTRADO
             if (cuerpoModal && modalAuditoria) {
                 cuerpoModal.innerHTML = `
                     <div style="text-align: center; font-family: sans-serif;">
@@ -3834,7 +3837,6 @@ async function evaluarCurpPreventiva(curpVal) {
                 modalAuditoria.style.display = 'flex';
             }
             
-            // Liberamos bloqueos previos si existían
             alternarBloqueoCamposPreventiva(false);
             document.getElementById('container-boton-editar').style.display = 'none';
             document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
@@ -3843,7 +3845,7 @@ async function evaluarCurpPreventiva(curpVal) {
             _tutorsCatalogGlobal = data.availableCompanions || [];
         }
 
-        // CONTROL COMPONENTE DE MENORES DE EDAD
+        // CONTROL DEL COMPONENTE DE MENORES DE EDAD
         const contenedorMenor = document.getElementById('seccion-menor-edad');
         const selectTutor = document.getElementById('prev-companion-select');
 
