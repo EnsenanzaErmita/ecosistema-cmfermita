@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.7.0
+        v2.8.0
     </div>
 
 
@@ -3711,8 +3711,18 @@ async function guardarServicioNube(event) {
 
 
 // Función para procesar el envío del nuevo formulario de medicina preventiva
+// =========================================================================
+// ENVÍO COMPUESTO INTEGRADO CORREGIDO (CAPTURA TRANSPARENTE DE EDAD TUTOR)
+// =========================================================================
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
+
+    // Capturamos el elemento de edad del tutor de forma segura
+    const inputAgeTutor = document.getElementById('prev-comp-age');
+    let edadTutorNumerica = 0;
+    if (inputAgeTutor && inputAgeTutor.value.trim() !== "") {
+        edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
+    }
 
     const payload = {
         rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
@@ -3728,13 +3738,13 @@ async function guardarPacientePreventivaNube(event) {
         companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
         selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : '',
         
-        // 🚀 NUEVO MAPEO DESGLOSADO HOMOLOGADO A PACIENTES
+        // 🚀 CORRECCIÓN: Extracción y mapeo directo homologado de las cajas de texto del tutor
         companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
         companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value.trim().toUpperCase() : '',
         companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value.trim().toUpperCase() : '',
         companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
         companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
-        companionAge: document.getElementById('prev-comp-age') && document.getElementById('prev-comp-age').value !== "" ? parseInt(document.getElementById('prev-comp-age').value) : 0,
+        companionAge: edadTutorNumerica, // 🚀 Viaja el número entero real capturado en pantalla (Ej: 42)
         companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
         companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
         companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
@@ -3764,6 +3774,7 @@ async function guardarPacientePreventivaNube(event) {
                 modalAuditoria.style.display = 'flex'; 
             }
 
+            // Blanqueamos el formulario tras un envío exitoso
             document.getElementById('form-paciente-preventiva').reset();
             document.getElementById('seccion-menor-edad').style.display = 'none';
             document.getElementById('container-boton-editar').style.display = 'none';
@@ -3779,6 +3790,7 @@ async function guardarPacientePreventivaNube(event) {
         alert('Fallo de conexión con el servidor de Render.');
     }
 }
+
 
 
 
