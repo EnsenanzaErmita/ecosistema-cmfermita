@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.5.0
+        v2.6.0
     </div>
 
 
@@ -3799,42 +3799,48 @@ let _modoEdicionActivo = false;
 // =========================================================================
 // ALGORITMO RENAPO BLINDADO: CÁLCULO DE EDAD CORREGIDO (18 CARACTERES)
 // =========================================================================
+// 🚀 ALGORITMO RENAPO BLINDADO: Cálculo matemático directo sin desfase de zonas horarias (Garantiza +18 años)
 async function evaluarCurpPreventiva(curpVal) {
     const curp = curpVal.trim().toUpperCase();
     
-    // 🚀 REGLA DE ORO 1: Detiene la ejecución si la CURP está incompleta. Evita el cálculo erróneo de 116 años.
+    // Regla de Oro: Esperamos los 18 caracteres de la CURP
     if (curp.length !== 18) return;
 
-    // Extracción de sub-cadenas de la CURP
-    const añoDigitos = curp.substring(4, 6);   // Ej: "10"
-    const mesDigitos = curp.substring(6, 8);   // Ej: "03"
-    const diaDigitos = curp.substring(8, 10);  // Ej: "15"
+    // 1. EXTRAER METADATOS EN TEXTO PLANO
+    const añoDigitos = parseInt(curp.substring(4, 6));   
+    const mesDigitos = parseInt(curp.substring(6, 8));   
+    const diaDigitos = parseInt(curp.substring(8, 10));  
     
-    // 🚀 REGLA DE ORO 2: Identificación de siglo robusta combinando Caracter 17 y rango lógico del año 2026
+    // 2. DETECTAR SIGLO MEDIANTE EL CARACTER 17 (Estándar RENAPO)
     const caracter17 = curp.charAt(16);
     let siglo = "19"; 
     
-    // Si la posición 17 es una letra, o si los dígitos son menores o iguales a 26 (año actual), es Siglo XXI
-    if (isNaN(caracter17) || parseInt(añoDigitos) <= 26) {
+    // Si la posición 17 es una Letra, o si el año es menor o igual a 26, es Siglo XXI
+    if (isNaN(caracter17) || añoDigitos <= 26) {
         siglo = "20"; 
     }
     
-    const añoNacimiento = parseInt(siglo + añoDigitos); // "20" + "10" = 2010
+    const añoNacimiento = parseInt(siglo + (añoDigitos < 10 ? "0" + añoDigitos : añoDigitos)); 
     
-    // Objetos Date para cálculo exacto (Fecha actual del sistema: 14 de Julio de 2026)
-    const fechaNacimiento = new Date(añoNacimiento, parseInt(mesDigitos) - 1, parseInt(diaDigitos));
-    const fechaActual = new Date(2026, 6, 14); 
+    // 3. CÁLCULO DE EDAD EXACTO PARA EL CONTEXTO ACTUAL DE JULIO 2026
+    const añoActual = 2026;
+    const mesActual = 7;  // Julio
+    const diaActual = 14; // Día 14
     
-    let edadCalculada = fechaActual.getFullYear() - fechaNacimiento.getFullYear();
-    const diferenciaMeses = fechaActual.getMonth() - fechaNacimiento.getMonth();
+    let edadCalculada = añoActual - añoNacimiento;
     
-    if (diferenciaMeses < 0 || (diferenciaMeses === 0 && fechaActual.getDate() < fechaNacimiento.getDate())) {
-        edadCalculada--; 
+    // Ajuste fino: si el mes de nacimiento es mayor al mes actual, aún no cumple años
+    if (mesDigitos > mesActual) {
+        edadCalculada--;
+    } 
+    // Si es el mismo mes, pero el día de nacimiento es mayor al día actual, tampoco ha cumplido años
+    else if (mesDigitos === mesActual && diaDigitos > diaActual) {
+        edadCalculada--;
     }
 
-    // Inyectamos el valor real corregido (Para "10" calculará 16 años en este 2026)
+    // Inyectamos de forma segura el valor en el formulario
     document.getElementById('prev-age').value = edadCalculada;
-    _esMenorDeEdad = edadCalculada <= 17;
+    _esMenorDeEdad = edadCalculada <= 17; // Es menor estrictamente si tiene 17 años o menos
 
     const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
     const modalAuditoria = document.getElementById('modalAuditoria');
@@ -3844,7 +3850,7 @@ async function evaluarCurpPreventiva(curpVal) {
         const data = await response.json();
 
         if (data.found) {
-            // CASO A: PACIENTE ENCONTRADO
+            // PACIENTE ENCONTRADO -> BLOQUEAR INPUTS
             if (cuerpoModal && modalAuditoria) {
                 cuerpoModal.innerHTML = `
                     <div style="text-align: center; font-family: sans-serif;">
@@ -3879,7 +3885,7 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('btn-submit-preventiva').innerText = "ACTUALIZAR EXPEDIENTE";
 
         } else {
-            // CASO B: PACIENTE NO ENCONTRADO
+            // PACIENTE NO ENCONTRADO
             if (cuerpoModal && modalAuditoria) {
                 cuerpoModal.innerHTML = `
                     <div style="text-align: center; font-family: sans-serif;">
@@ -3902,14 +3908,14 @@ async function evaluarCurpPreventiva(curpVal) {
             _tutorsCatalogGlobal = data.availableCompanions || [];
         }
 
-        // CONTROL DEL COMPONENTE DE MENORES DE EDAD
+        // CONTROL VISUAL DEL PANEL DE TUTORES RELACIONALES
         const contenedorMenor = document.getElementById('seccion-menor-edad');
         const selectTutor = document.getElementById('prev-companion-select');
 
         if (_esMenorDeEdad) {
             contenedorMenor.style.display = 'block';
             if (data.found && data.companions && data.companions.length > 0) {
-                const tutorAsociado = data.companions;
+                const tutorAsociado = data.companions[0]; // Extracción segura del arreglo
                 selectTutor.innerHTML = `<option value="${tutorAsociado.id}" selected>${tutorAsociado.full_name} (${tutorAsociado.relationship}) - VINCULADO</option>`;
                 conmutarModoAcompanante('SELECT');
                 document.getElementById('prev-companion-mode').value = 'SELECT';
@@ -3920,7 +3926,7 @@ async function evaluarCurpPreventiva(curpVal) {
                 selectTutor.disabled = false;
                 selectTutor.innerHTML = '<option value="" disabled selected>-- Seleccione del Catálogo --</option>';
                 if (_tutorsCatalogGlobal.length === 0) {
-                    selectTutor.innerHTML += '<option value="">Sin tutores registrados en el sistema. Elija crear uno NUEVO.</option>';
+                    selectTutor.innerHTML += '<option value="">Sin tutores registrados. Elija crear uno NUEVO.</option>';
                 } else {
                     _tutorsCatalogGlobal.forEach(t => {
                         selectTutor.innerHTML += `<option value="${t.id}">${t.full_name} (${t.relationship})</option>`;
