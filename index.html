@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.10.0
+        v2.1.0
     </div>
 
 
@@ -1408,45 +1408,100 @@
     
     <!-- Cuerpo del Formulario -->
     <div style="background: #f0fdf4; border-left: 5px solid var(--verde-issste); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        <form id="form-paciente-preventiva" onsubmit="guardarPacientePreventivaNube(event)">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+<form id="form-paciente-preventiva" onsubmit="guardarPacientePreventivaNube(event)">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+        
+        <!-- 🔍 CURP PRIMERO: Es el disparador de la inteligencia del formulario -->
+        <div>
+            <label for="prev-curp" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">CURP del Paciente (*):</label>
+            <input type="text" id="prev-curp" required maxlength="18" placeholder="Ej. AAAA000000HHHHHH00" oninput="evaluarCurpPreventiva(this.value)" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase; font-family: monospace; font-weight: bold; letter-spacing: 1px;">
+        </div>
+
+        <div>
+            <label for="prev-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">RFC del Paciente (*):</label>
+            <input type="text" id="prev-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
+        </div>
+        <div>
+            <label for="prev-firstname" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Nombre(s) (*):</label>
+            <input type="text" id="prev-firstname" required placeholder="Ej. María Luisa" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase;">
+        </div>
+        <div>
+            <label for="prev-paternal" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Apellido Paterno (*):</label>
+            <input type="text" id="prev-paternal" required placeholder="Ej. Mendoza" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase;">
+        </div>
+        <div>
+            <label for="prev-maternal" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Apellido Materno:</label>
+            <input type="text" id="prev-maternal" placeholder="Ej. Solís" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase;">
+        </div>
+        <div>
+            <label for="prev-age" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Edad (Calculada automáticamente) (*):</label>
+            <input type="number" id="prev-age" required min="0" max="120" placeholder="Años cumplidos" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
+        </div>
+        <div>
+            <label for="prev-phone" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Teléfono (*):</label>
+            <input type="tel" id="prev-phone" required placeholder="Ej. 5512345678" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
+        </div>
+        <div>
+            <label for="prev-email" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Correo Electrónico (*):</label>
+            <input type="email" id="prev-email" required placeholder="ejemplo@correo.com" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- 🚫 SECCIÓN DINÁMICA: CONTROL RELACIONAL DE ACOMPAÑANTES (INICIA OCULTO) -->
+        <!-- ========================================================================= -->
+        <div id="seccion-menor-edad" style="display: none; grid-column: 1 / -1; background: #fdf2f4; border: 2px solid var(--guinda); border-left: 8px solid var(--guinda); padding: 20px; border-radius: 6px; margin-top: 10px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
+            <h3 style="color: var(--guinda); margin-top: 0; font-size: 1.1em; border-bottom: 2px solid var(--guinda); padding-bottom: 5px; text-transform: uppercase;">⚠️ Alerta de Minoría de Edad: Control de Acompañantes</h3>
+            <p style="font-size: 0.85em; color: #555; margin-bottom: 15px;">El paciente es menor de 17 años. El marco legal institucional exige asociar un tutor o acompañante responsable.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
                 <div>
-                    <label for="prev-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">RFC del Paciente (*):</label>
-                    <input type="text" id="prev-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
+                    <label style="font-weight: bold; font-size: 0.85em; color: var(--guinda);">¿Cómo desea registrar al Acompañante?:</label>
+                    <select id="prev-companion-mode" onchange="conmutarModoAcompanante(this.value)" style="border-color: var(--guinda); outline: none;">
+                        <option value="SELECT" selected>Seleccionar uno ya existente en el catálogo</option>
+                        <option value="CREATE">Registrar los datos de un Acompañante NUEVO</option>
+                    </select>
                 </div>
-                <div>
-                    <label for="prev-curp" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">CURP del Paciente (*):</label>
-                    <input type="text" id="prev-curp" required placeholder="Ej. AAAA000000HHHHHH00" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
-                </div>
-                <div>
-                    <label for="prev-firstname" style="color: var(--verde-issste); font-weight: bold;">Nombre(s) (*):</label>
-                    <input type="text" id="prev-firstname" required placeholder="Ej. María Luisa" style="border-color: var(--verde-issste); text-transform: uppercase;">
-                </div>
-                <div>
-                    <label for="prev-paternal" style="color: var(--verde-issste); font-weight: bold;">Apellido Paterno (*):</label>
-                    <input type="text" id="prev-paternal" required placeholder="Ej. Mendoza" style="border-color: var(--verde-issste); text-transform: uppercase;">
-                </div>
-                <div>
-                    <label for="prev-maternal" style="color: var(--verde-issste); font-weight: bold;">Apellido Materno:</label>
-                    <input type="text" id="prev-maternal" placeholder="Ej. Solís" style="border-color: var(--verde-issste); text-transform: uppercase;">
-                </div>
-                <div>
-                    <label for="prev-age" style="color: var(--verde-issste); font-weight: bold;">Edad (*):</label>
-                    <input type="number" id="prev-age" required min="0" max="120" placeholder="Años cumplidos" style="border-color: var(--verde-issste);">
-                </div>
-                <div>
-                    <label for="prev-phone" style="color: var(--verde-issste); font-weight: bold;">Teléfono (*):</label>
-                    <input type="tel" id="prev-phone" required placeholder="Ej. 5512345678" style="border-color: var(--verde-issste);">
-                </div>
-                <div>
-                    <label for="prev-email" style="color: var(--verde-issste); font-weight: bold;">Correo Electrónico (*):</label>
-                    <input type="email" id="prev-email" required placeholder="ejemplo@correo.com" style="border-color: var(--verde-issste);">
-                </div>
-                <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
-                    <button type="submit" style="background-color: var(--verde-issste); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">REGISTRAR PACIENTE EN LA NUBE</button>
+
+                <!-- SUB-BLOQUE A: SELECCIONAR EXISTENTE -->
+                <div id="sub-bloque-companon-existente">
+                    <label style="font-weight: bold; font-size: 0.85em; color: var(--guinda);">Seleccionar Tutor Autorizado:</label>
+                    <select id="prev-companion-select" style="border-color: var(--guinda); outline: none;">
+                        <option value="">Cargando catálogo de acompañantes...</option>
+                    </select>
                 </div>
             </div>
-        </form>
+
+            <!-- SUB-BLOQUE B: CAPTURA DE NUEVO TUTOR (INICIA OCULTO) -->
+            <div id="sub-bloque-companion-nuevo" style="display: none; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; border-top: 1px dashed rgba(97,12,50,0.2); padding-top: 15px;">
+                <div>
+                    <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">CURP del Acompañante:</label>
+                    <input type="text" id="prev-comp-curp" placeholder="18 Caracteres" maxlength="18" style="border-color: var(--guinda); text-transform: uppercase; font-family: monospace;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">Nombre Completo:</label>
+                    <input type="text" id="prev-comp-name" placeholder="Ej. ROSA GONZÁLEZ ZAMUDIO" style="border-color: var(--guinda); text-transform: uppercase;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">Teléfono de Contacto:</label>
+                    <input type="tel" id="prev-comp-phone" placeholder="Ej. 5512345678" style="border-color: var(--guinda);">
+                </div>
+                <div>
+                    <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">Paternidad / Parentesco:</label>
+                    <select id="prev-comp-relationship" style="border-color: var(--guinda);">
+                        <option value="MADRE">MADRE</option>
+                        <option value="PADRE">PADRE</option>
+                        <option value="TUTOR LEGAL">TUTOR LEGAL</option>
+                        <option value="FAMILIAR DIRECTO">FAMILIAR DIRECTO</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
+            <button type="submit" style="background-color: var(--verde-issste); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">REGISTRAR PACIENTE EN LA NUBE</button>
+        </div>
+    </div>
+</form>
     </div>
 </div>
 
@@ -3632,6 +3687,153 @@ async function guardarPacientePreventivaNube(event) {
 
 
 
+let _tutorsCatalogGlobal = []; // Almacén global temporal para los tutores disponibles
+let _esMenorDeEdad = false;
+
+// FUNCIÓN MATRIZ: Evalúa la CURP cuando llega a los 18 caracteres
+async function evaluarCurpPreventiva(curpVal) {
+    const curp = curpVal.trim().toUpperCase();
+    if (curp.length !== 18) return;
+
+    // 🚀 ALGORITMO: Extracción de fecha de nacimiento y cálculo de edad (Contexto actual: 2026)
+    const añoDigitos = curp.substring(4, 6);
+    const mesDigitos = curp.substring(6, 8);
+    const diaDigitos = curp.substring(8, 10);
+    
+    // Determinamos el siglo (Regla RENAPO: si el siglo es 2000, la posición 17 lleva una Letra, si es 1900 lleva un Número)
+    const caracterSiglo = curp.charAt(16);
+    const siglo = (isNaN(caracterSiglo)) ? "20" : "19";
+    const añoCuatroDigitos = parseInt(siglo + añoDigitos);
+    
+    // Calculamos la edad exacta tomando como año base de ejecución el 2026
+    let edadCalculada = 2026 - añoCuatroDigitos;
+    // Ajuste fino por meses de margen
+    const mesActual = 7; // Julio 2026
+    if (parseInt(mesDigitos) > mesActual) {
+        edadCalculada--;
+    }
+
+    // Inyectamos la edad calculada directamente en el input visible
+    document.getElementById('prev-age').value = edadCalculada;
+
+    try {
+        // Disparamos la consulta inteligente hacia Render
+        const response = await fetch(`${BASE_URL}/api/preventive-patients/search/${curp}`);
+        const data = await response.json();
+
+        if (data.found) {
+            // CASO A: Paciente Registrado Previamente
+            alert(`¡PACIENTE ENCONTRADO!\nEl expediente ya existe en el programa. Se rellenarán los campos automáticamente.`);
+            
+            document.getElementById('prev-rfc').value = data.patient.rfc;
+            document.getElementById('prev-firstname').value = data.patient.first_name;
+            document.getElementById('prev-paternal').value = data.patient.last_name_paternal;
+            document.getElementById('prev-maternal').value = data.patient.last_name_maternal || '';
+            document.getElementById('prev-phone').value = data.patient.phone;
+            document.getElementById('prev-email').value = data.patient.email;
+            document.getElementById('prev-age').value = data.patient.age;
+
+            // Evaluamos la minoría basándonos en el expediente congelado
+            _esMenorDeEdad = data.patient.age <= 17;
+        } else {
+            // CASO B: Paciente Nuevo
+            alert(`PACIENTE NO ENCONTRADO:\nPor favor, complemente todos los campos para dar de alta el nuevo expediente preventivo.`);
+            _esMenorDeEdad = edadCalculada <= 17;
+            _tutorsCatalogGlobal = data.availableCompanions || [];
+        }
+
+        // 🎛️ Disparador visual del bloque de menores
+        const contenedorMenor = document.getElementById('seccion-menor-edad');
+        const selectTutor = document.getElementById('prev-companion-select');
+
+        if (_esMenorDeEdad) {
+            contenedorMenor.style.display = 'block';
+            
+            // Si el backend regresó acompañantes previos vinculados a este menor
+            if (data.found && data.companions && data.companions.length > 0) {
+                const tutorAsociado = data.companions[0];
+                selectTutor.innerHTML = `<option value="${tutorAsociado.id}" selected>${tutorAsociado.full_name} (${tutorAsociado.relationship}) - VINCULADO</option>`;
+                conmutarModoAcompanante('SELECT');
+                document.getElementById('prev-companion-mode').value = 'SELECT';
+            } else {
+                // Si es nuevo o no tiene asignado, pintamos el catálogo global disponible
+                selectTutor.innerHTML = '<option value="" disabled selected>-- Seleccione del Catálogo --</option>';
+                if (_tutorsCatalogGlobal.length === 0) {
+                    selectTutor.innerHTML += '<option value="">Sin tutores registrados. Elija crear uno NUEVO.</option>';
+                } else {
+                    _tutorsCatalogGlobal.forEach(t => {
+                        selectTutor.innerHTML += `<option value="${t.id}">${t.full_name} (${t.relationship})</option>`;
+                    });
+                }
+            }
+        } else {
+            contenedorMenor.style.display = 'none';
+        }
+
+    } catch (error) {
+        console.error('Error en búsqueda inteligente preventivo:', error);
+    }
+}
+
+// Conmutador interactivo entre elegir del catálogo o capturar uno nuevo
+function conmutarModoAcompanante(modo) {
+    const bloqueSel = document.getElementById('sub-bloque-companon-existente');
+    const bloqueNuevo = document.getElementById('sub-bloque-companion-nuevo');
+
+    if (modo === 'SELECT') {
+        bloqueSel.style.display = 'block';
+        bloqueNuevo.style.display = 'none';
+    } else {
+        bloqueSel.style.display = 'none';
+        bloqueNuevo.style.display = 'grid';
+    }
+}
+
+// REEMPLAZO EXTENDIDO: Guardado unificado compuesto hacia el nuevo endpoint unificado
+async function guardarPacientePreventivaNube(event) {
+    event.preventDefault();
+
+    const payload = {
+        rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
+        curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
+        firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
+        lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
+        lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
+        age: parseInt(document.getElementById('prev-age').value),
+        phone: document.getElementById('prev-phone').value.trim(),
+        email: document.getElementById('prev-email').value.trim(),
+        
+        isMinor: _esMenorDeEdad,
+        companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
+        selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : '',
+        
+        companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
+        companionName: document.getElementById('prev-comp-name') ? document.getElementById('prev-comp-name').value.trim().toUpperCase() : '',
+        companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
+        companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
+    };
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/preventive-patients/integrated`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            alert('¡Expediente de Medicina Preventiva guardado con éxito!');
+            document.getElementById('form-paciente-preventiva').reset();
+            document.getElementById('seccion-menor-edad').style.display = 'none';
+            _esMenorDeEdad = false;
+        } else {
+            const data = await response.json();
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error al guardar expediente compuesto:', error);
+        alert('Fallo de conexión con el servidor.');
+    }
+}
 
 
 
@@ -3641,16 +3843,17 @@ async function guardarPacientePreventivaNube(event) {
 
 
 
+
+    // Vinculación explícita
+    window.evaluarCurpPreventiva = evaluarCurpPreventiva;
+    window.conmutarModoAcompanante = conmutarModoAcompanante;
+    window.guardarPacientePreventivaNube = guardarPacientePreventivaNube;
     // Vinculación al alcance global
     window.guardarPacientePreventivaNube = guardarPacientePreventivaNube;
-
-
     // Vinculación explícita al contexto global
     window.deInmediatoCargarRolesYUsuarios = deInmediatoCargarRolesYUsuarios;
     window.eliminarServicioNube = eliminarServicioNube;
     window.guardarUsuarioNube = guardarUsuarioNube;
-
-
     // 🚀 MANDATORIO: Aseguramos su exposición global para que el formulario la reconozca al hacer submit
     window.guardarServicioNube = guardarServicioNube;
     // =========================================================================
