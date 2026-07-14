@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.6.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.7.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1080,6 +1080,9 @@ app.delete('/api/services/:id', (req, res) => {
 // =========================================================================
 // ENDPOINT: REGISTRO INTEGRADO BLINDADO CON SOPORTE DE CLONACIÓN DE TUTORES
 // =========================================================================
+// =========================================================================
+// ENDPOINT: REGISTRO INTEGRADO BLINDADO CON INSERT_ID INDEPENDIENTE
+// =========================================================================
 app.post('/api/preventive-patients/integrated', (req, res) => {
     const { 
         rfc, curp, firstName, lastNamePaternal, lastNameMaternal, age, phone, email,
@@ -1106,24 +1109,23 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                                 last_name_maternal=VALUES(last_name_maternal), age=VALUES(age), phone=VALUES(phone), email=VALUES(email)
     `;
 
-    pool.query(sqlInsertPatient, patientData, (errPat) => {
+    // 🚀 resultPat contiene los metadatos de la inserción directa de Clever Cloud
+    pool.query(sqlInsertPatient, patientData, (errPat, resultPat) => {
         if (errPat) {
             console.error('Error al persistir paciente preventivo:', errPat);
             return res.status(500).json({ message: 'No se pudo guardar el expediente del paciente.' });
         }
 
-        // 🔍 REPARACIÓN MÁXIMA: Buscamos la ID de forma limpia
-        pool.query('SELECT id FROM preventive_patients WHERE curp = ?', [curp.trim().toUpperCase()], (errId, resultsId) => {
-            if (errId || !resultsId || resultsId.length === 0) {
-                return res.status(500).json({ message: 'Error al recuperar ID del paciente.' });
-            }
-            const patientId = resultsId[0].id; // 🚀 EXTRAE EL renglón cero de la lista de forma exitosa
+        // 🏛️ REPARACIÓN ABSOLUTA: Si resultPat.insertId es 0 (porque fue un UPDATE), buscamos por CURP,
+        // de lo contrario usamos la ID nativa del insertId que es inmediata y no falla.
+        let patientId = resultPat.insertId;
 
+        const procesarFlujoAcompanantes = (idDelPaciente) => {
             // EVALUACIÓN DE MENORES DE EDAD
             if (isMinor) {
                 if (companionSelectionType === 'EXISTING' && selectedCompanionId) {
                     const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
-                    pool.query(sqlLink, [patientId, parseInt(selectedCompanionId)], () => {
+                    pool.query(sqlLink, [idDelPaciente, parseInt(selectedCompanionId)], () => {
                         return res.status(201).json({ message: 'Menor vinculado con éxito al tutor seleccionado.' });
                     });
                 } 
@@ -1132,7 +1134,7 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                         return res.status(400).json({ message: 'Los datos del nuevo acompañante están incompletos.' });
                     }
 
-                    // ACCIÓN EN CASCADA: Guardamos primero al acompañante en el catálogo de tutores
+                    // PASO A: Guardamos primero al acompañante en el catálogo de tutores
                     const sqlInsertComp = `
                         INSERT INTO preventive_companions 
                         (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, phone, email, relationship) 
@@ -1144,37 +1146,50 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                         companionRfc.trim().toUpperCase(), companionCurp.trim().toUpperCase(), companionFirstName.trim().toUpperCase(),
                         companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
                         parseInt(companionAge), companionPhone.trim(), companionEmail.trim().toLowerCase(), companionRelationship
-                    ], (errC) => {
+                    ], (errC, resultComp) => {
                         if (errC) {
                             console.error('Error al insertar tutor en el catálogo:', errC);
                             return res.status(500).json({ message: 'Error al registrar al acompañante.' });
                         }
 
-                        // 🚀 REGLA DE ORO DE VACCINACIÓN AUTOMÁTICA: Insertamos al tutor en la tabla preventiva de pacientes simultáneamente
-                        const sqlTutorComoPaciente = `
-                            INSERT IGNORE INTO preventive_patients 
-                            (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, phone, email) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                        `;
-                        pool.query(sqlTutorComoPaciente, [
-                            companionRfc.trim().toUpperCase(), companionCurp.trim().toUpperCase(), companionFirstName.trim().toUpperCase(),
-                            companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
-                            parseInt(companionAge), companionPhone.trim(), companionEmail.trim().toLowerCase()
-                        ], (errClone) => {
-                            if (errClone) console.error('Aviso: El tutor ya existía como paciente preventivo independiente.', errClone);
+                        // Recuperamos el ID del tutor usando su insertId nativo
+                        let companionId = resultComp.insertId;
 
-                            // Recuperamos la ID del tutor guardado para crear el enlace relacional final
-                            pool.query('SELECT id FROM preventive_companions WHERE curp = ?', [companionCurp.trim().toUpperCase()], (errCId, resCId) => {
-                                if (errCId || !resCId || resCId.length === 0) {
-                                    return res.status(500).json({ message: 'Error al enlazar con el acompañante.' });
-                                }
-                                const companionId = resCId[0].id; // 🚀 EXTRAE el renglón cero exitosamente
+                        const registrarTutorComoPacienteYEnlazar = (idDelTutor) => {
+                            // PASO B: 🚀 REGLA DE ORO: Insertamos al tutor en la tabla general de pacientes preventivos para su vacunación posterior
+                            const sqlTutorComoPaciente = `
+                                INSERT INTO preventive_patients 
+                                (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, phone, email) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                                ON DUPLICATE KEY UPDATE first_name=VALUES(first_name), last_name_paternal=VALUES(last_name_paternal), age=VALUES(age), phone=VALUES(phone), email=VALUES(email)
+                            `;
+                            pool.query(sqlTutorComoPaciente, [
+                                companionRfc.trim().toUpperCase(), companionCurp.trim().toUpperCase(), companionFirstName.trim().toUpperCase(),
+                                companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
+                                parseInt(companionAge), companionPhone.trim(), companionEmail.trim().toLowerCase()
+                            ], (errClone) => {
+                                if (errClone) console.error('Aviso: El tutor ya existía como paciente independiente.', errClone);
+
+                                // PASO C: Creamos el enlace relacional final en la tabla intermedia
                                 const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
-                                pool.query(sqlLink, [patientId, companionId], () => {
-                                    return res.status(201).json({ message: 'Expediente guardado. El tutor quedó registrado simultáneamente como paciente para vacunación.' });
+                                pool.query(sqlLink, [idDelPaciente, idDelTutor], () => {
+                                    return res.status(201).json({ message: 'Expediente del menor guardado. El acompañante quedó registrado simultáneamente como paciente para su esquema de vacunación.' });
                                 });
                             });
-                        });
+                        };
+
+                        if (companionId === 0) {
+                            // Si el tutor ya existía en el catálogo y fue un UPDATE, recuperamos su ID por CURP de forma segura
+                            pool.query('SELECT id FROM preventive_companions WHERE curp = ?', [companionCurp.trim().toUpperCase()], (errCId, resCId) => {
+                                if (!errCId && resCId && resCId.length > 0) {
+                                    registrarTutorComoPacienteYEnlazar(resCId[0].id);
+                                } else {
+                                    return res.status(500).json({ message: 'Error al enlazar con el tutor existente.' });
+                                }
+                            });
+                        } else {
+                            registrarTutorComoPacienteYEnlazar(companionId);
+                        }
                     });
                 } else {
                     return res.status(201).json({ message: 'Menor de edad registrado. Pendiente vincular un tutor.' });
@@ -1182,7 +1197,20 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
             } else {
                 res.status(201).json({ message: 'Expediente de derechohabiente adulto guardado correctamente.' });
             }
-        });
+        };
+
+        if (patientId === 0) {
+            // Si fue un UPDATE de un paciente existente, buscamos su ID por CURP de respaldo
+            pool.query('SELECT id FROM preventive_patients WHERE curp = ?', [curp.trim().toUpperCase()], (errIdBack, resIdBack) => {
+                if (!errIdBack && resIdBack && resIdBack.length > 0) {
+                    procesarFlujoAcompanantes(resIdBack[0].id);
+                } else {
+                    return res.status(500).json({ message: 'Error al recuperar ID del paciente existente.' });
+                }
+            });
+        } else {
+            procesarFlujoAcompanantes(patientId);
+        }
     });
 });
 
