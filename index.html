@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.1.0
+        v2.2.0
     </div>
 
 
@@ -3687,44 +3687,67 @@ async function guardarPacientePreventivaNube(event) {
 
 
 
-let _tutorsCatalogGlobal = []; // Almacén global temporal para los tutores disponibles
+
+let _tutorsCatalogGlobal = []; 
 let _esMenorDeEdad = false;
 
-// FUNCIÓN MATRIZ: Evalúa la CURP cuando llega a los 18 caracteres
+// 🚀 FUNCIÓN MATRIZ CORREGIDA: Algoritmo RENAPO Oficial y Alertas en Ventana Flotante Estilizada
 async function evaluarCurpPreventiva(curpVal) {
     const curp = curpVal.trim().toUpperCase();
     if (curp.length !== 18) return;
 
-    // 🚀 ALGORITMO: Extracción de fecha de nacimiento y cálculo de edad (Contexto actual: 2026)
-    const añoDigitos = curp.substring(4, 6);
-    const mesDigitos = curp.substring(6, 8);
-    const diaDigitos = curp.substring(8, 10);
+    // 1. EXTRAER METADATOS DE LA CURP
+    const añoDigitos = curp.substring(4, 6);   // Ej: "04"
+    const mesDigitos = curp.substring(6, 8);   // Ej: "03"
+    const diaDigitos = curp.substring(8, 10);  // Ej: "15"
     
-    // Determinamos el siglo (Regla RENAPO: si el siglo es 2000, la posición 17 lleva una Letra, si es 1900 lleva un Número)
-    const caracterSiglo = curp.charAt(16);
-    const siglo = (isNaN(caracterSiglo)) ? "20" : "19";
-    const añoCuatroDigitos = parseInt(siglo + añoDigitos);
+    // 2. DETECTAR SIGLO MEDIANTE EL CARACTER 17 (Oficial RENAPO) [1]
+    const caracter17 = curp.charAt(16);
+    let siglo = "19"; // Por defecto siglo pasado
     
-    // Calculamos la edad exacta tomando como año base de ejecución el 2026
-    let edadCalculada = 2026 - añoCuatroDigitos;
-    // Ajuste fino por meses de margen
-    const mesActual = 7; // Julio 2026
+    if (isNaN(caracter17)) {
+        siglo = "20"; // Si el caracter 17 es una LETRA (A-Z), nació del 2000 en adelante [1]
+    }
+    
+    const añoNacimiento = parseInt(siglo + añoDigitos); // Combina: "20" + "04" = 2004 [1]
+    
+    // 3. CÁLCULO EXACTO DE LA EDAD EN EL AÑO ACTUAL (2026) [1]
+    let edadCalculada = 2026 - añoNacimiento;
+    
+    // Ajuste por mes de nacimiento (Mes actual de ejecución: Julio = 7) [1]
+    const mesActual = 7; 
     if (parseInt(mesDigitos) > mesActual) {
-        edadCalculada--;
+        edadCalculada--; // Si no ha cumplido meses este año, se resta 1
     }
 
-    // Inyectamos la edad calculada directamente en el input visible
+    // Inyectamos la edad calculada de forma inmediata en el input
     document.getElementById('prev-age').value = edadCalculada;
+    _esMenorDeEdad = edadCalculada <= 17;
+
+    // Capturamos tu modal de auditoría oficial para inyectar los mensajes estilizados [1]
+    const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
+    const modalAuditoria = document.getElementById('modalAuditoria');
 
     try {
-        // Disparamos la consulta inteligente hacia Render
         const response = await fetch(`${BASE_URL}/api/preventive-patients/search/${curp}`);
         const data = await response.json();
 
         if (data.found) {
-            // CASO A: Paciente Registrado Previamente
-            alert(`¡PACIENTE ENCONTRADO!\nEl expediente ya existe en el programa. Se rellenarán los campos automáticamente.`);
-            
+            // 🏛️ CASO A: PACIENTE ENCONTRADO (VENTANA EMERGENTE ESTILIZADA) [1]
+            if (cuerpoModal && modalAuditoria) {
+                cuerpoModal.innerHTML = `
+                    <div style="text-align: center;">
+                        <span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span>
+                        <h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Paciente Localizado!</h4>
+                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563;">
+                            El expediente clínico ya se encuentra registrado previamente en la base de datos de Clever Cloud. Los campos se rellenarán automáticamente de forma segura.
+                        </p>
+                    </div>
+                `;
+                modalAuditoria.style.display = 'flex'; // Encendemos la ventana flotante [1]
+            }
+
+            // Precarga de datos en texto plano
             document.getElementById('prev-rfc').value = data.patient.rfc;
             document.getElementById('prev-firstname').value = data.patient.first_name;
             document.getElementById('prev-paternal').value = data.patient.last_name_paternal;
@@ -3733,33 +3756,42 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('prev-email').value = data.patient.email;
             document.getElementById('prev-age').value = data.patient.age;
 
-            // Evaluamos la minoría basándonos en el expediente congelado
             _esMenorDeEdad = data.patient.age <= 17;
         } else {
-            // CASO B: Paciente Nuevo
-            alert(`PACIENTE NO ENCONTRADO:\nPor favor, complemente todos los campos para dar de alta el nuevo expediente preventivo.`);
-            _esMenorDeEdad = edadCalculada <= 17;
+            // 🏛️ CASO B: PACIENTE NO ENCONTRADO (VENTANA EMERGENTE ESTILIZADA) [1]
+            if (cuerpoModal && modalAuditoria) {
+                cuerpoModal.innerHTML = `
+                    <div style="text-align: center;">
+                        <span style="color: #b45309; font-size: 2.5em; display:block; margin-bottom:5px;">ℹ️</span>
+                        <h4 style="margin:0; color: #b45309; font-size:1.2em; text-transform:uppercase;">Paciente No Registrado</h4>
+                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563;">
+                            La CURP ingresada no cuenta con un expediente preventivo activo.<br>
+                            <strong>Por favor, capture de forma manual todos los campos requeridos en el formulario.</strong>
+                        </p>
+                    </div>
+                `;
+                modalAuditoria.style.display = 'flex'; // Encendemos la ventana flotante [1]
+            }
+            
             _tutorsCatalogGlobal = data.availableCompanions || [];
         }
 
-        // 🎛️ Disparador visual del bloque de menores
+        // 🎛️ CONTROL DEL PANEL DE MENORES DE EDAD
         const contenedorMenor = document.getElementById('seccion-menor-edad');
         const selectTutor = document.getElementById('prev-companion-select');
 
         if (_esMenorDeEdad) {
             contenedorMenor.style.display = 'block';
             
-            // Si el backend regresó acompañantes previos vinculados a este menor
             if (data.found && data.companions && data.companions.length > 0) {
                 const tutorAsociado = data.companions[0];
-                selectTutor.innerHTML = `<option value="${tutorAsociado.id}" selected>${tutorAsociado.full_name} (${tutorAsociado.relationship}) - VINCULADO</option>`;
+                selectTutor.innerHTML = `<option value="${tutorAsociado.id}" selected>${tutorAsociado.full_name} (${tutorAsociado.relationship}) - ENLAZADO</option>`;
                 conmutarModoAcompanante('SELECT');
                 document.getElementById('prev-companion-mode').value = 'SELECT';
             } else {
-                // Si es nuevo o no tiene asignado, pintamos el catálogo global disponible
                 selectTutor.innerHTML = '<option value="" disabled selected>-- Seleccione del Catálogo --</option>';
                 if (_tutorsCatalogGlobal.length === 0) {
-                    selectTutor.innerHTML += '<option value="">Sin tutores registrados. Elija crear uno NUEVO.</option>';
+                    selectTutor.innerHTML += '<option value="">Sin tutores registrados en el sistema. Elija crear uno NUEVO.</option>';
                 } else {
                     _tutorsCatalogGlobal.forEach(t => {
                         selectTutor.innerHTML += `<option value="${t.id}">${t.full_name} (${t.relationship})</option>`;
@@ -3775,21 +3807,7 @@ async function evaluarCurpPreventiva(curpVal) {
     }
 }
 
-// Conmutador interactivo entre elegir del catálogo o capturar uno nuevo
-function conmutarModoAcompanante(modo) {
-    const bloqueSel = document.getElementById('sub-bloque-companon-existente');
-    const bloqueNuevo = document.getElementById('sub-bloque-companion-nuevo');
-
-    if (modo === 'SELECT') {
-        bloqueSel.style.display = 'block';
-        bloqueNuevo.style.display = 'none';
-    } else {
-        bloqueSel.style.display = 'none';
-        bloqueNuevo.style.display = 'grid';
-    }
-}
-
-// REEMPLAZO EXTENDIDO: Guardado unificado compuesto hacia el nuevo endpoint unificado
+// Envío compuesto parametrizado relacional
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
@@ -3821,19 +3839,58 @@ async function guardarPacientePreventivaNube(event) {
         });
 
         if (response.ok) {
-            alert('¡Expediente de Medicina Preventiva guardado con éxito!');
+            // Usamos también tu modal oficial para el éxito del guardado [1]
+            const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
+            const modalAuditoria = document.getElementById('modalAuditoria');
+            
+            if (cuerpoModal && modalAuditoria) {
+                cuerpoModal.innerHTML = `
+                    <div style="text-align: center;">
+                        <span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span>
+                        <h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Registro Guardado!</h4>
+                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563;">
+                            El expediente compuesto de Medicina Preventiva y la relación de acompañantes se ha guardado exitosamente en Clever Cloud.
+                        </p>
+                    </div>
+                `;
+                modalAuditoria.style.display = 'flex'; // Desplegamos la ventana [1]
+            }
+
             document.getElementById('form-paciente-preventiva').reset();
             document.getElementById('seccion-menor-edad').style.display = 'none';
             _esMenorDeEdad = false;
         } else {
             const data = await response.json();
-            alert('Error: ' + data.message);
+            alert('Error al guardar: ' + data.message);
         }
     } catch (error) {
         console.error('Error al guardar expediente compuesto:', error);
         alert('Fallo de conexión con el servidor.');
     }
 }
+
+
+
+
+
+// 🏛️ MANDATORIO: Conmuta los sub-bloques visuales entre buscar del catálogo o capturar uno nuevo
+function conmutarModoAcompanante(modo) {
+    const bloqueSel = document.getElementById('sub-bloque-companon-existente');
+    const bloqueNuevo = document.getElementById('sub-bloque-companion-nuevo');
+
+    if (!bloqueSel || !bloqueNuevo) return;
+
+    if (modo === 'SELECT') {
+        // Enciende la lista desplegable y oculta los cuadros de texto
+        bloqueSel.style.display = 'block';
+        bloqueNuevo.style.display = 'none';
+    } else {
+        // Oculta la lista y enciende la rejilla de captura para el nuevo acompañante
+        bloqueSel.style.display = 'none';
+        bloqueNuevo.style.display = 'grid';
+    }
+}
+
 
 
 
