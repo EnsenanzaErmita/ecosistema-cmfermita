@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.2.0
+        v2.3.0
     </div>
 
 
@@ -1390,17 +1390,48 @@
     </div>
 </div>
 
+
+
+
+
+
+<!-- ========================================================================= -->
+<!-- VISTA A: PANEL DE MEDICINA PREVENTIVA (MENÚ INTERMEDIO)                   -->
+<!-- ========================================================================= -->
+<div id="panel-medicina-preventiva" class="view" style="display: none; padding: 20px;">
+    <!-- Barra superior ejecutiva Verde ISSSTE -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
+        <h2 style="color: var(--verde-issste); margin:0; font-family: 'Segoe UI', sans-serif;">Módulo de Medicina Preventiva</h2>
+        <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Cerrar Sesión</button>
+    </div>
+
+    <div class="teaching-hero" style="border-color: var(--verde-issste);">
+        <h2 style="color: var(--verde-issste); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Servicio de Salud Pública y Prevención</h2>
+        <div style="font-size: 1.1em; font-style: italic; color: var(--verde-issste); margin-top: 8px; font-weight: 300;">"Prevenir es proteger el futuro de nuestra derechohabiencia"</div>
+    </div>
+
+    <!-- REJILLA DE OPCIONES -->
+    <div class="login-grid" style="margin-top: 20px;">
+        <!-- TARJETA: REGISTRO DE PACIENTES -->
+        <div class="card" style="border-top: 8px solid var(--verde-issste); text-align: center;">
+            <h3 style="color: var(--verde-issste); margin-top: 0; font-size: 1.50em;">Registro de Pacientes</h3>
+            <p>Alta de derechohabientes en programas de vacunación, detección oportuna y seguimiento de salud.</p>
+            <button onclick="activarModulo('modulo-registro-pacientes-preventiva', this)" class="btn-save" style="background: var(--verde-issste); color: white !important;">ABRIR FORMULARIO DE REGISTRO</button>
+        </div>
+    </div>
+</div>
+
 <!-- ========================================================================= -->
 <!-- VISTA B: FORMULARIO DE ALTA DE PACIENTES PREVENTIVA                       -->
 <!-- ========================================================================= -->
 <div id="modulo-registro-pacientes-preventiva" class="view" style="display: none;">
-    <!-- Barra superior -->
+    <!-- Barra superior con limpieza automática al volver -->
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--verde-issste); margin-bottom: 20px; padding-bottom: 10px;">
         <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Control de Medicina Preventiva</h2>
-        <button onclick="activarModulo('panel-medicina-preventiva', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">← Volver al Panel</button>
+        <button onclick="volverYLimpiarPreventiva()" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">← Volver al Panel</button>
     </div>
 
-    <!-- Encabezado -->
+    <!-- Encabezado Informativo -->
     <div style="background-color: var(--verde-issste); display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
         <span style="font-weight: bold; font-size: 1.2em;">Formulario de Registro de Pacientes</span>
         <span style="text-align: right; font-size: 0.85em;">Programa de Detección Oportuna 📑</span>
@@ -1408,102 +1439,112 @@
     
     <!-- Cuerpo del Formulario -->
     <div style="background: #f0fdf4; border-left: 5px solid var(--verde-issste); padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-top: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-<form id="form-paciente-preventiva" onsubmit="guardarPacientePreventivaNube(event)">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
-        
-        <!-- 🔍 CURP PRIMERO: Es el disparador de la inteligencia del formulario -->
-        <div>
-            <label for="prev-curp" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">CURP del Paciente (*):</label>
-            <input type="text" id="prev-curp" required maxlength="18" placeholder="Ej. AAAA000000HHHHHH00" oninput="evaluarCurpPreventiva(this.value)" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase; font-family: monospace; font-weight: bold; letter-spacing: 1px;">
-        </div>
-
-        <div>
-            <label for="prev-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">RFC del Paciente (*):</label>
-            <input type="text" id="prev-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
-        </div>
-        <div>
-            <label for="prev-firstname" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Nombre(s) (*):</label>
-            <input type="text" id="prev-firstname" required placeholder="Ej. María Luisa" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase;">
-        </div>
-        <div>
-            <label for="prev-paternal" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Apellido Paterno (*):</label>
-            <input type="text" id="prev-paternal" required placeholder="Ej. Mendoza" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase;">
-        </div>
-        <div>
-            <label for="prev-maternal" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Apellido Materno:</label>
-            <input type="text" id="prev-maternal" placeholder="Ej. Solís" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase;">
-        </div>
-        <div>
-            <label for="prev-age" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Edad (Calculada automáticamente) (*):</label>
-            <input type="number" id="prev-age" required min="0" max="120" placeholder="Años cumplidos" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
-        </div>
-        <div>
-            <label for="prev-phone" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Teléfono (*):</label>
-            <input type="tel" id="prev-phone" required placeholder="Ej. 5512345678" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
-        </div>
-        <div>
-            <label for="prev-email" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Correo Electrónico (*):</label>
-            <input type="email" id="prev-email" required placeholder="ejemplo@correo.com" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
-        </div>
-
-        <!-- ========================================================================= -->
-        <!-- 🚫 SECCIÓN DINÁMICA: CONTROL RELACIONAL DE ACOMPAÑANTES (INICIA OCULTO) -->
-        <!-- ========================================================================= -->
-        <div id="seccion-menor-edad" style="display: none; grid-column: 1 / -1; background: #fdf2f4; border: 2px solid var(--guinda); border-left: 8px solid var(--guinda); padding: 20px; border-radius: 6px; margin-top: 10px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
-            <h3 style="color: var(--guinda); margin-top: 0; font-size: 1.1em; border-bottom: 2px solid var(--guinda); padding-bottom: 5px; text-transform: uppercase;">⚠️ Alerta de Minoría de Edad: Control de Acompañantes</h3>
-            <p style="font-size: 0.85em; color: #555; margin-bottom: 15px;">El paciente es menor de 17 años. El marco legal institucional exige asociar un tutor o acompañante responsable.</p>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+        <form id="form-paciente-preventiva" onsubmit="guardarPacientePreventivaNube(event)">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                
+                <!-- 🔍 CURP DISPARADOR -->
                 <div>
-                    <label style="font-weight: bold; font-size: 0.85em; color: var(--guinda);">¿Cómo desea registrar al Acompañante?:</label>
-                    <select id="prev-companion-mode" onchange="conmutarModoAcompanante(this.value)" style="border-color: var(--guinda); outline: none;">
-                        <option value="SELECT" selected>Seleccionar uno ya existente en el catálogo</option>
-                        <option value="CREATE">Registrar los datos de un Acompañante NUEVO</option>
-                    </select>
+                    <label for="prev-curp" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">CURP del Paciente (*):</label>
+                    <input type="text" id="prev-curp" required maxlength="18" placeholder="Ej. AAAA000000HHHHHH00" oninput="evaluarCurpPreventiva(this.value)" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase; font-family: monospace; font-weight: bold; letter-spacing: 1px;">
+                </div>
+                <div>
+                    <label for="prev-rfc" style="display: block; font-size: 0.85em; font-weight: bold; color: var(--verde-issste); margin-bottom: 5px;">RFC del Paciente (*):</label>
+                    <input type="text" id="prev-rfc" required placeholder="Ej. ABCD123456XYZ" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-firstname" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Nombre(s) (*):</label>
+                    <input type="text" id="prev-firstname" required placeholder="Ej. María Luisa" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-paternal" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Apellido Paterno (*):</label>
+                    <input type="text" id="prev-paternal" required placeholder="Ej. Mendoza" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-maternal" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Apellido Materno:</label>
+                    <input type="text" id="prev-maternal" placeholder="Ej. Solís" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label for="prev-age" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Edad (*):</label>
+                    <input type="number" id="prev-age" required min="0" max="120" placeholder="Años cumplidos" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label for="prev-phone" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Teléfono (*):</label>
+                    <input type="tel" id="prev-phone" required placeholder="Ej. 5512345678" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label for="prev-email" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Correo Electrónico (*):</label>
+                    <input type="email" id="prev-email" required placeholder="ejemplo@correo.com" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box;">
                 </div>
 
-                <!-- SUB-BLOQUE A: SELECCIONAR EXISTENTE -->
-                <div id="sub-bloque-companon-existente">
-                    <label style="font-weight: bold; font-size: 0.85em; color: var(--guinda);">Seleccionar Tutor Autorizado:</label>
-                    <select id="prev-companion-select" style="border-color: var(--guinda); outline: none;">
-                        <option value="">Cargando catálogo de acompañantes...</option>
-                    </select>
+
+
+                <!-- ========================================================================= -->
+                <!-- 🚫 SECCIÓN DINÁMICA: CONTROL RELACIONAL DE ACOMPAÑANTES (INICIA OCULTO) -->
+                <!-- ========================================================================= -->
+                <div id="seccion-menor-edad" style="display: none; grid-column: 1 / -1; background: #fdf2f4; border: 2px solid var(--guinda); border-left: 8px solid var(--guinda); padding: 20px; border-radius: 6px; margin-top: 10px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
+                    <h3 style="color: var(--guinda); margin-top: 0; font-size: 1.1em; border-bottom: 2px solid var(--guinda); padding-bottom: 5px; text-transform: uppercase;">⚠️ Acompañante Requerido (Menor de Edad)</h3>
+                    <p style="font-size: 0.85em; color: #555; margin-bottom: 15px;">El paciente es menor de 17 años. El marco legal institucional exige asociar un tutor o acompañante responsable.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                        <div>
+                            <label style="font-weight: bold; font-size: 0.85em; color: var(--guinda);">¿Cómo desea registrar al Acompañante?:</label>
+                            <select id="prev-companion-mode" onchange="conmutarModoAcompanante(this.value)" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white; outline: none;">
+                                <option value="SELECT" selected>Seleccionar uno ya existente en el catálogo</option>
+                                <option value="CREATE">Registrar los datos de un Acompañante NUEVO</option>
+                            </select>
+                        </div>
+
+                        <!-- SUB-BLOQUE A: SELECCIONAR EXISTENTE -->
+                        <div id="sub-bloque-companon-existente">
+                            <label style="font-weight: bold; font-size: 0.85em; color: var(--guinda);">Seleccionar Tutor Autorizado:</label>
+                            <select id="prev-companion-select" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white; outline: none;">
+                                <option value="">Cargando catálogo de acompañantes...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SUB-BLOQUE B: CAPTURA DE NUEVO TUTOR (INICIA OCULTO) -->
+                    <div id="sub-bloque-companion-nuevo" style="display: none; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; border-top: 1px dashed rgba(97,12,50,0.2); padding-top: 15px;">
+                        <div>
+                            <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda); display: block; margin-bottom: 5px;">CURP del Acompañante:</label>
+                            <input type="text" id="prev-comp-curp" placeholder="18 Caracteres" maxlength="18" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase; font-family: monospace;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda); display: block; margin-bottom: 5px;">Nombre Completo:</label>
+                            <input type="text" id="prev-comp-name" placeholder="Ej. ROSA GONZÁLEZ ZAMUDIO" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white; text-transform: uppercase;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda); display: block; margin-bottom: 5px;">Teléfono de Contacto:</label>
+                            <input type="tel" id="prev-comp-phone" placeholder="Ej. 5512345678" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda); display: block; margin-bottom: 5px;">Paternidad / Parentesco:</label>
+                            <select id="prev-comp-relationship" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white;">
+                                <option value="MADRE">MADRE</option>
+                                <option value="PADRE">PADRE</option>
+                                <option value="TUTOR LEGAL">TUTOR LEGAL</option>
+                                <option value="FAMILIAR DIRECTO">FAMILIAR DIRECTO</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- BOTONERA COMPUESTA CON ESPACIO PARA MODIFICACIONES -->
+                <div style="grid-column: 1 / -1; display: flex; gap: 15px; margin-top: 15px; width: 100%;">
+                    <!-- ⚙ Contenedor dinámico para el botón de "Modificar Datos" -->
+                    <div id="container-boton-editar" style="display: none; flex: 1;"></div>
+                    
+                    <div id="container-boton-guardar" style="flex: 2;">
+                        <button type="submit" id="btn-submit-preventiva" style="background-color: var(--verde-issste); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">REGISTRAR PACIENTE EN LA NUBE</button>
+                    </div>
+                </div>
+
             </div>
-
-            <!-- SUB-BLOQUE B: CAPTURA DE NUEVO TUTOR (INICIA OCULTO) -->
-            <div id="sub-bloque-companion-nuevo" style="display: none; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; border-top: 1px dashed rgba(97,12,50,0.2); padding-top: 15px;">
-                <div>
-                    <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">CURP del Acompañante:</label>
-                    <input type="text" id="prev-comp-curp" placeholder="18 Caracteres" maxlength="18" style="border-color: var(--guinda); text-transform: uppercase; font-family: monospace;">
-                </div>
-                <div>
-                    <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">Nombre Completo:</label>
-                    <input type="text" id="prev-comp-name" placeholder="Ej. ROSA GONZÁLEZ ZAMUDIO" style="border-color: var(--guinda); text-transform: uppercase;">
-                </div>
-                <div>
-                    <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">Teléfono de Contacto:</label>
-                    <input type="tel" id="prev-comp-phone" placeholder="Ej. 5512345678" style="border-color: var(--guinda);">
-                </div>
-                <div>
-                    <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">Paternidad / Parentesco:</label>
-                    <select id="prev-comp-relationship" style="border-color: var(--guinda);">
-                        <option value="MADRE">MADRE</option>
-                        <option value="PADRE">PADRE</option>
-                        <option value="TUTOR LEGAL">TUTOR LEGAL</option>
-                        <option value="FAMILIAR DIRECTO">FAMILIAR DIRECTO</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 5px;">
-            <button type="submit" style="background-color: var(--verde-issste); color: white; border: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">REGISTRAR PACIENTE EN LA NUBE</button>
-        </div>
-    </div>
-</form>
+        </form>
     </div>
 </div>
+
+
 
 
 
@@ -3688,66 +3729,73 @@ async function guardarPacientePreventivaNube(event) {
 
 
 
+// =========================================================================
+// VARIABLES GLOBALES DE CONTROL - MEDICINA PREVENTIVA
+// =========================================================================
 let _tutorsCatalogGlobal = []; 
 let _esMenorDeEdad = false;
+let _modoEdicionActivo = false;
 
-// 🚀 FUNCIÓN MATRIZ CORREGIDA: Algoritmo RENAPO Oficial y Alertas en Ventana Flotante Estilizada
+// =========================================================================
+// ALGORITMO RENAPO OFICIAL: CÁLCULO DE EDAD EXACTO EN EL AÑO 2026
+// =========================================================================
 async function evaluarCurpPreventiva(curpVal) {
     const curp = curpVal.trim().toUpperCase();
     if (curp.length !== 18) return;
 
-    // 1. EXTRAER METADATOS DE LA CURP
-    const añoDigitos = curp.substring(4, 6);   // Ej: "04"
-    const mesDigitos = curp.substring(6, 8);   // Ej: "03"
-    const diaDigitos = curp.substring(8, 10);  // Ej: "15"
+    // Desglose de cadenas de texto de la CURP
+    const añoDigitos = curp.substring(4, 6);   
+    const mesDigitos = curp.substring(6, 8);   
+    const diaDigitos = curp.substring(8, 10);  
     
-    // 2. DETECTAR SIGLO MEDIANTE EL CARACTER 17 (Oficial RENAPO) [1]
+    // Regla Oficial RENAPO: Si el caracter 17 es una letra (A-Z) nació a partir del 2000
     const caracter17 = curp.charAt(16);
-    let siglo = "19"; // Por defecto siglo pasado
+    const siglo = (isNaN(caracter17)) ? "20" : "19";
+    const añoNacimiento = parseInt(siglo + añoDigitos); 
     
-    if (isNaN(caracter17)) {
-        siglo = "20"; // Si el caracter 17 es una LETRA (A-Z), nació del 2000 en adelante [1]
-    }
+    // Creamos los objetos Date para la resta matemática precisa
+    const fechaNacimiento = new Date(añoNacimiento, parseInt(mesDigitos) - 1, parseInt(diaDigitos));
     
-    const añoNacimiento = parseInt(siglo + añoDigitos); // Combina: "20" + "04" = 2004 [1]
+    // 📅 FIJADO: Fecha actual del sistema (14 de Julio de 2026)
+    const fechaActual = new Date(2026, 6, 14); 
     
-    // 3. CÁLCULO EXACTO DE LA EDAD EN EL AÑO ACTUAL (2026) [1]
-    let edadCalculada = 2026 - añoNacimiento;
+    let edadCalculada = fechaActual.getFullYear() - fechaNacimiento.getFullYear();
+    const diferenciaMeses = fechaActual.getMonth() - fechaNacimiento.getMonth();
     
-    // Ajuste por mes de nacimiento (Mes actual de ejecución: Julio = 7) [1]
-    const mesActual = 7; 
-    if (parseInt(mesDigitos) > mesActual) {
-        edadCalculada--; // Si no ha cumplido meses este año, se resta 1
+    // Restamos un año si no ha pasado su fecha de cumpleaños en el año corriente
+    if (diferenciaMeses < 0 || (diferenciaMeses === 0 && fechaActual.getDate() < fechaNacimiento.getDate())) {
+        edadCalculada--; 
     }
 
-    // Inyectamos la edad calculada de forma inmediata en el input
+    // Inyectamos el valor calculado en el input de pantalla
     document.getElementById('prev-age').value = edadCalculada;
     _esMenorDeEdad = edadCalculada <= 17;
 
-    // Capturamos tu modal de auditoría oficial para inyectar los mensajes estilizados [1]
     const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
     const modalAuditoria = document.getElementById('modalAuditoria');
 
     try {
+        // Petición de búsqueda inteligente a Render
         const response = await fetch(`${BASE_URL}/api/preventive-patients/search/${curp}`);
         const data = await response.json();
 
         if (data.found) {
-            // 🏛️ CASO A: PACIENTE ENCONTRADO (VENTANA EMERGENTE ESTILIZADA) [1]
+            // 🏛️ CASO A: PACIENTE ENCONTRADO -> BLOQUEAR INPUTS Y SOLICITAR EDICIÓN
             if (cuerpoModal && modalAuditoria) {
                 cuerpoModal.innerHTML = `
-                    <div style="text-align: center;">
+                    <div style="text-align: center; font-family: sans-serif;">
                         <span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span>
-                        <h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Paciente Localizado!</h4>
-                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563;">
-                            El expediente clínico ya se encuentra registrado previamente en la base de datos de Clever Cloud. Los campos se rellenarán automáticamente de forma segura.
+                        <h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Expediente Localizado!</h4>
+                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">
+                            El expediente ya se encuentra registrado previamente en la base de datos de Clever Cloud.<br>
+                            <strong>Los campos se han bloqueado por seguridad. Pulse el botón "Modificar Datos" si requiere realizar cambios.</strong>
                         </p>
                     </div>
                 `;
-                modalAuditoria.style.display = 'flex'; // Encendemos la ventana flotante [1]
+                modalAuditoria.style.display = 'flex';
             }
 
-            // Precarga de datos en texto plano
+            // Rellenar formulario automáticamente con los datos congelados
             document.getElementById('prev-rfc').value = data.patient.rfc;
             document.getElementById('prev-firstname').value = data.patient.first_name;
             document.getElementById('prev-paternal').value = data.patient.last_name_paternal;
@@ -3757,38 +3805,60 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('prev-age').value = data.patient.age;
 
             _esMenorDeEdad = data.patient.age <= 17;
+            
+            // Forzar bloqueo operativo para evitar duplicidades accidentales
+            alternarBloqueoCamposPreventiva(true);
+            _modoEdicionActivo = false;
+            
+            // Inyectamos dinámicamente el botón de "Modificar Datos"
+            const contenedorBtnEditar = document.getElementById('container-boton-editar');
+            if (contenedorBtnEditar) {
+                contenedorBtnEditar.innerHTML = '<button type="button" onclick="habilitarModoEdicionPreventiva()" style="background-color: #d97706; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase; font-size: 0.9em;">⚙ Modificar Datos</button>';
+                contenedorBtnEditar.style.display = 'block';
+            }
+            document.getElementById('btn-submit-preventiva').innerText = "ACTUALIZAR EXPEDIENTE";
+
         } else {
-            // 🏛️ CASO B: PACIENTE NO ENCONTRADO (VENTANA EMERGENTE ESTILIZADA) [1]
+            // CASO B: PACIENTE NO ENCONTRADO -> CAPTURA MANUAL LIBRE
             if (cuerpoModal && modalAuditoria) {
                 cuerpoModal.innerHTML = `
-                    <div style="text-align: center;">
+                    <div style="text-align: center; font-family: sans-serif;">
                         <span style="color: #b45309; font-size: 2.5em; display:block; margin-bottom:5px;">ℹ️</span>
-                        <h4 style="margin:0; color: #b45309; font-size:1.2em; text-transform:uppercase;">Paciente No Registrado</h4>
-                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563;">
-                            La CURP ingresada no cuenta con un expediente preventivo activo.<br>
+                        <h4 style="margin:0; color: #b45309; font-size:1.2em; text-transform:uppercase;">CURP Libre de Registro</h4>
+                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">
+                            No se detectaron antecedentes de este paciente en el programa de Medicina Preventiva.<br>
                             <strong>Por favor, capture de forma manual todos los campos requeridos en el formulario.</strong>
                         </p>
                     </div>
                 `;
-                modalAuditoria.style.display = 'flex'; // Encendemos la ventana flotante [1]
+                modalAuditoria.style.display = 'flex';
             }
             
+            // Liberamos bloqueos previos si existían
+            alternarBloqueoCamposPreventiva(false);
+            document.getElementById('container-boton-editar').style.display = 'none';
+            document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
+            _modoEdicionActivo = false;
+
             _tutorsCatalogGlobal = data.availableCompanions || [];
         }
 
-        // 🎛️ CONTROL DEL PANEL DE MENORES DE EDAD
+        // CONTROL COMPONENTE DE MENORES DE EDAD
         const contenedorMenor = document.getElementById('seccion-menor-edad');
         const selectTutor = document.getElementById('prev-companion-select');
 
         if (_esMenorDeEdad) {
             contenedorMenor.style.display = 'block';
-            
             if (data.found && data.companions && data.companions.length > 0) {
-                const tutorAsociado = data.companions[0];
-                selectTutor.innerHTML = `<option value="${tutorAsociado.id}" selected>${tutorAsociado.full_name} (${tutorAsociado.relationship}) - ENLAZADO</option>`;
+                const tutorAsociado = data.companions;
+                selectTutor.innerHTML = `<option value="${tutorAsociado.id}" selected>${tutorAsociado.full_name} (${tutorAsociado.relationship}) - VINCULADO</option>`;
                 conmutarModoAcompanante('SELECT');
                 document.getElementById('prev-companion-mode').value = 'SELECT';
+                document.getElementById('prev-companion-mode').disabled = true;
+                selectTutor.disabled = true;
             } else {
+                document.getElementById('prev-companion-mode').disabled = false;
+                selectTutor.disabled = false;
                 selectTutor.innerHTML = '<option value="" disabled selected>-- Seleccione del Catálogo --</option>';
                 if (_tutorsCatalogGlobal.length === 0) {
                     selectTutor.innerHTML += '<option value="">Sin tutores registrados en el sistema. Elija crear uno NUEVO.</option>';
@@ -3807,7 +3877,63 @@ async function evaluarCurpPreventiva(curpVal) {
     }
 }
 
-// Envío compuesto parametrizado relacional
+
+
+// =========================================================================
+// 2. FUNCIONES AUXILIARES DE CONTROL, BLOQUEO Y CONMUTACIÓN
+// =========================================================================
+function alternarBloqueoCamposPreventiva(bloquear) {
+    const campos = ['prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-phone', 'prev-email'];
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.readOnly = bloquear; 
+    });
+}
+
+function habilitarModoEdicionPreventiva() {
+    alternarBloqueoCamposPreventiva(false); 
+    _modoEdicionActivo = true;
+    alert('¡Edición Habilitada!\nPuede modificar los campos de texto libre. Al terminar presione el botón de abajo para guardar los cambios.');
+    
+    if (_esMenorDeEdad) {
+        document.getElementById('prev-companion-mode').disabled = false;
+        document.getElementById('prev-companion-select').disabled = false;
+    }
+}
+
+function conmutarModoAcompanante(modo) {
+    const bloqueSel = document.getElementById('sub-bloque-companon-existente');
+    const bloqueNuevo = document.getElementById('sub-bloque-companion-nuevo');
+    if (!bloqueSel || !bloqueNuevo) return;
+
+    if (modo === 'SELECT') {
+        bloqueSel.style.display = 'block';
+        bloqueNuevo.style.display = 'none';
+    } else {
+        bloqueSel.style.display = 'none';
+        bloqueNuevo.style.display = 'grid';
+    }
+}
+
+// =========================================================================
+// 3. FUNCIÓN DE LIMPIEZA ABSOLUTA AL VOLVER AL MENÚ ANTERIOR
+// =========================================================================
+function volverYLimpiarPreventiva() {
+    document.getElementById('form-paciente-preventiva').reset();
+    alternarBloqueoCamposPreventiva(false);
+    _esMenorDeEdad = false;
+    _modoEdicionActivo = false;
+    
+    document.getElementById('seccion-menor-edad').style.display = 'none';
+    document.getElementById('container-boton-editar').style.display = 'none';
+    document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
+    
+    activarModulo('panel-medicina-preventiva', null);
+}
+
+// =========================================================================
+// 4. ENVÍO COMPUESTO INTEGRADO HACIA LA API DE RENDER
+// =========================================================================
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
@@ -3839,55 +3965,35 @@ async function guardarPacientePreventivaNube(event) {
         });
 
         if (response.ok) {
-            // Usamos también tu modal oficial para el éxito del guardado [1]
             const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
             const modalAuditoria = document.getElementById('modalAuditoria');
             
             if (cuerpoModal && modalAuditoria) {
                 cuerpoModal.innerHTML = `
-                    <div style="text-align: center;">
+                    <div style="text-align: center; font-family: sans-serif;">
                         <span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span>
                         <h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Registro Guardado!</h4>
-                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563;">
+                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height:1.5;">
                             El expediente compuesto de Medicina Preventiva y la relación de acompañantes se ha guardado exitosamente en Clever Cloud.
                         </p>
                     </div>
                 `;
-                modalAuditoria.style.display = 'flex'; // Desplegamos la ventana [1]
+                modalAuditoria.style.display = 'flex'; 
             }
 
             document.getElementById('form-paciente-preventiva').reset();
             document.getElementById('seccion-menor-edad').style.display = 'none';
+            document.getElementById('container-boton-editar').style.display = 'none';
+            document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
             _esMenorDeEdad = false;
+            _modoEdicionActivo = false;
         } else {
             const data = await response.json();
             alert('Error al guardar: ' + data.message);
         }
     } catch (error) {
         console.error('Error al guardar expediente compuesto:', error);
-        alert('Fallo de conexión con el servidor.');
-    }
-}
-
-
-
-
-
-// 🏛️ MANDATORIO: Conmuta los sub-bloques visuales entre buscar del catálogo o capturar uno nuevo
-function conmutarModoAcompanante(modo) {
-    const bloqueSel = document.getElementById('sub-bloque-companon-existente');
-    const bloqueNuevo = document.getElementById('sub-bloque-companion-nuevo');
-
-    if (!bloqueSel || !bloqueNuevo) return;
-
-    if (modo === 'SELECT') {
-        // Enciende la lista desplegable y oculta los cuadros de texto
-        bloqueSel.style.display = 'block';
-        bloqueNuevo.style.display = 'none';
-    } else {
-        // Oculta la lista y enciende la rejilla de captura para el nuevo acompañante
-        bloqueSel.style.display = 'none';
-        bloqueNuevo.style.display = 'grid';
+        alert('Fallo de conexión con el servidor de Render.');
     }
 }
 
@@ -3900,7 +4006,9 @@ function conmutarModoAcompanante(modo) {
 
 
 
-
+    // BINDINGS GLOBALES
+    window.habilitarModoEdicionPreventiva = habilitarModoEdicionPreventiva;
+    window.volverYLimpiarPreventiva = volverYLimpiarPreventiva;
     // Vinculación explícita
     window.evaluarCurpPreventiva = evaluarCurpPreventiva;
     window.conmutarModoAcompanante = conmutarModoAcompanante;
