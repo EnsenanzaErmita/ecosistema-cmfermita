@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.7.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.8.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1272,10 +1272,7 @@ app.get('/api/preventive-patients/search/:curp', (req, res) => {
 
 
 // =========================================================================
-// ENDPOINT: ACTUALIZAR EXPEDIENTE Y PROCESAR NUEVO ACOMPAÑANTE (CORREGIDO)
-// =========================================================================
-// =========================================================================
-// ENDPOINT: ACTUALIZAR EXPEDIENTE COMPUESTO - PARTE 1
+// ENDPOINT: ACTUALIZAR EXPEDIENTE COMPUESTO - PARTE 1 (CORREGIDA)
 // =========================================================================
 app.put('/api/preventive-patients/update', (req, res) => {
     const { 
@@ -1285,6 +1282,7 @@ app.put('/api/preventive-patients/update', (req, res) => {
         companionAge, companionGender, companionPhone, companionEmail, companionRelationship 
     } = req.body;
 
+    // 🚀 REPARACIÓN: Agregamos !gender a la validación obligatoria para que no rebote el formulario
     if (!curp || !rfc || !firstName || !lastNamePaternal || !age || !gender || !phone || !email) {
         return res.status(400).json({ message: 'Los datos obligatorios para la actualización están incompletos.' });
     }
