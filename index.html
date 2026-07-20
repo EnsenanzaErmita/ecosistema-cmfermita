@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.14.0
+        v1.15.0
     </div>
 
 
@@ -3747,111 +3747,83 @@ async function guardarServicioNube(event) {
 // =========================================================================
 // ENVÍO COMPUESTO INTEGRADO CORREGIDO (CAPTURA TRANSPARENTE DE EDAD TUTOR)
 // =========================================================================
-async function guardarPacientePreventivaNube(event) {
+function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // Desbloqueamos todo temporalmente para extraer el texto sin restricciones del navegador
-    const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-gender', 'prev-phone', 'prev-email'];
+    // 🚀 REPARACIÓN CRÍTICA 1: Habilitamos temporalmente todos los campos en pantalla 
+    // para que el navegador permita extraer sus textos y números mediante .value (evita enviar vacíos o NaN)
+    const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
     todosLosIds.forEach(id => {
         const input = document.getElementById(id);
         if (input) input.disabled = false;
     });
 
-    // Capturamos la edad del tutor de forma segura
+    // Validamos la conversión a número de las edades de forma segura
+    const valorEdadPaciente = document.getElementById('prev-age').value;
+    const edadPacienteNumerica = valorEdadPaciente ? parseInt(valorEdadPaciente) : 0;
+
     const inputAgeTutor = document.getElementById('prev-comp-age');
     let edadTutorNumerica = 0;
     if (inputAgeTutor && inputAgeTutor.value.trim() !== "") {
         edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
     }
 
-    // Extraemos la edad del paciente validando el número entero
-    const valorEdadPaciente = document.getElementById('prev-age').value;
-    const edadPacienteNumerica = valorEdadPaciente ? parseInt(valorEdadPaciente) : 0;
-
+    // 🚀 REPARACIÓN CRÍTICA 2: Mapeamos los dos campos de género inclusivo que hacían falta en el objeto JSON
     const payload = {
-        rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
+        rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
         firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
         age: edadPacienteNumerica,
-        gender: document.getElementById('prev-gender').value, 
+        gender: document.getElementById('prev-gender') ? document.getElementById('prev-gender').value : 'PREFIERO NO DECIRLO', // 📑 Campo Agregado
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
-        
         isMinor: _esMenorDeEdad,
-        companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
-        selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : '',
         
+        companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
+        selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : null,
         companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
         companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value.trim().toUpperCase() : '',
         companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value.trim().toUpperCase() : '',
         companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
         companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
-        companionAge: edadTutorNumerica, 
-        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value : 'PREFIERO NO DECIRLO', 
+        companionAge: edadTutorNumerica,
+        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value : 'PREFIERO NO DECIRLO', // 📑 Campo Agregado
         companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
         companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
         companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
     };
 
-    // 🚀 REPARACIÓN ABSOLUTA: Conmutación dinámica de rutas según el estado de la variable global
-    const urlTarget = _modoEdicionActivo 
+    const url = _modoEdicionActivo 
         ? `${BASE_URL}/api/preventive-patients/update` 
         : `${BASE_URL}/api/preventive-patients/integrated`;
         
-    const metodoHttp = _modoEdicionActivo ? 'PUT' : 'POST';
+    const metodo = _modoEdicionActivo ? 'PUT' : 'POST';
 
-    try {
-        const response = await fetch(urlTarget, {
-            method: metodoHttp,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
-            const modalAuditoria = document.getElementById('modalAuditoria');
-            
-            if (cuerpoModal && modalAuditoria) {
-                const tituloMensaje = _modoEdicionActivo ? '¡Expediente Actualizado!' : '¡Registro Guardado!';
-                const detalleMensaje = _modoEdicionActivo 
-                    ? 'Los cambios en el derechohabiente y su estatus en la plataforma de Medicina Preventiva se han guardado exitosamente.'
-                    : 'El expediente compuesto del paciente se ha guardado exitosamente en la base de datos de Clever Cloud.';
-
-                cuerpoModal.innerHTML = `
-                    <div style="text-align: center; font-family: sans-serif;">
-                        <span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span>
-                        <h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">${tituloMensaje}</h4>
-                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height:1.5;">
-                            ${detalleMensaje}
-                        </p>
-                    </div>
-                `;
-                modalAuditoria.style.display = 'flex'; 
-            }
-
-            // Blanqueamos el formulario tras la operación exitosa
-            document.getElementById('form-paciente-preventiva').reset();
-            document.getElementById('seccion-menor-edad').style.display = 'none';
-            if (document.getElementById('container-boton-editar')) {
-                document.getElementById('container-boton-editar').style.display = 'none';
-            }
-            document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
-            
-            if (document.getElementById('prev-gender')) document.getElementById('prev-gender').value = 'PREFIERO NO DECIRLO';
-            if (document.getElementById('prev-comp-gender')) document.getElementById('prev-comp-gender').value = 'PREFIERO NO DECIRLO';
-
-            _esMenorDeEdad = false;
-            _modoEdicionActivo = false;
-        } else {
-            const data = await response.json();
-            alert('Error en la operación: ' + data.message);
+    fetch(url, {
+        method: metodo,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.json().then(err => { throw new Error(err.message); });
         }
-    } catch (error) {
-        console.error('Error al procesar el expediente compuesto:', error);
-        alert('Fallo de conexión con el servidor de Render.');
-    }
+        return res.json();
+    })
+    .then(data => {
+        alert(data.message);
+        volverYLimpiarPreventiva(); 
+    })
+    .catch(err => {
+        alert(`Error en la operación: ${err.message}`);
+        
+        // 🚀 Si el servidor llega a fallar, volvemos a congelar el formulario para proteger el CURP
+        if (_modoEdicionActivo === false) {
+            alternarBloqueoCamposPreventiva(true);
+        }
+    });
 }
 
 
