@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.8.0
+        v1.0.0
     </div>
 
 
@@ -3806,12 +3806,8 @@ let _esMenorDeEdad = false;
 let _modoEdicionActivo = false;
 
 // =========================================================================
-// ALGORITMO RENAPO OFICIAL: CÁLCULO DE EDAD EXACTO EN EL AÑO 2026
-// =========================================================================
-// =========================================================================
-// ALGORITMO RENAPO BLINDADO: CÁLCULO DE EDAD CORREGIDO (18 CARACTERES)
-// =========================================================================
 // 🚀 ALGORITMO RENAPO BLINDADO: Cálculo matemático directo sin desfase de zonas horarias (Garantiza +18 años)
+// =========================================================================
 async function evaluarCurpPreventiva(curpVal) {
     const curp = curpVal.trim().toUpperCase();
     
@@ -3862,6 +3858,9 @@ async function evaluarCurpPreventiva(curpVal) {
         const data = await response.json();
 
         if (data.found) {
+            // 🏛️ REPARACIÓN: Extraemos de forma segura el primer elemento del arreglo devuelto por el pool.query
+            const datosPaciente = Array.isArray(data.patient) ? data.patient[0] : data.patient;
+
             // PACIENTE ENCONTRADO -> BLOQUEAR INPUTS
             if (cuerpoModal && modalAuditoria) {
                 cuerpoModal.innerHTML = `
@@ -3877,15 +3876,15 @@ async function evaluarCurpPreventiva(curpVal) {
                 modalAuditoria.style.display = 'flex';
             }
 
-            document.getElementById('prev-rfc').value = data.patient.rfc;
-            document.getElementById('prev-firstname').value = data.patient.first_name;
-            document.getElementById('prev-paternal').value = data.patient.last_name_paternal;
-            document.getElementById('prev-maternal').value = data.patient.last_name_maternal || '';
-            document.getElementById('prev-phone').value = data.patient.phone;
-            document.getElementById('prev-email').value = data.patient.email;
-            document.getElementById('prev-age').value = data.patient.age;
+            document.getElementById('prev-rfc').value = datosPaciente.rfc;
+            document.getElementById('prev-firstname').value = datosPaciente.first_name;
+            document.getElementById('prev-paternal').value = datosPaciente.last_name_paternal;
+            document.getElementById('prev-maternal').value = datosPaciente.last_name_maternal || '';
+            document.getElementById('prev-phone').value = datosPaciente.phone;
+            document.getElementById('prev-email').value = datosPaciente.email;
+            document.getElementById('prev-age').value = datosPaciente.age;
 
-            _esMenorDeEdad = data.patient.age <= 17;
+            _esMenorDeEdad = datosPaciente.age <= 17;
             alternarBloqueoCamposPreventiva(true);
             _modoEdicionActivo = false;
             
@@ -3913,7 +3912,9 @@ async function evaluarCurpPreventiva(curpVal) {
             }
             
             alternarBloqueoCamposPreventiva(false);
-            document.getElementById('container-boton-editar').style.display = 'none';
+            if (document.getElementById('container-boton-editar')) {
+                document.getElementById('container-boton-editar').style.display = 'none';
+            }
             document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
             _modoEdicionActivo = false;
 
@@ -3925,10 +3926,15 @@ async function evaluarCurpPreventiva(curpVal) {
         const selectTutor = document.getElementById('prev-companion-select');
 
         if (_esMenorDeEdad) {
-            contenedorMenor.style.display = 'block';
+            if (contenedorMenor) contenedorMenor.style.display = 'block';
+            
             if (data.found && data.companions && data.companions.length > 0) {
-                const tutorAsociado = data.companions[0]; // Extracción segura del arreglo
-                selectTutor.innerHTML = `<option value="${tutorAsociado.id}" selected>${tutorAsociado.full_name} (${tutorAsociado.relationship}) - VINCULADO</option>`;
+                const tutorAsociado = data.companions[0]; 
+                
+                // 🛠️ REPARACIÓN: Si la consulta relacional entrega nombres separados, armamos el string completo
+                const nombreTutor = tutorAsociado.full_name || `${tutorAsociado.first_name} ${tutorAsociado.last_name_paternal}`;
+                
+                selectTutor.innerHTML = `<option value="${tutorAsociado.id}" selected>${nombreTutor.toUpperCase()} (${tutorAsociado.relationship}) - VINCULADO</option>`;
                 conmutarModoAcompanante('SELECT');
                 document.getElementById('prev-companion-mode').value = 'SELECT';
                 document.getElementById('prev-companion-mode').disabled = true;
@@ -3941,12 +3947,12 @@ async function evaluarCurpPreventiva(curpVal) {
                     selectTutor.innerHTML += '<option value="">Sin tutores registrados. Elija crear uno NUEVO.</option>';
                 } else {
                     _tutorsCatalogGlobal.forEach(t => {
-                        selectTutor.innerHTML += `<option value="${t.id}">${t.full_name} (${t.relationship})</option>`;
+                        selectTutor.innerHTML += `<option value="${t.id}">${t.full_name.toUpperCase()} (${t.relationship})</option>`;
                     });
                 }
             }
         } else {
-            contenedorMenor.style.display = 'none';
+            if (contenedorMenor) contenedorMenor.style.display = 'none';
         }
 
     } catch (error) {
