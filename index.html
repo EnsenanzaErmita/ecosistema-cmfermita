@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.4.0
+        v1.5.0
     </div>
 
 
@@ -1507,7 +1507,7 @@
     <div id="sub-bloque-companion-nuevo" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; border-top: 1px dashed rgba(97,12,50,0.2); padding-top: 15px;">
         <div>
             <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">CURP del Acompañante (*):</label>
-            <input type="text" id="prev-comp-curp" placeholder="18 Caracteres" maxlength="18" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; text-transform: uppercase; font-family: monospace;">
+            <input type="text" id="prev-comp-curp" placeholder="18 Caracteres" maxlength="18" oninput="evaluarCurpAcompanante(this.value)" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; text-transform: uppercase; font-family: monospace;">
         </div>
         <div>
             <label style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">RFC del Acompañante (*):</label>
@@ -3806,49 +3806,30 @@ let _esMenorDeEdad = false;
 let _modoEdicionActivo = false;
 
 // =========================================================================
-// 🚀 ALGORITMO RENAPO BLINDADO: Cálculo matemático directo sin desfase de zonas horarias (Garantiza +18 años)
+// 🚀 ALGORITMO RENAPO OPTIMIZADO PARA PACIENTES (Actualizado para flexibilidad de tutores)
 // =========================================================================
 async function evaluarCurpPreventiva(curpVal) {
     const curp = curpVal.trim().toUpperCase();
-    
-    // Regla de Oro: Esperamos los 18 caracteres de la CURP
     if (curp.length !== 18) return;
 
-    // 1. EXTRAER METADATOS EN TEXTO PLANO
+    // 1. CALCULAR EDAD DEL PACIENTE
     const añoDigitos = parseInt(curp.substring(4, 6));   
     const mesDigitos = parseInt(curp.substring(6, 8));   
     const diaDigitos = parseInt(curp.substring(8, 10));  
-    
-    // 2. DETECTAR SIGLO MEDIANTE EL CARACTER 17 (Estándar RENAPO)
     const caracter17 = curp.charAt(16);
-    let siglo = "19"; 
-    
-    // Si la posición 17 es una Letra, o si el año es menor o igual a 26, es Siglo XXI
-    if (isNaN(caracter17) || añoDigitos <= 26) {
-        siglo = "20"; 
-    }
-    
+    let siglo = (isNaN(caracter17) || añoDigitos <= 26) ? "20" : "19"; 
     const añoNacimiento = parseInt(siglo + (añoDigitos < 10 ? "0" + añoDigitos : añoDigitos)); 
     
-    // 3. CÁLCULO DE EDAD EXACTO PARA EL CONTEXTO ACTUAL DE JULIO 2026
     const añoActual = 2026;
-    const mesActual = 7;  // Julio
-    const diaActual = 14; // Día 14
-    
+    const mesActual = 7;  
+    const diaActual = 14; 
     let edadCalculada = añoActual - añoNacimiento;
-    
-    // Ajuste fino: si el mes de nacimiento es mayor al mes actual, aún no cumple años
-    if (mesDigitos > mesActual) {
-        edadCalculada--;
-    } 
-    // Si es el mismo mes, pero el día de nacimiento es mayor al día actual, tampoco ha cumplido años
-    else if (mesDigitos === mesActual && diaDigitos > diaActual) {
+    if (mesDigitos > mesActual || (mesDigitos === mesActual && diaDigitos > diaActual)) {
         edadCalculada--;
     }
 
-    // Inyectamos de forma segura el valor en el formulario
     document.getElementById('prev-age').value = edadCalculada;
-    _esMenorDeEdad = edadCalculada <= 17; // Es menor estrictamente si tiene 17 años o menos
+    _esMenorDeEdad = edadCalculada <= 17; 
 
     const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
     const modalAuditoria = document.getElementById('modalAuditoria');
@@ -3857,91 +3838,25 @@ async function evaluarCurpPreventiva(curpVal) {
         const response = await fetch(`${BASE_URL}/api/preventive-patients/search/${curp}`);
         const data = await response.json();
 
-        if (data.found) {
-            // 🏛️ REPARACIÓN: Extraemos de forma segura el primer elemento del arreglo devuelto por el pool.query
-            const datosPaciente = Array.isArray(data.patient) ? data.patient[0] : data.patient;
-
-            // PACIENTE ENCONTRADO -> BLOQUEAR INPUTS
-            if (cuerpoModal && modalAuditoria) {
-                cuerpoModal.innerHTML = `
-                    <div style="text-align: center; font-family: sans-serif;">
-                        <span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span>
-                        <h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Expediente Localizado!</h4>
-                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">
-                            El expediente ya se encuentra registrado previamente en la base de datos de Clever Cloud.<br>
-                            <strong>Los campos se han bloqueado por seguridad. Pulse el botón "Modificar Datos" si requiere realizar cambios.</strong>
-                        </p>
-                    </div>
-                `;
-                modalAuditoria.style.display = 'flex';
-            }
-
-            document.getElementById('prev-rfc').value = datosPaciente.rfc;
-            document.getElementById('prev-firstname').value = datosPaciente.first_name;
-            document.getElementById('prev-paternal').value = datosPaciente.last_name_paternal;
-            document.getElementById('prev-maternal').value = datosPaciente.last_name_maternal || '';
-            document.getElementById('prev-phone').value = datosPaciente.phone;
-            document.getElementById('prev-email').value = datosPaciente.email;
-            document.getElementById('prev-age').value = datosPaciente.age;
-
-            _esMenorDeEdad = datosPaciente.age <= 17;
-            alternarBloqueoCamposPreventiva(true);
-            _modoEdicionActivo = false;
-            
-            const contenedorBtnEditar = document.getElementById('container-boton-editar');
-            if (contenedorBtnEditar) {
-                contenedorBtnEditar.innerHTML = '<button type="button" onclick="habilitarModoEdicionPreventiva()" style="background-color: #d97706; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase; font-size: 0.9em;">⚙ Modificar Datos</button>';
-                contenedorBtnEditar.style.display = 'block';
-            }
-            document.getElementById('btn-submit-preventiva').innerText = "ACTUALIZAR EXPEDIENTE";
-
-        } else {
-            // PACIENTE NO ENCONTRADO
-            if (cuerpoModal && modalAuditoria) {
-                cuerpoModal.innerHTML = `
-                    <div style="text-align: center; font-family: sans-serif;">
-                        <span style="color: #b45309; font-size: 2.5em; display:block; margin-bottom:5px;">ℹ️</span>
-                        <h4 style="margin:0; color: #b45309; font-size:1.2em; text-transform:uppercase;">CURP Libre de Registro</h4>
-                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">
-                            No se detectaron antecedentes de este paciente en el programa de Medicina Preventiva.<br>
-                            <strong>Por favor, capture de forma manual todos los campos requeridos en el formulario.</strong>
-                        </p>
-                    </div>
-                `;
-                modalAuditoria.style.display = 'flex';
-            }
-            
-            alternarBloqueoCamposPreventiva(false);
-            if (document.getElementById('container-boton-editar')) {
-                document.getElementById('container-boton-editar').style.display = 'none';
-            }
-            document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
-            _modoEdicionActivo = false;
-
-            _tutorsCatalogGlobal = data.availableCompanions || [];
-        }
-
-        // CONTROL VISUAL DEL PANEL DE TUTORES RELACIONALES
+        // CONTROL VISUAL PANEL DE TUTORES (REQUERIMIENTO: Mantener abierto y libre para cambios)
         const contenedorMenor = document.getElementById('seccion-menor-edad');
         const selectTutor = document.getElementById('prev-companion-select');
+        const selectModo = document.getElementById('prev-companion-mode');
 
         if (_esMenorDeEdad) {
             if (contenedorMenor) contenedorMenor.style.display = 'block';
             
+            // 🔓 SOLUCIÓN: Nunca bloqueamos los selectores del tutor para permitir alternar de acompañante
+            if (selectModo) selectModo.disabled = false;
+            if (selectTutor) selectTutor.disabled = false;
+
             if (data.found && data.companions && data.companions.length > 0) {
-                const tutorAsociado = data.companions[0]; 
-                
-                // 🛠️ REPARACIÓN: Si la consulta relacional entrega nombres separados, armamos el string completo
-                const nombreTutor = tutorAsociado.full_name || `${tutorAsociado.first_name} ${tutorAsociado.last_name_paternal}`;
-                
-                selectTutor.innerHTML = `<option value="${tutorAsociado.id}" selected>${nombreTutor.toUpperCase()} (${tutorAsociado.relationship}) - VINCULADO</option>`;
-                conmutarModoAcompanante('SELECT');
-                document.getElementById('prev-companion-mode').value = 'SELECT';
-                document.getElementById('prev-companion-mode').disabled = true;
-                selectTutor.disabled = true;
+                // Si el menor ya existía, inyectamos en el catálogo global sus acompañantes históricos primero
+                // pero dejamos la opción abierta para seleccionar cualquier otro o crear uno nuevo
+                inyectarCatálogoTutoresConHistorico(data.companions, _tutorsCatalogGlobal || []);
             } else {
-                document.getElementById('prev-companion-mode').disabled = false;
-                selectTutor.disabled = false;
+                // Si es menor nuevo o no tiene históricos, cargamos el catálogo institucional general
+                _tutorsCatalogGlobal = data.availableCompanions || [];
                 selectTutor.innerHTML = '<option value="" disabled selected>-- Seleccione del Catálogo --</option>';
                 if (_tutorsCatalogGlobal.length === 0) {
                     selectTutor.innerHTML += '<option value="">Sin tutores registrados. Elija crear uno NUEVO.</option>';
@@ -3953,6 +3868,41 @@ async function evaluarCurpPreventiva(curpVal) {
             }
         } else {
             if (contenedorMenor) contenedorMenor.style.display = 'none';
+        }
+
+        // LÓGICA DE AUTO-RELLENO DEL PACIENTE PRINCIPAL (Se mantiene intacta)
+        if (data.found) {
+            const datosPaciente = data.patient;
+            if (cuerpoModal && modalAuditoria) {
+                cuerpoModal.innerHTML = `<div style="text-align: center; font-family: sans-serif;"><span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span><h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Expediente Localizado!</h4><p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">El expediente ya se encuentra registrado en Clever Cloud.<br><strong>Los campos del paciente se han bloqueado. Los del acompañante quedan libres si se requiere cambiar.</strong></p></div>`;
+                modalAuditoria.style.display = 'flex';
+            }
+            document.getElementById('prev-rfc').value = datosPaciente.rfc;
+            document.getElementById('prev-firstname').value = datosPaciente.first_name;
+            document.getElementById('prev-paternal').value = datosPaciente.last_name_paternal;
+            document.getElementById('prev-maternal').value = datosPaciente.last_name_maternal || '';
+            document.getElementById('prev-phone').value = datosPaciente.phone;
+            document.getElementById('prev-email').value = datosPaciente.email;
+            document.getElementById('prev-age').value = datosPaciente.age;
+
+            alternarBloqueoCamposPreventiva(true); // Solo congela al paciente, no al tutor
+            _modoEdicionActivo = false;
+            
+            const contenedorBtnEditar = document.getElementById('container-boton-editar');
+            if (contenedorBtnEditar) {
+                contenedorBtnEditar.innerHTML = '<button type="button" onclick="habilitarModoEdicionPreventiva()" style="background-color: #d97706; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase; font-size: 0.9em;">⚙ Modificar Datos Paciente</button>';
+                contenedorBtnEditar.style.display = 'block';
+            }
+            document.getElementById('btn-submit-preventiva').innerText = "ACTUALIZAR EXPEDIENTE";
+        } else {
+            if (cuerpoModal && modalAuditoria) {
+                cuerpoModal.innerHTML = `<div style="text-align: center; font-family: sans-serif;"><span style="color: #b45309; font-size: 2.5em; display:block; margin-bottom:5px;">ℹ️</span><h4 style="margin:0; color: #b45309; font-size:1.2em; text-transform:uppercase;">CURP Libre de Registro</h4><p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">No se detectaron antecedentes de este paciente.<br>Por favor, capture de forma manual los campos requeridos.</p></div>`;
+                modalAuditoria.style.display = 'flex';
+            }
+            alternarBloqueoCamposPreventiva(false);
+            if (document.getElementById('container-boton-editar')) document.getElementById('container-boton-editar').style.display = 'none';
+            document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
+            _modoEdicionActivo = false;
         }
 
     } catch (error) {
@@ -4036,6 +3986,40 @@ function habilitarModoEdicionPreventiva() {
     removerBotonModificar();
 }
 
+
+
+// =========================================================================
+// 🚀 NUEVA FUNCIÓN: CALCULAR EDAD DEL ACOMPAÑANTE EN TIEMPO REAL MEDIANTE CURP
+// =========================================================================
+function evaluarCurpAcompanante(curpVal) {
+    const curp = curpVal.trim().toUpperCase();
+    if (curp.length !== 18) return;
+
+    const añoDigitos = parseInt(curp.substring(4, 6));   
+    const mesDigitos = parseInt(curp.substring(6, 8));   
+    const diaDigitos = parseInt(curp.substring(8, 10));  
+    const caracter17 = curp.charAt(16);
+    
+    let siglo = (isNaN(caracter17) || añoDigitos <= 26) ? "20" : "19"; 
+    const añoNacimiento = parseInt(siglo + (añoDigitos < 10 ? "0" + añoDigitos : añoDigitos)); 
+    
+    const añoActual = 2026;
+    const mesActual = 7;  
+    const diaActual = 14; 
+    
+    let edadTutor = añoActual - añoNacimiento;
+    if (mesDigitos > mesActual || (mesDigitos === mesActual && diaDigitos > diaActual)) {
+        edadTutor--;
+    }
+
+    const inputEdadTutor = document.getElementById('prev-comp-age');
+    if (inputEdadTutor) {
+        inputEdadTutor.value = edadTutor;
+        if (edadTutor < 18) {
+            alert("Atención: El acompañante capturado figura como menor de edad. Verifique la CURP.");
+        }
+    }
+}
 
 
 
@@ -4132,13 +4116,40 @@ function guardarPacientePreventivaNube(event) {
 
 
 
+// Mezcla de forma inteligente los tutores pasados del menor con el catálogo global completo
+function inyectarCatálogoTutoresConHistorico(historicos, globales) {
+    const select = document.getElementById('prev-companion-select');
+    if (!select) return;
+
+    select.innerHTML = '<option value="" disabled selected>-- Seleccione un Acompañante para esta visita --</option>';
+    
+    // 1. Priorizamos pintar los acompañantes que ya han venido con este menor específico
+    historicos.forEach(h => {
+        const nombre = h.full_name || `${h.first_name} ${h.last_name_paternal}`;
+        select.innerHTML += `<option value="${h.id}" style="font-weight:bold; color:#15803d;">⭐ ${nombre.toUpperCase()} (${h.relationship}) - PREVIO</option>`;
+    });
+
+    // 2. Separador visual en el listado
+    select.innerHTML += '<option value="" disabled>--------------------------------------------</option>';
+
+    // 3. Pintamos el resto del catálogo institucional general disponible
+    globales.forEach(g => {
+        // Evitamos duplicar en el dropdown si ya se listó en los históricos
+        const yaExiste = historicos.some(h => h.id === g.id);
+        if (!yaExiste) {
+            select.innerHTML += `<option value="${g.id}">${g.full_name.toUpperCase()} (${g.relationship})</option>`;
+        }
+    });
+}
 
 
 
 
 
 
-
+    // 📑 AGREGA ESTAS DOS LÍNEAS NUEVAS AQUÍ:
+    window.evaluarCurpAcompanante = evaluarCurpAcompanante;
+    window.conmutarModoAcompanante = conmutarModoAcompanante;
     // BINDINGS GLOBALES
     window.habilitarModoEdicionPreventiva = habilitarModoEdicionPreventiva;
     window.volverYLimpiarPreventiva = volverYLimpiarPreventiva;
