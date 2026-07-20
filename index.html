@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.5.0
+        v1.6.0
     </div>
 
 
@@ -3886,7 +3886,9 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('prev-age').value = datosPaciente.age;
 
             alternarBloqueoCamposPreventiva(true); // Solo congela al paciente, no al tutor
-            _modoEdicionActivo = false;
+            
+            // 🚀 REPARACIÓN CRÍTICA: Se activa el modo edición para que viaje mediante PUT (Actualización)
+            _modoEdicionActivo = true; 
             
             const contenedorBtnEditar = document.getElementById('container-boton-editar');
             if (contenedorBtnEditar) {

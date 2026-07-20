@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.5.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.6.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1272,39 +1272,126 @@ app.get('/api/preventive-patients/search/:curp', (req, res) => {
 
 
 // =========================================================================
-// ENDPOINT: ACTUALIZAR EXPEDIENTE EXISTENTE (Para el botón ACTUALIZAR EXPEDIENTE)
+// ENDPOINT: ACTUALIZAR EXPEDIENTE Y PROCESAR NUEVO ACOMPAÑANTE (CORREGIDO)
 // =========================================================================
 app.put('/api/preventive-patients/update', (req, res) => {
-    const { rfc, curp, firstName, lastNamePaternal, lastNameMaternal, age, phone, email } = req.body;
+    const { 
+        rfc, curp, firstName, lastNamePaternal, lastNameMaternal, age, phone, email,
+        isMinor, companionSelectionType, selectedCompanionId, 
+        companionRfc, companionCurp, companionFirstName, companionPaternal, companionMaternal,
+        companionAge, companionPhone, companionEmail, companionRelationship 
+    } = req.body;
 
     if (!curp || !rfc || !firstName || !lastNamePaternal || !age || !phone || !email) {
         return res.status(400).json({ message: 'Los datos obligatorios para la actualización están incompletos.' });
     }
 
-    const sqlUpdate = `
+    const cleanCurp = curp.trim().toUpperCase();
+
+    // PASO A: Actualizar los datos del menor (por si modificaron teléfono, nombre, etc.)
+    const sqlUpdatePatient = `
         UPDATE preventive_patients 
         SET rfc = ?, first_name = ?, last_name_paternal = ?, last_name_maternal = ?, age = ?, phone = ?, email = ?
         WHERE curp = ?
     `;
 
-    const updateData = [
-        rfc.trim().toUpperCase(), 
-        firstName.trim().toUpperCase(), 
-        lastNamePaternal.trim().toUpperCase(), 
-        lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '', 
-        parseInt(age), 
-        phone.trim(), 
-        email.trim().toLowerCase(),
-        curp.trim().toUpperCase() // Llave de búsqueda fija que no se modifica
+    const patientData = [
+        rfc.trim().toUpperCase(), firstName.trim().toUpperCase(), lastNamePaternal.trim().toUpperCase(), 
+        lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '', parseInt(age), phone.trim(), email.trim().toLowerCase(),
+        cleanCurp
     ];
 
-    pool.query(sqlUpdate, updateData, (err, result) => {
-        if (err) {
-            console.error('Error al actualizar expediente en la nube:', err);
-            return res.status(500).json({ message: 'No se pudieron guardar los cambios del expediente.' });
+    pool.query(sqlUpdatePatient, patientData, (errUp, resultUp) => {
+        if (errUp) {
+            console.error('Error al actualizar expediente base:', errUp);
+            return res.status(500).json({ message: 'No se pudieron actualizar los datos del paciente.' });
         }
-        
-        return res.status(200).json({ message: 'Expediente institucional actualizado correctamente en la nube.' });
+
+        // Recuperamos el ID interno del paciente menor que ya existía
+        pool.query('SELECT id FROM preventive_patients WHERE curp = ?', [cleanCurp], (errId, resId) => {
+            if (errId || resId.length === 0) {
+                return res.status(500).json({ message: 'Error al recuperar identificador del expediente.' });
+            }
+            const idDelPaciente = resId[0].id;
+
+            // PASO B: Si es menor de edad, procesamos su acompañante actual para esta visita
+            if (isMinor) {
+                // Opción A: Seleccionó un tutor del catálogo global
+                if (companionSelectionType === 'EXISTING' && selectedCompanionId) {
+                    const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
+                    pool.query(sqlLink, [idDelPaciente, parseInt(selectedCompanionId)], () => {
+                        return res.status(200).json({ message: 'Expediente del menor actualizado y vinculado con éxito al tutor seleccionado.' });
+                    });
+                } 
+                // Opción B: Registró un tutor totalmente NUEVO para esta consulta
+                else if (companionSelectionType === 'CREATE') {
+                    if (!companionRfc || !companionCurp || !companionFirstName || !companionPaternal || !companionAge) {
+                        return res.status(400).json({ message: 'Los datos del nuevo acompañante están incompletos.' });
+                    }
+
+                    const cleanCompCurp = companionCurp.trim().toUpperCase();
+                    const cleanCompRfc = companionRfc.trim().toUpperCase();
+
+                    // Guardamos al tutor en el catálogo de acompañantes con columnas divididas
+                    const sqlInsertComp = `
+                        INSERT INTO preventive_companions 
+                        (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, phone, email, relationship) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE first_name=VALUES(first_name), last_name_paternal=VALUES(last_name_paternal), age=VALUES(age), phone=VALUES(phone), email=VALUES(email)
+                    `;
+
+                    pool.query(sqlInsertComp, [
+                        cleanCompRfc, cleanCompCurp, companionFirstName.trim().toUpperCase(),
+                        companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
+                        parseInt(companionAge), companionPhone.trim(), companionEmail.trim().toLowerCase(), companionRelationship
+                    ], (errC, resultComp) => {
+                        if (errC) {
+                            console.error('Error al insertar tutor en el catálogo:', errC);
+                            return res.status(500).json({ message: 'Error al registrar al acompañante.' });
+                        }
+
+                        const registrarTutorComoPacienteYEnlazar = (idDelTutor) => {
+                            // Clonamos al tutor en pacientes generales para su vacunación posterior
+                            const sqlTutorComoPaciente = `
+                                INSERT INTO preventive_patients 
+                                (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, phone, email) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                                ON DUPLICATE KEY UPDATE first_name=VALUES(first_name), last_name_paternal=VALUES(last_name_paternal), age=VALUES(age), phone=VALUES(phone), email=VALUES(email)
+                            `;
+                            pool.query(sqlTutorComoPaciente, [
+                                cleanCompRfc, cleanCompCurp, companionFirstName.trim().toUpperCase(),
+                                companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
+                                parseInt(companionAge), companionPhone.trim(), companionEmail.trim().toLowerCase()
+                            ], (errClone) => {
+                                if (errClone) console.error('Aviso: El tutor ya existía como paciente independiente.');
+
+                                // Creamos el enlace relacional de esta nueva visita en la tabla intermedia
+                                const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
+                                pool.query(sqlLink, [idDelPaciente, idDelTutor], () => {
+                                    return res.status(200).json({ message: 'Expediente del menor actualizado. El nuevo acompañante quedó registrado y enlazado con éxito para esta visita.' });
+                                });
+                            });
+                        };
+
+                        if (resultComp.insertId === 0) {
+                            pool.query('SELECT id FROM preventive_companions WHERE curp = ?', [cleanCompCurp], (errCId, resCId) => {
+                                if (!errCId && resCId && resCId.length > 0) {
+                                    registrarTutorComoPacienteYEnlazar(resCId[0].id);
+                                } else {
+                                    return res.status(500).json({ message: 'Error al enlazar con el tutor existente.' });
+                                }
+                            });
+                        } else {
+                            registrarTutorComoPacienteYEnlazar(resultComp.insertId);
+                        }
+                    });
+                } else {
+                    return res.status(200).json({ message: 'Expediente del menor actualizado correctamente.' });
+                }
+            } else {
+                return res.status(200).json({ message: 'Expediente institucional actualizado correctamente en la nube.' });
+            }
+        });
     });
 });
 
