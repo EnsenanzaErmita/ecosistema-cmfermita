@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.13.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.14.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1104,11 +1104,14 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
             return res.status(400).json({ message: 'El CURP ya corresponde a un paciente registrado en el sistema.' });
         }
 
+        // 🚀 BLINDAJE ABSOLUTO: Aseguramos que gender nunca viaje vacío o nulo a MySQL (Usa un valor seguro por defecto si falla el front)
+        const pacienteGenderSeguro = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
+
         // Inserción limpia del paciente con columna gender incluida
         const patientData = [
             cleanRfc, cleanCurp, firstName.trim().toUpperCase(),
             lastNamePaternal.trim().toUpperCase(), lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '',
-            parseInt(age), gender.trim().toUpperCase(), phone.trim(), email.trim().toLowerCase()
+            parseInt(age), pacienteGenderSeguro, phone.trim(), email.trim().toLowerCase()
         ];
 
         const sqlInsertPatient = `
@@ -1143,6 +1146,9 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                     const cleanCompCurp = companionCurp.trim().toUpperCase();
                     const cleanCompRfc = companionRfc.trim().toUpperCase();
 
+                    // 🚀 BLINDAJE ABSOLUTO TUTOR: Aseguramos valor por defecto para evitar rechazos NOT NULL de MySQL
+                    const tutorGenderSeguro = (companionGender && companionGender.trim() !== "") ? companionGender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
+
                     // Registrar relación guardándolo en catálogo incluyendo columna gender
                     const sqlInsertComp = `
                         INSERT IGNORE INTO preventive_companions 
@@ -1153,7 +1159,7 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                     pool.query(sqlInsertComp, [
                         cleanCompRfc, cleanCompCurp, companionFirstName.trim().toUpperCase(),
                         companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
-                        parseInt(companionAge), companionGender.trim().toUpperCase(), companionPhone.trim(), companionEmail.trim().toLowerCase(), companionRelationship
+                        parseInt(companionAge), tutorGenderSeguro, companionPhone.trim(), companionEmail.trim().toLowerCase(), companionRelationship
                     ], (errC, resultComp) => {
                         if (errC) {
                             console.error('Error al insertar tutor en el catálogo:', errC);
@@ -1170,7 +1176,7 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                             pool.query(sqlTutorComoPaciente, [
                                 cleanCompRfc, cleanCompCurp, companionFirstName.trim().toUpperCase(),
                                 companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
-                                parseInt(companionAge), companionGender.trim().toUpperCase(), companionPhone.trim(), companionEmail.trim().toLowerCase()
+                                parseInt(companionAge), tutorGenderSeguro, companionPhone.trim(), companionEmail.trim().toLowerCase()
                             ], (errClone) => {
                                 if (errClone) console.error('Aviso: El acompañante ya existía en pacientes generales.');
 
