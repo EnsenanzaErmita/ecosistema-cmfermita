@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.2.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.3.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
