@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.10.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.11.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1272,10 +1272,7 @@ app.get('/api/preventive-patients/search/:curp', (req, res) => {
 
 
 // =========================================================================
-// ENDPOINT: ACTUALIZAR EXPEDIENTE COMPUESTO - PARTE 1 (CORREGIDA)
-// =========================================================================
-// =========================================================================
-// ENDPOINT: ACTUALIZAR EXPEDIENTE COMPUESTO - PARTE 1 (REPARACIÓN DE INDICE DE ARREGLO)
+// ENDPOINT: ACTUALIZAR EXPEDIENTE COMPUESTO - PARTE 1 (HOMOLOGACIÓN DE CAPITALIZACIÓN)
 // =========================================================================
 app.put('/api/preventive-patients/update', (req, res) => {
     const { 
@@ -1285,6 +1282,7 @@ app.put('/api/preventive-patients/update', (req, res) => {
         companionAge, companionGender, companionPhone, companionEmail, companionRelationship 
     } = req.body;
 
+    // 🚀 REPARACIÓN HISTÓRICA: Corregimos firstName en la validación (N mayúscula como viaja desde el front)
     if (!curp || !rfc || !firstName || !lastNamePaternal || !age || !gender || !phone || !email) {
         return res.status(400).json({ message: 'Los datos obligatorios para la actualización están incompletos.' });
     }
@@ -1312,12 +1310,9 @@ app.put('/api/preventive-patients/update', (req, res) => {
 
         // Recuperamos el ID interno del paciente que ya existía
         pool.query('SELECT id FROM preventive_patients WHERE curp = ?', [cleanCurp], (errId, resId) => {
-            // 🚀 REPARACIÓN: Validamos correctamente la existencia en el arreglo devuelto por MySQL
             if (errId || !resId || resId.length === 0) {
                 return res.status(500).json({ message: 'Error al recuperar identificador del expediente.' });
             }
-            
-            // 🚀 REPARACIÓN CRÍTICA: Añadimos [0] para extraer de forma exitosa el ID real del registro
             const idDelPaciente = resId[0].id; 
 
             // PASO B: Si es menor de edad, procesamos su acompañante actual para esta visita
