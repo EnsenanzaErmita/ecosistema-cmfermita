@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.6.0
+        v1.7.0
     </div>
 
 
@@ -1477,6 +1477,22 @@
                 </div>
 
 
+<div>
+    <label for="prev-gender" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Género / Identidad (*):</label>
+    <select id="prev-gender" required style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+        <option value="MUJER">MUJER</option>
+        <option value="HOMBRE">HOMBRE</option>
+        <option value="NO BINARIO">NO BINARIO (NBX)</option>
+        <option value="TRANSGÉNERO">TRANSGÉNERO</option>
+        <option value="INTERSEXUAL">INTERSEXUAL</option>
+        <option value="PREFIERO NO DECIRLO" selected>PREFIERO NO DECIRLO</option>
+    </select>
+</div>
+
+
+
+
+
 
                 <!-- ========================================================================= -->
                 <!-- 🚫 SECCIÓN DINÁMICA: CONTROL RELACIONAL DE ACOMPAÑANTES (INICIA OCULTO) -->
@@ -1546,6 +1562,23 @@
                 <option value="FAMILIAR RESPONSABLE">FAMILIAR RESPONSABLE</option>
             </select>
         </div>
+
+
+<div>
+    <label for="prev-comp-gender" style="font-size: 0.8em; font-weight: bold; color: var(--guinda);">Género Tutor (*):</label>
+    <select id="prev-comp-gender" style="width: 100%; padding: 10px; border: 1px solid var(--guinda); border-radius: 4px; box-sizing: border-box; background: white;">
+        <option value="MUJER">MUJER</option>
+        <option value="HOMBRE">HOMBRE</option>
+        <option value="NO BINARIO">NO BINARIO (NBX)</option>
+        <option value="TRANSGÉNERO">TRANSGÉNERO</option>
+        <option value="INTERSEXUAL">INTERSEXUAL</option>
+        <option value="PREFIERO NO DECIRLO" selected>PREFIERO NO DECIRLO</option>
+    </select>
+</div>
+
+
+
+
     </div>
 </div>
 
@@ -3731,6 +3764,7 @@ async function guardarPacientePreventivaNube(event) {
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
         age: parseInt(document.getElementById('prev-age').value),
+        gender: document.getElementById('prev-gender').value, // 🚀 NUEVO GÉNERO INCLUSIVO PACIENTE
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
         
@@ -3738,21 +3772,29 @@ async function guardarPacientePreventivaNube(event) {
         companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
         selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : '',
         
-        // 🚀 CORRECCIÓN: Extracción y mapeo directo homologado de las cajas de texto del tutor
+        // 🚀 Extracción y mapeo directo homologado de las cajas de texto del tutor con género
         companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
         companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value.trim().toUpperCase() : '',
         companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value.trim().toUpperCase() : '',
         companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
         companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
-        companionAge: edadTutorNumerica, // 🚀 Viaja el número entero real capturado en pantalla (Ej: 42)
+        companionAge: edadTutorNumerica, 
+        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value : 'PREFIERO NO DECIRLO', // 🚀 NUEVO GÉNERO INCLUSIVO TUTOR
         companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
         companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
         companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
     };
 
+    // 🚀 DETERMINACIÓN DINÁMICA DE LA OPERACIÓN (INSERCIÓN O ACTUALIZACIÓN RECURRENTE)
+    const urlTarget = _modoEdicionActivo 
+        ? `${BASE_URL}/api/preventive-patients/update` 
+        : `${BASE_URL}/api/preventive-patients/integrated`;
+        
+    const metodoHttp = _modoEdicionActivo ? 'PUT' : 'POST';
+
     try {
-        const response = await fetch(`${BASE_URL}/api/preventive-patients/integrated`, {
-            method: 'POST',
+        const response = await fetch(urlTarget, {
+            method: metodoHttp,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
@@ -3762,31 +3804,43 @@ async function guardarPacientePreventivaNube(event) {
             const modalAuditoria = document.getElementById('modalAuditoria');
             
             if (cuerpoModal && modalAuditoria) {
+                const tituloMensaje = _modoEdicionActivo ? '¡Expediente Actualizado!' : '¡Registro Guardado!';
+                const detalleMensaje = _modoEdicionActivo 
+                    ? 'Los cambios en el derechohabiente menor y la vinculación de su acompañante para esta visita se han guardado exitosamente en Clever Cloud.'
+                    : 'El expediente compuesto del menor y el alta del tutor para su vacunación simultánea se han guardado exitosamente en Clever Cloud.';
+
                 cuerpoModal.innerHTML = `
                     <div style="text-align: center; font-family: sans-serif;">
                         <span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span>
-                        <h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Registro Guardado!</h4>
+                        <h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">${tituloMensaje}</h4>
                         <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height:1.5;">
-                            El expediente compuesto del menor y el alta del tutor para su vacunación simultánea se han guardado exitosamente en Clever Cloud.
+                            ${detalleMensaje}
                         </p>
                     </div>
                 `;
                 modalAuditoria.style.display = 'flex'; 
             }
 
-            // Blanqueamos el formulario tras un envío exitoso
+            // Blanqueamos el formulario tras una operación exitosa
             document.getElementById('form-paciente-preventiva').reset();
             document.getElementById('seccion-menor-edad').style.display = 'none';
-            document.getElementById('container-boton-editar').style.display = 'none';
+            if (document.getElementById('container-boton-editar')) {
+                document.getElementById('container-boton-editar').style.display = 'none';
+            }
             document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
+            
+            // Restablecemos los valores por defecto del género inclusivo
+            if (document.getElementById('prev-gender')) document.getElementById('prev-gender').value = 'PREFIERO NO DECIRLO';
+            if (document.getElementById('prev-comp-gender')) document.getElementById('prev-comp-gender').value = 'PREFIERO NO DECIRLO';
+
             _esMenorDeEdad = false;
             _modoEdicionActivo = false;
         } else {
             const data = await response.json();
-            alert('Error al guardar: ' + data.message);
+            alert('Error en la operación: ' + data.message);
         }
     } catch (error) {
-        console.error('Error al guardar expediente compuesto:', error);
+        console.error('Error al procesar el expediente compuesto:', error);
         alert('Fallo de conexión con el servidor de Render.');
     }
 }
@@ -3958,14 +4012,15 @@ function removerBotonModificar() {
 // 2. FUNCIONES AUXILIARES DE CONTROL, BLOQUEO Y CONMUTACIÓN
 // =========================================================================
 // FUNCIÓN ÚNICA DE BLOQUEO: Usa disabled de forma consistente para congelar el formulario
+// 🔓 REGLA DE ORO: El género nunca se bloquea para permitir libre modificación
 function alternarBloqueoCamposPreventiva(bloquear) {
     const ids = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
     ids.forEach(id => {
         const input = document.getElementById(id);
         if (input) input.disabled = bloquear;
     });
+    // El elemento 'prev-gender' se queda fuera del ciclo para que siempre se pueda cambiar
 }
-
 
 
 // Modifica tu función actual para que el CURP permanezca bloqueado siempre en edición
