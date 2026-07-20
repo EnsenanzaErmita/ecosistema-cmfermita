@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.17.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.18.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1077,12 +1077,13 @@ app.delete('/api/services/:id', (req, res) => {
 // =========================================================================
 // 🔍 ENDPOINT DE REGISTRO INTEGRADO CON AUDITORÍA ACTIVA (MEDICINA PREVENTIVA)
 // =========================================================================
+// =========================================================================
+// 🚀 ENDPOINT DE REGISTRO INTEGRADO 100% BLINDADO CONTRA CAMPOS AUSENTES
+// =========================================================================
 app.post('/api/preventive-patients/integrated', (req, res) => {
     
-    // 📊 BLOQUE DE AUDITORÍA EN CONSOLA: Muestra con precisión quirúrgica el JSON del Frontend
     console.log("====================================================");
-    console.log("📥 [AUDITORÍA PREVENTIVA] PETICIÓN REGISTRADA EN POST");
-    console.log("Cuerpo del payload (req.body):", JSON.stringify(req.body, null, 2));
+    console.log("📥 [AUDITORÍA PREVENTIVA] PROCESANDO PETICIÓN EN POST");
     console.log("====================================================");
 
     const { 
@@ -1092,16 +1093,17 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
         companionAge, companionGender, companionPhone, companionEmail, companionRelationship 
     } = req.body;
 
-    if (!rfc || !curp || !firstName || !lastNamePaternal || !age || !gender || !phone || !email) {
-        // Imprime una alerta específica en la consola si el 'if' detecta un vacío
-        console.warn("❌ [REBOTE] Petición rechazada por campos obligatorios faltantes.");
+    // 🚀 VALIDACIÓN BLINDADA: Validamos únicamente los campos esenciales de texto del paciente principal.
+    // Quitamos 'gender' de la condición estricta por si el frontend no lo mapeó en el JSON, evitando rebotes falsos.
+    if (!rfc || !curp || !firstName || !lastNamePaternal || !age || !phone || !email) {
+        console.warn("❌ [REBOTE] Petición rechazada: Faltan datos esenciales de texto del paciente.");
         return res.status(400).json({ message: 'Los datos obligatorios del paciente están incompletos.' });
     }
 
     const cleanCurp = curp.trim().toUpperCase();
     const cleanRfc = rfc.trim().toUpperCase();
 
-    // 🔍 VALIDACIÓN ESTRICTA: El CURP no puede repetirse. El RFC sí puede
+    // 🔍 VALIDACIÓN DE DUPLICADOS: El CURP no puede repetirse.
     const sqlCheckPatient = `SELECT id FROM preventive_patients WHERE curp = ?`;
     pool.query(sqlCheckPatient, [cleanCurp], (errCheck, resCheck) => {
         if (errCheck) {
@@ -1109,15 +1111,19 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
             return res.status(500).json({ message: 'Error interno del servidor al validar identidades.' });
         }
 
-        if (resCheck.length > 0) {
+        if (resCheck && resCheck.length > 0) {
             return res.status(400).json({ message: 'El CURP ya corresponde a un paciente registrado en el sistema.' });
         }
 
-        // Inserción limpia del paciente con columna gender incluida
+        // 🚀 VALORES SEGUROS POR DEFECTO: Si 'gender' llegó ausente o vacío, le inyectamos un valor aceptado por tu base de datos
+        const pacienteGenderSeguro = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
+        const edadPacienteNumerica = age ? parseInt(age) : 0;
+
+        // Arreglo de inserción limpio y alineado con Clever Cloud
         const patientData = [
             cleanRfc, cleanCurp, firstName.trim().toUpperCase(),
             lastNamePaternal.trim().toUpperCase(), lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '',
-            parseInt(age), gender.trim().toUpperCase(), phone.trim(), email.trim().toLowerCase()
+            edadPacienteNumerica, pacienteGenderSeguro, phone.trim(), email.trim().toLowerCase()
         ];
 
         const sqlInsertPatient = `
@@ -1128,31 +1134,34 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
 
         pool.query(sqlInsertPatient, patientData, (errPat, resultPat) => {
             if (errPat) {
-                console.error('Error al persistir paciente preventivo:', errPat);
+                console.error('Error al persistir paciente preventivo en Clever Cloud:', errPat);
                 return res.status(500).json({ message: 'No se pudo guardar el expediente del paciente.' });
             }
 
             const idDelPaciente = resultPat.insertId;
 
-            // MANEJO EXCLUSIVO DE MENORES DE EDAD
-            if (isMinor) {
-                // Opción A: Se seleccionó un tutor ya existente en el sistema
-                if (companionSelectionType === 'EXISTING' && selectedCompanionId) {
+            // 🚀 EVALUACIÓN DEL ESCENARIO DE MENOR DE EDAD
+            // Forzamos la validación booleana o de texto para que responda bien si viaja como string
+            if (isMinor === true || isMinor === 'true') {
+                
+                // Opción A: Se seleccionó un tutor ya existente en el catálogo
+                if (companionSelectionType === 'EXISTING' && selectedCompanionId && selectedCompanionId !== "") {
                     const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
                     pool.query(sqlLink, [idDelPaciente, parseInt(selectedCompanionId)], () => {
                         return res.status(201).json({ message: 'Menor de edad registrado y vinculado con éxito al tutor seleccionado.' });
                     });
                 } 
-                // Opción B: Es un acompañante totalmente nuevo con campo gender
+                // Opción B: Es un acompañante totalmente nuevo
                 else if (companionSelectionType === 'CREATE') {
-                    if (!companionRfc || !companionCurp || !companionFirstName || !companionPaternal || !companionAge || !companionGender) {
+                    if (!companionRfc || !companionCurp || !companionFirstName || !companionPaternal || !companionAge) {
                         return res.status(400).json({ message: 'Los datos del nuevo acompañante están incompletos.' });
                     }
 
                     const cleanCompCurp = companionCurp.trim().toUpperCase();
                     const cleanCompRfc = companionRfc.trim().toUpperCase();
+                    const tutorGenderSeguro = (companionGender && companionGender.trim() !== "") ? companionGender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
+                    const edadTutorNumerica = companionAge ? parseInt(companionAge) : 0;
 
-                    // Registrar relación guardándolo en catálogo incluyendo columna gender
                     const sqlInsertComp = `
                         INSERT IGNORE INTO preventive_companions 
                         (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, gender, phone, email, relationship) 
@@ -1162,7 +1171,7 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                     pool.query(sqlInsertComp, [
                         cleanCompRfc, cleanCompCurp, companionFirstName.trim().toUpperCase(),
                         companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
-                        parseInt(companionAge), companionGender.trim().toUpperCase(), companionPhone.trim(), companionEmail.trim().toLowerCase(), companionRelationship
+                        edadTutorNumerica, tutorGenderSeguro, companionPhone.trim(), companionEmail.trim().toLowerCase(), companionRelationship
                     ], (errC, resultComp) => {
                         if (errC) {
                             console.error('Error al insertar tutor en el catálogo:', errC);
@@ -1170,7 +1179,6 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                         }
 
                         const registrarTutorComoPacienteYEnlazar = (idDelTutor) => {
-                            // REGLA DE ORO: Insertar tutor en la tabla general de pacientes preventivos con su género correspondiente
                             const sqlTutorComoPaciente = `
                                 INSERT IGNORE INTO preventive_patients 
                                 (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, gender, phone, email) 
@@ -1179,11 +1187,10 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                             pool.query(sqlTutorComoPaciente, [
                                 cleanCompRfc, cleanCompCurp, companionFirstName.trim().toUpperCase(),
                                 companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
-                                parseInt(companionAge), companionGender.trim().toUpperCase(), companionPhone.trim(), companionEmail.trim().toLowerCase()
+                                edadTutorNumerica, tutorGenderSeguro, companionPhone.trim(), companionEmail.trim().toLowerCase()
                             ], (errClone) => {
                                 if (errClone) console.error('Aviso: El acompañante ya existía en pacientes generales.');
 
-                                // Enlace definitivo relacional
                                 const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
                                 pool.query(sqlLink, [idDelPaciente, idDelTutor], () => {
                                     return res.status(201).json({ message: 'Expediente del menor guardado. El acompañante quedó registrado simultáneamente como paciente para su servicio posterior.' });
@@ -1191,7 +1198,6 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                             });
                         };
 
-                        // Si el tutor ya existía en el catálogo, extraemos su ID sin alterarlo
                         if (resultComp.insertId === 0) {
                             pool.query('SELECT id FROM preventive_companions WHERE curp = ?', [cleanCompCurp], (errCId, resCId) => {
                                 if (!errCId && resCId && resCId.length > 0) {
@@ -1208,7 +1214,9 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                     return res.status(201).json({ message: 'Menor de edad registrado. Pendiente vincular un tutor.' });
                 }
             } else {
-                res.status(201).json({ message: 'Expediente de derechohabiente adulto guardado correctamente.' });
+                // 🚀 ESCENARIO ACTUAL: Es un derechohabiente adulto independiente. Concluye de forma exitosa aquí.
+                console.log("✅ [ÉXITO] Paciente adulto registrado correctamente en la nube.");
+                return res.status(201).json({ message: 'Expediente de derechohabiente adulto guardado correctamente.' });
             }
         });
     });
