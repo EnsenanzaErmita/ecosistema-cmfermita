@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.8.0
+        v1.9.0
     </div>
 
 
@@ -3750,6 +3750,14 @@ async function guardarServicioNube(event) {
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
+    // 🚀 REPARACIÓN ABSOLUTA: Desbloqueamos todo temporalmente para que el navegador 
+    // permita extraer el texto y los números de los campos (evita enviar NaN o vacíos)
+    const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-gender', 'prev-phone', 'prev-email'];
+    todosLosIds.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.disabled = false;
+    });
+
     // Capturamos el elemento de edad del tutor de forma segura
     const inputAgeTutor = document.getElementById('prev-comp-age');
     let edadTutorNumerica = 0;
@@ -3757,14 +3765,18 @@ async function guardarPacientePreventivaNube(event) {
         edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
     }
 
+    // Extraemos la edad del paciente validando que no sea un campo roto
+    const valorEdadPaciente = document.getElementById('prev-age').value;
+    const edadPacienteNumerica = valorEdadPaciente ? parseInt(valorEdadPaciente) : 0;
+
     const payload = {
         rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
         firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
-        age: parseInt(document.getElementById('prev-age').value),
-        gender: document.getElementById('prev-gender').value, // 🚀 NUEVO GÉNERO INCLUSIVO PACIENTE
+        age: edadPacienteNumerica,
+        gender: document.getElementById('prev-gender').value, 
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
         
@@ -3772,20 +3784,19 @@ async function guardarPacientePreventivaNube(event) {
         companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
         selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : '',
         
-        // 🚀 Extracción y mapeo directo homologado de las cajas de texto del tutor con género
         companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
         companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value.trim().toUpperCase() : '',
         companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value.trim().toUpperCase() : '',
         companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
         companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
         companionAge: edadTutorNumerica, 
-        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value : 'PREFIERO NO DECIRLO', // 🚀 NUEVO GÉNERO INCLUSIVO TUTOR
+        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value : 'PREFIERO NO DECIRLO', 
         companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
         companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
         companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
     };
 
-    // 🚀 DETERMINACIÓN DINÁMICA DE LA OPERACIÓN (INSERCIÓN O ACTUALIZACIÓN RECURRENTE)
+    // Determinación dinámica de la operación
     const urlTarget = _modoEdicionActivo 
         ? `${BASE_URL}/api/preventive-patients/update` 
         : `${BASE_URL}/api/preventive-patients/integrated`;
@@ -3829,7 +3840,6 @@ async function guardarPacientePreventivaNube(event) {
             }
             document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
             
-            // Restablecemos los valores por defecto del género inclusivo
             if (document.getElementById('prev-gender')) document.getElementById('prev-gender').value = 'PREFIERO NO DECIRLO';
             if (document.getElementById('prev-comp-gender')) document.getElementById('prev-comp-gender').value = 'PREFIERO NO DECIRLO';
 
@@ -3838,10 +3848,26 @@ async function guardarPacientePreventivaNube(event) {
         } else {
             const data = await response.json();
             alert('Error en la operación: ' + data.message);
+            
+            // Si el servidor responde con error, volvemos a congelar los campos para que el usuario no altere el CURP por accidente
+            if (_modoEdicionActivo === false) {
+                todosLosIds.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input && id === 'prev-curp') input.disabled = true; // Mantiene el CURP bajo resguardo
+                });
+            }
         }
     } catch (error) {
         console.error('Error al procesar el expediente compuesto:', error);
         alert('Fallo de conexión con el servidor de Render.');
+        
+        // Devolvemos el bloqueo en caso de fallo técnico de red
+        if (!_modoEdicionActivo) {
+            todosLosIds.forEach(id => {
+                const input = document.getElementById(id);
+                if (input && id === 'prev-curp') input.disabled = true;
+            });
+        }
     }
 }
 
