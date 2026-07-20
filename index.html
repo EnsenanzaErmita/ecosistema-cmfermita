@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.1.0
+        v1.2.0
     </div>
 
 
@@ -3962,21 +3962,62 @@ async function evaluarCurpPreventiva(curpVal) {
 
 
 
+
+// NUEVA FUNCIÓN: Soluciona el error desplegando los campos correctos del acompañante
+function conmutarModoAcompanante(modo) {
+    const bloqueExistente = document.getElementById('sub-bloque-companon-existente');
+    const bloqueNuevo = document.getElementById('sub-bloque-companion-nuevo');
+
+    if (modo === 'SELECT') {
+        if (bloqueExistente) bloqueExistente.style.display = 'block';
+        if (bloqueNuevo) bloqueNuevo.style.display = 'none';
+        limpiarCamposTutorManual();
+    } 
+    else if (modo === 'CREATE') {
+        if (bloqueExistente) bloqueExistente.style.display = 'none';
+        // Usamos grid para mantener tu diseño de rejilla original del HTML
+        if (bloqueNuevo) bloqueNuevo.style.display = 'grid'; 
+    }
+}
+
+
+// Limpia los datos manuales del tutor para evitar el envío de basura
+function limpiarCamposTutorManual() {
+    const campos = [
+        'prev-comp-curp', 'prev-comp-rfc', 'prev-comp-firstname', 
+        'prev-comp-paternal', 'prev-comp-maternal', 'prev-comp-age', 
+        'prev-comp-phone', 'prev-comp-email'
+    ];
+    campos.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.value = '';
+    });
+}
+
+
+function removerBotonModificar() {
+    const btn = document.getElementById('btn-modificar-datos');
+    if (btn) btn.remove();
+}
+
+
+
 // =========================================================================
 // 2. FUNCIONES AUXILIARES DE CONTROL, BLOQUEO Y CONMUTACIÓN
 // =========================================================================
+// FUNCIÓN ÚNICA DE BLOQUEO: Usa disabled de forma consistente para congelar el formulario
 function alternarBloqueoCamposPreventiva(bloquear) {
-    const campos = ['prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-phone', 'prev-email'];
-    campos.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.readOnly = bloquear; 
+    const ids = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
+    ids.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.disabled = bloquear;
     });
 }
 
 
 
-
 // Modifica tu función actual para que el CURP permanezca bloqueado siempre en edición
+// Habilita la edición garantizando que el CURP se mantenga siempre bloqueado
 function habilitarModoEdicionPreventiva() {
     _modoEdicionActivo = true;
     
@@ -3995,14 +4036,6 @@ function habilitarModoEdicionPreventiva() {
     removerBotonModificar();
 }
 
-// Modifica tu función de bloqueo general existente
-function alternarBloqueoCamposPreventiva(bloquear) {
-    const ids = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
-    ids.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) input.disabled = bloquear;
-    });
-}
 
 
 
@@ -4021,11 +4054,25 @@ function volverYLimpiarPreventiva() {
     _modoEdicionActivo = false;
     
     document.getElementById('seccion-menor-edad').style.display = 'none';
-    document.getElementById('container-boton-editar').style.display = 'none';
+    
+    const contenedorBtnEditar = document.getElementById('container-boton-editar');
+    if (contenedorBtnEditar) contenedorBtnEditar.style.display = 'none';
+    
     document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
     
+    // Restablecemos los controles del tutor por si se quedaron congelados
+    const selectMode = document.getElementById('prev-companion-mode');
+    const selectComp = document.getElementById('prev-companion-select');
+    if (selectMode) selectMode.disabled = false;
+    if (selectComp) selectComp.disabled = false;
+    
+    conmutarModoAcompanante('SELECT'); // Regresa al estado visual por defecto
+    removerBotonModificar();
+
     activarModulo('panel-medicina-preventiva', null);
 }
+
+
 
 // =========================================================================
 // 4. ENVÍO COMPUESTO INTEGRADO HACIA LA API DE RENDER
@@ -4033,7 +4080,6 @@ function volverYLimpiarPreventiva() {
 function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // Recopilación de datos del formulario del paciente
     const payload = {
         curp: document.getElementById('prev-curp').value,
         rfc: document.getElementById('prev-rfc').value,
@@ -4044,7 +4090,7 @@ function guardarPacientePreventivaNube(event) {
         phone: document.getElementById('prev-phone').value,
         email: document.getElementById('prev-email').value,
         isMinor: _esMenorDeEdad,
-        // Datos del acompañante si aplica
+        
         companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
         selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : null,
         companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value : '',
@@ -4058,7 +4104,6 @@ function guardarPacientePreventivaNube(event) {
         companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : ''
     };
 
-    // Determinamos la URL y el método HTTP según el estado del formulario
     const url = _modoEdicionActivo 
         ? `${BASE_URL}/api/preventive-patients/update` 
         : `${BASE_URL}/api/preventive-patients/integrated`;
@@ -4078,7 +4123,7 @@ function guardarPacientePreventivaNube(event) {
     })
     .then(data => {
         alert(data.message);
-        volverYLimpiarPreventiva(); // Regresa al panel limpando el formulario
+        volverYLimpiarPreventiva(); 
     })
     .catch(err => {
         alert(`Error en la operación: ${err.message}`);
