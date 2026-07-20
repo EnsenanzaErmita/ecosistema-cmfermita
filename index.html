@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.11.0
+        v1.12.0
     </div>
 
 
@@ -3889,8 +3889,11 @@ let _modoEdicionActivo = false;
 // 🚀 ALGORITMO RENAPO OPTIMIZADO PARA PACIENTES (Actualizado para flexibilidad de tutores)
 // =========================================================================
 async function evaluarCurpPreventiva(curpVal) {
+    // 🚀 REPARACIÓN ABSOLUTA: Si el valor está vacío, es nulo o no mide 18 caracteres, se detiene inmediatamente.
+    // Esto evita que el método .reset() del formulario dispare validaciones erróneas y alertas falsas.
+    if (!curpVal || curpVal.trim() === "" || curpVal.trim().length !== 18) return;
+
     const curp = curpVal.trim().toUpperCase();
-    if (curp.length !== 18) return;
 
     // 1. CALCULAR EDAD DEL PACIENTE
     const añoDigitos = parseInt(curp.substring(4, 6));   
@@ -3910,6 +3913,15 @@ async function evaluarCurpPreventiva(curpVal) {
 
     document.getElementById('prev-age').value = edadCalculada;
     _esMenorDeEdad = edadCalculada <= 17; 
+
+    // 🚀 NUEVO: EXTRACCIÓN Y PRESELECCIÓN DE GÉNERO REGISTRAL DESDE LA CURP (Posición 11)
+    const caracter11 = curp.charAt(10);
+    const selectGender = document.getElementById('prev-gender');
+    if (selectGender) {
+        if (caracter11 === 'H') selectGender.value = 'HOMBRE';
+        else if (caracter11 === 'M') selectGender.value = 'MUJER';
+        else if (caracter11 === 'X') selectGender.value = 'NO BINARIO';
+    }
 
     const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
     const modalAuditoria = document.getElementById('modalAuditoria');
@@ -3964,6 +3976,11 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('prev-phone').value = datosPaciente.phone;
             document.getElementById('prev-email').value = datosPaciente.email;
             document.getElementById('prev-age').value = datosPaciente.age;
+            
+            // 🚀 NUEVO: Auto-rellenar el género guardado en la base de datos
+            if (selectGender && datosPaciente.gender) {
+                selectGender.value = datosPaciente.gender;
+            }
 
             alternarBloqueoCamposPreventiva(true); // Solo congela al paciente, no al tutor
             
