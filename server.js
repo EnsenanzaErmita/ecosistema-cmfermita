@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.0.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.1.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1269,6 +1269,44 @@ app.get('/api/preventive-patients/search/:curp', (req, res) => {
 });
 
 
+
+
+// =========================================================================
+// ENDPOINT: ACTUALIZAR EXPEDIENTE EXISTENTE (Para el botón ACTUALIZAR EXPEDIENTE)
+// =========================================================================
+app.put('/api/preventive-patients/update', (req, res) => {
+    const { rfc, curp, firstName, lastNamePaternal, lastNameMaternal, age, phone, email } = req.body;
+
+    if (!curp || !rfc || !firstName || !lastNamePaternal || !age || !phone || !email) {
+        return res.status(400).json({ message: 'Los datos obligatorios para la actualización están incompletos.' });
+    }
+
+    const sqlUpdate = `
+        UPDATE preventive_patients 
+        SET rfc = ?, first_name = ?, last_name_paternal = ?, last_name_maternal = ?, age = ?, phone = ?, email = ?
+        WHERE curp = ?
+    `;
+
+    const updateData = [
+        rfc.trim().toUpperCase(), 
+        firstName.trim().toUpperCase(), 
+        lastNamePaternal.trim().toUpperCase(), 
+        lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '', 
+        parseInt(age), 
+        phone.trim(), 
+        email.trim().toLowerCase(),
+        curp.trim().toUpperCase() // Llave de búsqueda fija que no se modifica
+    ];
+
+    pool.query(sqlUpdate, updateData, (err, result) => {
+        if (err) {
+            console.error('Error al actualizar expediente en la nube:', err);
+            return res.status(500).json({ message: 'No se pudieron guardar los cambios del expediente.' });
+        }
+        
+        return res.status(200).json({ message: 'Expediente institucional actualizado correctamente en la nube.' });
+    });
+});
 
 
 

@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.0.0
+        v1.1.0
     </div>
 
 
@@ -3973,30 +3973,43 @@ function alternarBloqueoCamposPreventiva(bloquear) {
     });
 }
 
+
+
+
+// Modifica tu función actual para que el CURP permanezca bloqueado siempre en edición
 function habilitarModoEdicionPreventiva() {
-    alternarBloqueoCamposPreventiva(false); 
     _modoEdicionActivo = true;
-    alert('¡Edición Habilitada!\nPuede modificar los campos de texto libre. Al terminar presione el botón de abajo para guardar los cambios.');
     
-    if (_esMenorDeEdad) {
-        document.getElementById('prev-companion-mode').disabled = false;
-        document.getElementById('prev-companion-select').disabled = false;
-    }
+    // Desbloqueamos todos los campos MENOS el CURP (Punto clave)
+    const ids = ['prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
+    ids.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.disabled = false;
+    });
+    
+    // Aseguramos que el CURP se quede estrictamente bloqueado
+    const inputCurp = document.getElementById('prev-curp');
+    if (inputCurp) inputCurp.disabled = true;
+
+    alert("Campos habilitados para modificación. El CURP no puede ser alterado.");
+    removerBotonModificar();
 }
 
-function conmutarModoAcompanante(modo) {
-    const bloqueSel = document.getElementById('sub-bloque-companon-existente');
-    const bloqueNuevo = document.getElementById('sub-bloque-companion-nuevo');
-    if (!bloqueSel || !bloqueNuevo) return;
-
-    if (modo === 'SELECT') {
-        bloqueSel.style.display = 'block';
-        bloqueNuevo.style.display = 'none';
-    } else {
-        bloqueSel.style.display = 'none';
-        bloqueNuevo.style.display = 'grid';
-    }
+// Modifica tu función de bloqueo general existente
+function alternarBloqueoCamposPreventiva(bloquear) {
+    const ids = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
+    ids.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.disabled = bloquear;
+    });
 }
+
+
+
+
+
+
+
 
 // =========================================================================
 // 3. FUNCIÓN DE LIMPIEZA ABSOLUTA AL VOLVER AL MENÚ ANTERIOR
@@ -4017,67 +4030,59 @@ function volverYLimpiarPreventiva() {
 // =========================================================================
 // 4. ENVÍO COMPUESTO INTEGRADO HACIA LA API DE RENDER
 // =========================================================================
-async function guardarPacientePreventivaNube(event) {
+function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
+    // Recopilación de datos del formulario del paciente
     const payload = {
-        rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
-        curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
-        firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
-        lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
-        lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
-        age: parseInt(document.getElementById('prev-age').value),
-        phone: document.getElementById('prev-phone').value.trim(),
-        email: document.getElementById('prev-email').value.trim(),
-        
+        curp: document.getElementById('prev-curp').value,
+        rfc: document.getElementById('prev-rfc').value,
+        firstName: document.getElementById('prev-firstname').value,
+        lastNamePaternal: document.getElementById('prev-paternal').value,
+        lastNameMaternal: document.getElementById('prev-maternal').value,
+        age: document.getElementById('prev-age').value,
+        phone: document.getElementById('prev-phone').value,
+        email: document.getElementById('prev-email').value,
         isMinor: _esMenorDeEdad,
+        // Datos del acompañante si aplica
         companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
-        selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : '',
-        
-        companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
-        companionName: document.getElementById('prev-comp-name') ? document.getElementById('prev-comp-name').value.trim().toUpperCase() : '',
-        companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
-        companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
+        selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : null,
+        companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value : '',
+        companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value : '',
+        companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value : '',
+        companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value : '',
+        companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value : '',
+        companionAge: document.getElementById('prev-comp-age') ? document.getElementById('prev-comp-age').value : '',
+        companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value : '',
+        companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value : '',
+        companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : ''
     };
 
-    try {
-        const response = await fetch(`${BASE_URL}/api/preventive-patients/integrated`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+    // Determinamos la URL y el método HTTP según el estado del formulario
+    const url = _modoEdicionActivo 
+        ? `${BASE_URL}/api/preventive-patients/update` 
+        : `${BASE_URL}/api/preventive-patients/integrated`;
+        
+    const metodo = _modoEdicionActivo ? 'PUT' : 'POST';
 
-        if (response.ok) {
-            const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
-            const modalAuditoria = document.getElementById('modalAuditoria');
-            
-            if (cuerpoModal && modalAuditoria) {
-                cuerpoModal.innerHTML = `
-                    <div style="text-align: center; font-family: sans-serif;">
-                        <span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span>
-                        <h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Registro Guardado!</h4>
-                        <p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height:1.5;">
-                            El expediente compuesto de Medicina Preventiva y la relación de acompañantes se ha guardado exitosamente en Clever Cloud.
-                        </p>
-                    </div>
-                `;
-                modalAuditoria.style.display = 'flex'; 
-            }
-
-            document.getElementById('form-paciente-preventiva').reset();
-            document.getElementById('seccion-menor-edad').style.display = 'none';
-            document.getElementById('container-boton-editar').style.display = 'none';
-            document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
-            _esMenorDeEdad = false;
-            _modoEdicionActivo = false;
-        } else {
-            const data = await response.json();
-            alert('Error al guardar: ' + data.message);
+    fetch(url, {
+        method: metodo,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.json().then(err => { throw new Error(err.message); });
         }
-    } catch (error) {
-        console.error('Error al guardar expediente compuesto:', error);
-        alert('Fallo de conexión con el servidor de Render.');
-    }
+        return res.json();
+    })
+    .then(data => {
+        alert(data.message);
+        volverYLimpiarPreventiva(); // Regresa al panel limpando el formulario
+    })
+    .catch(err => {
+        alert(`Error en la operación: ${err.message}`);
+    });
 }
 
 
