@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.36.0
+        v1.37.0
     </div>
 
 
@@ -3957,7 +3957,19 @@ function alternarBloqueoCamposPreventiva(bloquear) {
 
 
 function volverYLimpiarPreventiva() {
+    // 🏛️ CANDADO INSTITUCIONAL: Resguardamos el valor libre que digitaste con tu teclado
+    const inputGender = document.getElementById('prev-gender');
+    const valorGenderAntesDelReset = inputGender ? inputGender.value : '';
+
+    // Tu comando nativo original de limpieza masiva
     document.getElementById('form-paciente-preventiva').reset();
+
+    // 🚀 RESTAURACIÓN INMEDIATA: Devolvemos tu texto libre a la caja antes de que viaje el JSON
+    if (inputGender) {
+        inputGender.value = valorGenderAntesDelReset;
+    }
+
+    // Tus líneas operacionales intactas y sin ninguna modificación
     alternarBloqueoCamposPreventiva(false);
     _esMenorDeEdad = false;
     _modoEdicionActivo = false;
@@ -4099,33 +4111,6 @@ function evaluarCurpAcompanante(curpVal) {
 
 
 
-// =========================================================================
-// 3. FUNCIÓN DE LIMPIEZA ABSOLUTA AL VOLVER AL MENÚ ANTERIOR
-// =========================================================================
-function volverYLimpiarPreventiva() {
-    document.getElementById('form-paciente-preventiva').reset();
-    alternarBloqueoCamposPreventiva(false);
-    _esMenorDeEdad = false;
-    _modoEdicionActivo = false;
-    
-    document.getElementById('seccion-menor-edad').style.display = 'none';
-    
-    const contenedorBtnEditar = document.getElementById('container-boton-editar');
-    if (contenedorBtnEditar) contenedorBtnEditar.style.display = 'none';
-    
-    document.getElementById('btn-submit-preventiva').innerText = "REGISTRAR PACIENTE EN LA NUBE";
-    
-    // Restablecemos los controles del tutor por si se quedaron congelados
-    const selectMode = document.getElementById('prev-companion-mode');
-    const selectComp = document.getElementById('prev-companion-select');
-    if (selectMode) selectMode.disabled = false;
-    if (selectComp) selectComp.disabled = false;
-    
-    conmutarModoAcompanante('SELECT'); // Regresa al estado visual por defecto
-    removerBotonModificar();
-
-    activarModulo('panel-medicina-preventiva', null);
-}
 
 
 
