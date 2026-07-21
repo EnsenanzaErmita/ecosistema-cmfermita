@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.40.0
+        v1.41.0
     </div>
 
 
@@ -1477,10 +1477,17 @@
                 </div>
 
 
-<!-- 🚀 CONFIGURACIÓN IDÉNTICA AL INPUT DE NOMBRE -->
+<!-- 🚀 REGRESO A BOX DESPLEGABLE HOMOLOGADO -->
 <div>
     <label for="prev-gender" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Género / Identidad (*):</label>
-    <input type="text" id="prev-gender" required placeholder="Ej. HOMBRE, MUJER, NO BINARIO" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase; background: white;">
+    <select id="prev-gender" name="gender" required style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
+        <option value="MUJER">MUJER</option>
+        <option value="HOMBRE">HOMBRE</option>
+        <option value="NO BINARIO">NO BINARIO (NBX)</option>
+        <option value="TRANSGÉNERO">TRANSGÉNERO</option>
+        <option value="INTERSEXUAL">INTERSEXUAL</option>
+        <option value="PREFIERO NO DECIRLO" selected>PREFIERO NO DECIRLO</option>
+    </select>
 </div>
 
 
@@ -3737,7 +3744,7 @@ async function guardarServicioNube(event) {
 
 
 // =========================================================================
-// 🚀 REPARACIÓN FRONTERA DEFINITIVA: EXTRACCIÓN LIMITADA Y AISLADA
+// 🚀 REPARACIÓN FRONTERA DEFINITIVA: REGRESO A BOX DESPLEGABLE HOMOLOGADO
 // =========================================================================
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
@@ -3749,10 +3756,6 @@ async function guardarPacientePreventivaNube(event) {
         if (input) input.disabled = false;
     });
 
-    // 🚀 EXTRACCIÓN DETALLADA: Leemos el valor del texto libre aislando el elemento por su ID exacto
-    const inputGenderFisico = document.getElementById('prev-gender');
-    const valorGenderReal = (inputGenderFisico && inputGenderFisico.value.trim() !== "") ? inputGenderFisico.value.trim().toUpperCase() : 'NO_DEFINIDO';
-
     // Extracción segura del tutor por si las dudas
     const inputCompGenderFisico = document.getElementById('prev-comp-gender');
     const valorCompGenderReal = (inputCompGenderFisico && inputCompGenderFisico.value.trim() !== "") ? inputCompGenderFisico.value.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
@@ -3763,16 +3766,13 @@ async function guardarPacientePreventivaNube(event) {
     const payload = {
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
         rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
-        
-        // El ejemplo perfecto que sí funciona:
         firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
-        
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
         age: document.getElementById('prev-age').value ? parseInt(document.getElementById('prev-age').value) : 0,
         
-        // 🚀 REPLICADO EXACTO: Copia fiel de la estructura del Nombre (.value.trim().toUpperCase())
-        gender: document.getElementById('prev-gender').value.trim().toUpperCase(),
+        // 🚀 CAPTURA DEL BOX DESPLEGABLE: Lee directamente la opción seleccionada en el HTML (Con g minúscula)
+        gender: document.getElementById('prev-gender').value,
         
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
@@ -3785,7 +3785,7 @@ async function guardarPacientePreventivaNube(event) {
         companionPaternal: '',
         companionMaternal: '',
         companionAge: 0,
-        companionGender: '',
+        companionGender: valorCompGenderReal,
         companionPhone: '',
         companionEmail: '',
         companionRelationship: 'MADRE'
