@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.20.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.21.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1291,7 +1291,7 @@ app.get('/api/preventive-patients/search/:curp', (req, res) => {
 
 
 // =========================================================================
-// 🚀 ENDPOINT DE ACTUALIZAR EXPEDIENTE - PARTE 1 (ALINEACIÓN DE COLUMNA GENDER)
+// 🔍 ENDPOINT PUT - PARTE 1 CON AUDITORÍA ACTIVA DE ACTUALIZACIÓN
 // =========================================================================
 app.put('/api/preventive-patients/update', (req, res) => {
     const { 
@@ -1307,48 +1307,57 @@ app.put('/api/preventive-patients/update', (req, res) => {
     }
 
     const cleanCurp = curp.trim().toUpperCase();
-
-    // 🚀 VALORES SEGUROS POR DEFECTO: Si 'gender' llegó ausente o vacío, le inyectamos un valor aceptado por la BD
     const pacienteGenderSeguro = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
     const edadPacienteNumerica = age ? parseInt(age) : 0;
 
-    // PASO A: Actualizar los datos del paciente o menor principal (Contiene 8 columnas a modificar)
     const sqlUpdatePatient = `
         UPDATE preventive_patients 
         SET rfc = ?, first_name = ?, last_name_paternal = ?, last_name_maternal = ?, age = ?, gender = ?, phone = ?, email = ?
         WHERE curp = ?
     `;
 
-    // 🚀 REPARACIÓN ABSOLUTA: Agregamos 'pacienteGenderSeguro' en la posición 6 exacta para que coincida con el signo de interrogación
     const patientData = [
         rfc.trim().toUpperCase(), 
         firstName.trim().toUpperCase(), 
         lastNamePaternal.trim().toUpperCase(), 
         lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '', 
         edadPacienteNumerica, 
-        pacienteGenderSeguro, // ← 📑 Añadido en su posición correcta
+        pacienteGenderSeguro, 
         phone.trim(), 
         email.trim().toLowerCase(),
-        cleanCurp // ← Pasa al WHERE curp = ? al final
+        cleanCurp
     ];
+
+    // 📊 AUDITORÍA EN CONSOLA: Vemos el arreglo exacto antes de mandarlo a MySQL
+    console.log("====================================================");
+    console.log("📝 [AUDITORÍA PUT] ENVIANDO ARREGLO A MYSQL:");
+    console.log("patientData:", patientData);
+    console.log("====================================================");
 
     pool.query(sqlUpdatePatient, patientData, (errUp, resultUp) => {
         if (errUp) {
-            console.error('Error al actualizar expediente base:', errUp);
+            console.error('❌ [ERROR EN SQL UPDATE]:', errUp);
             return res.status(500).json({ message: 'No se pudieron actualizar los datos del paciente.' });
         }
+
+        // 📊 AUDITORÍA EN CONSOLA: Vemos qué respondió MySQL (cuántas filas cambiaron)
+        console.log("📊 [RESULTADO MYSQL PUT]:");
+        console.log("Filas afectadas (affectedRows):", resultUp.affectedRows);
+        console.log("Filas modificadas (changedRows):", resultUp.changedRows);
+        console.log("Mensaje de MySQL (message):", resultUp.message);
+        console.log("====================================================");
 
         // Recuperamos el ID interno del paciente que ya existía de forma segura
         pool.query('SELECT id FROM preventive_patients WHERE curp = ?', [cleanCurp], (errId, resId) => {
             if (errId || !resId || resId.length === 0) {
                 return res.status(500).json({ message: 'Error al recuperar identificador del expediente.' });
             }
-            const idDelPaciente = resId[0].id; 
+            const idDelPaciente = resId.id; 
 
-            // PASO B: Evaluación del escenario de menor de edad (Acepta booleanos o strings booleanos)
+            // PASO B: Evaluación del escenario de menor de edad
             if (isMinor === true || isMinor === 'true') {
                 
-                // Opción A: El tutor ya existía, pero ACTUALIZAMOS sus datos al vuelo (Género, contacto, parentesco)
+                // Opción A: El tutor ya existía, pero ACTUALIZAMOS sus datos al vuelo
                 if (companionSelectionType === 'EXISTING' && selectedCompanionId && selectedCompanionId !== "") {
                     
                     const sqlUpdateExistingComp = `
@@ -1370,7 +1379,6 @@ app.put('/api/preventive-patients/update', (req, res) => {
                     pool.query(sqlUpdateExistingComp, compUpdateData, (errCompUp) => {
                         if (errCompUp) console.error('Aviso: No se pudieron actualizar los campos del acompañante seleccionado:', errCompUp);
                         
-                        // Sincronizamos también sus datos en el padrón general de pacientes (Usa CURP como enlace seguro)
                         const sqlUpdateTutorAsPatient = `
                             UPDATE preventive_patients 
                             SET rfc = ?, first_name = ?, last_name_paternal = ?, last_name_maternal = ?, age = ?, gender = ?, phone = ?, email = ?
@@ -1386,7 +1394,6 @@ app.put('/api/preventive-patients/update', (req, res) => {
                         pool.query(sqlUpdateTutorAsPatient, tutorAsPatientData, (errTutorPatUp) => {
                             if (errTutorPatUp) console.error('Aviso: El tutor no existía en el padrón general como paciente:', errTutorPatUp);
 
-                            // Garantizamos el enlace relacional final en la tabla intermedia
                             const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
                             pool.query(sqlLink, [idDelPaciente, parseInt(selectedCompanionId)], () => {
                                 return res.status(200).json({ message: 'Expediente del derechohabiente y datos de su acompañante actualizados con éxito.' });
