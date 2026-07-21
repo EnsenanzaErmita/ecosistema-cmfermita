@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.34.0
+        v1.35.0
     </div>
 
 
@@ -3736,73 +3736,89 @@ async function guardarServicioNube(event) {
 
 
 
+// =========================================================================
+// 🚀 REPARACIÓN FRONTERA DEFINITIVA: EXTRACCIÓN LIMITADA Y AISLADA
+// =========================================================================
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // 🚀 RESPALDO VISUAL OBLIGATORIO: Forzamos el desbloqueo para leer la pantalla
-    const inputsParaLectura = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email', 'prev-gender'];
-    inputsParaLectura.forEach(id => {
-        const elemento = document.getElementById(id);
-        if (elemento) elemento.disabled = false;
+    // Desbloqueamos forzadamente todos los inputs para lectura del DOM
+    const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email', 'prev-gender'];
+    todosLosIds.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.disabled = false;
     });
 
-    // Extracción limpia y directa (.value) de tus inputs del HTML real
-    const textoCurp = document.getElementById('prev-curp') ? document.getElementById('prev-curp').value.trim() : '';
-    const textoFirstname = document.getElementById('prev-firstname') ? document.getElementById('prev-firstname').value.trim() : '';
-    const textoGender = document.getElementById('prev-gender') ? document.getElementById('prev-gender').value.trim() : '';
+    // 🚀 EXTRACCIÓN DETALLADA: Leemos el valor del texto libre aislando el elemento por su ID exacto
+    const inputGenderFisico = document.getElementById('prev-gender');
+    const valorGenderReal = (inputGenderFisico && inputGenderFisico.value.trim() !== "") ? inputGenderFisico.value.trim().toUpperCase() : 'NO_DEFINIDO';
 
-    // 🚨 ALERT IMPERATIVO: Si esta alerta no salta en tu pantalla, el botón está invocando otra función.
-    alert(
-        `🚨 [VERIFICACIÓN FRONTEND] VALORES RECOLECTADOS DE LA PANTALLA:\n\n` +
-        `• CURP: "${textoCurp}"\n` +
-        `• Nombre: "${textoFirstname}"\n` +
-        `• TEXTO MANUAL ESCRITO EN GÉNERO: "${textoGender}"\n\n` +
-        `Al presionar ACEPTAR, este paquete exacto se enviará mediante un fetch JSON hacia Render.`
-    );
+    // Extracción segura del tutor por si las dudas
+    const inputCompGenderFisico = document.getElementById('prev-comp-gender');
+    const valorCompGenderReal = (inputCompGenderFisico && inputCompGenderFisico.value.trim() !== "") ? inputCompGenderFisico.value.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
 
+    const valorEdadPaciente = document.getElementById('prev-age').value;
+    const edadPacienteNumerica = valorEdadPaciente ? parseInt(valorEdadPaciente) : 0;
+
+    // 🏛️ PAYLOAD ALINEADO LETRA POR LETRA CON TU DESESTRUCTURACIÓN DEL BACKEND
     const payload = {
-        curp: textoCurp.toUpperCase(),
-        rfc: document.getElementById('prev-rfc') ? document.getElementById('prev-rfc').value.trim().toUpperCase() : '',
-        firstName: textoFirstname.toUpperCase(),
-        lastNamePaternal: document.getElementById('prev-paternal') ? document.getElementById('prev-paternal').value.trim().toUpperCase() : '',
+        curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
+        rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
+        firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
+        lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal') ? document.getElementById('prev-maternal').value.trim().toUpperCase() : '',
-        age: document.getElementById('prev-age') && document.getElementById('prev-age').value ? parseInt(document.getElementById('prev-age').value) : 0,
+        age: edadPacienteNumerica,
         
-        // 🚀 SE ENVÍA ESTRICTAMENTE COMO 'gender' EN MINÚSCULAS
-        gender: textoGender, 
+        // 🚀 Inyección obligatoria con la g minúscula idéntica a tu req.body del backend
+        gender: valorGenderReal, 
         
-        phone: document.getElementById('prev-phone') ? document.getElementById('prev-phone').value.trim() : '',
-        email: document.getElementById('prev-email') ? document.getElementById('prev-email').value.trim() : '',
+        phone: document.getElementById('prev-phone').value.trim(),
+        email: document.getElementById('prev-email').value.trim(),
         isMinor: _esMenorDeEdad,
-        companionSelectionType: 'SELECT',
-        selectedCompanionId: '',
-        companionCurp: '',
-        companionRfc: '',
-        companionFirstName: '',
-        companionPaternal: '',
-        companionMaternal: '',
-        companionAge: 0,
-        companionGender: '',
-        companionPhone: '',
-        companionEmail: '',
-        companionRelationship: 'MADRE'
+        
+        companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
+        selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : null,
+        companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
+        companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value.trim().toUpperCase() : '',
+        companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value.trim().toUpperCase() : '',
+        companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
+        companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
+        companionAge: document.getElementById('prev-comp-age') && document.getElementById('prev-comp-age').value ? parseInt(document.getElementById('prev-comp-age').value) : 0,
+        companionGender: valorCompGenderReal,
+        companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
+        companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
+        companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
     };
 
-    const url = `${BASE_URL}/api/preventive-patients/integrated`;
+    const url = _modoEdicionActivo 
+        ? `${BASE_URL}/api/preventive-patients/update` 
+        : `${BASE_URL}/api/preventive-patients/integrated`;
+        
+    const metodo = _modoEdicionActivo ? 'PUT' : 'POST';
 
     try {
         const response = await fetch(url, {
-            method: 'POST',
+            method: metodo,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.message);
+        }
+
         const data = await response.json();
-        alert("Respuesta del Servidor Render: " + data.message);
+        alert(data.message);
         volverYLimpiarPreventiva(); 
 
     } catch (err) {
-        alert(`Error de Red/Conexión: ${err.message}`);
+        alert(`Error en la operación: ${err.message}`);
+        if (_modoEdicionActivo) {
+            alternarBloqueoCamposPreventiva(true);
+            const inputCurpField = document.getElementById('prev-curp');
+            if (inputCurpField) inputCurpField.disabled = true;
+        }
     }
 }
 
