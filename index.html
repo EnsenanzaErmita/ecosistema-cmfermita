@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.22.0
+        v1.23.0
     </div>
 
 
@@ -3841,13 +3841,8 @@ let _esMenorDeEdad = false;
 let _modoEdicionActivo = false;
 
 // =========================================================================
-// 🚀 CONTROLADOR FRONTEND UNIFICADO Y BLINDADO - PARTE 1
+// 🚀 ALGORITMO RENAPO OPTIMIZADO - AUTO-RELLENO SIN SOBREESCRITURAS DE GÉNERO
 // =========================================================================
-
-// =========================================================================
-// 🚀 CONTROLADOR FRONTEND UNIFICADO Y BLINDADO - PARTE 1 (CORREGIDA)
-// =========================================================================
-
 async function evaluarCurpPreventiva(curpVal) {
     // Candado estricto: detiene ejecuciones asíncronas accidentales (ej. al limpiar con .reset())
     if (!curpVal || curpVal.trim() === "" || curpVal.trim().length !== 18) return;
@@ -3873,7 +3868,7 @@ async function evaluarCurpPreventiva(curpVal) {
     document.getElementById('prev-age').value = edadCalculada;
     _esMenorDeEdad = edadCalculada <= 17; 
 
-    // Preselección automatizada de género registral basado en la posición 11 de la CURP
+    // Preselección automatizada de género registral basado estrictamente en el estándar de la CURP (Posición 11)
     const caracter11 = curp.charAt(10);
     const selectGender = document.getElementById('prev-gender');
     if (selectGender) {
@@ -3918,11 +3913,10 @@ async function evaluarCurpPreventiva(curpVal) {
 
         // LÓGICA DE AUTO-RELLENO DE IDENTIDAD DEL PACIENTE
         if (data.found) {
-            // 🚀 REPARACIÓN ABSOLUTA: Leemos data.patient directo como el OBJETO que manda tu servidor
             const datosPaciente = data.patient;
 
             if (cuerpoModal && modalAuditoria) {
-                cuerpoModal.innerHTML = `<div style="text-align: center; font-family: sans-serif;"><span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span><h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Expediente Localizado!</h4><p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">El expediente ya se encuentra registrado en Clever Cloud.<br><strong>Los campos se han auto-rellenado y bloqueado por seguridad. Puede modificarlos si lo requiere.</strong></p></div>`;
+                cuerpoModal.innerHTML = `<div style="text-align: center; font-family: sans-serif;"><span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span><h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Expediente Localizado!</h4><p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">El expediente ya se encuentra registrado en Clever Cloud.<br><strong>Los campos se han auto-rellenado y bloqueado por seguridad. Puede modificar el género si lo requiere.</strong></p></div>`;
                 modalAuditoria.style.display = 'flex';
             }
 
@@ -3934,7 +3928,10 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('prev-email').value = datosPaciente.email || '';
             document.getElementById('prev-age').value = datosPaciente.age || edadCalculada;
             
-            if (selectGender && datosPaciente.gender) {
+            // 🚀 REPARACIÓN ABSOLUTA: Si el expediente en la BD dice 'PREFIERO NO DECIRLO' o viene en blanco, 
+            // RESPETAMOS la preselección inteligente que hizo el algoritmo de la CURP ("HOMBRE" / "MUJER") 
+            // permitiendo que el usuario guarde el cambio sin que la BD le regrese el valor anterior de forma asíncrona.
+            if (selectGender && datosPaciente.gender && datosPaciente.gender !== 'PREFIERO NO DECIRLO' && datosPaciente.gender !== '') {
                 selectGender.value = datosPaciente.gender;
             }
 
@@ -3962,6 +3959,8 @@ async function evaluarCurpPreventiva(curpVal) {
         console.error('Error en búsqueda inteligente preventivo:', error);
     }
 }
+
+
 
 function alternarBloqueoCamposPreventiva(bloquear) {
     const ids = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
