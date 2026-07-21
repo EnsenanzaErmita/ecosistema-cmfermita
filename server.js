@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.23.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.24.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1075,15 +1075,15 @@ app.delete('/api/services/:id', (req, res) => {
 
 
 // =========================================================================
-// 🔍 ENDPOINT DE REGISTRO INTEGRADO CON AUDITORÍA ACTIVA (MEDICINA PREVENTIVA)
-// =========================================================================
-// =========================================================================
-// 🚀 ENDPOINT DE REGISTRO INTEGRADO 100% BLINDADO CONTRA CAMPOS AUSENTES
+// 🔍 ENDPOINT DE REGISTRO INTEGRADO CON AUDITORÍA PROFUNDA EN POST
 // =========================================================================
 app.post('/api/preventive-patients/integrated', (req, res) => {
     
+    // 📊 RECUADRO DE AUDITORÍA: Veremos línea por línea el JSON que manda tu Frontend en registros nuevos
     console.log("====================================================");
-    console.log("📥 [AUDITORÍA PREVENTIVA] PROCESANDO PETICIÓN EN POST");
+    console.log("📥 [AUDITORÍA POST - PACIENTE NUEVO] LLEGADA DE DATOS:");
+    console.log("Cuerpo completo (req.body):", JSON.stringify(req.body, null, 2));
+    console.log("Variable gender extraída:", req.body.gender);
     console.log("====================================================");
 
     const { 
@@ -1093,17 +1093,14 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
         companionAge, companionGender, companionPhone, companionEmail, companionRelationship 
     } = req.body;
 
-    // 🚀 VALIDACIÓN BLINDADA: Validamos únicamente los campos esenciales de texto del paciente principal.
-    // Quitamos 'gender' de la condición estricta por si el frontend no lo mapeó en el JSON, evitando rebotes falsos.
     if (!rfc || !curp || !firstName || !lastNamePaternal || !age || !phone || !email) {
-        console.warn("❌ [REBOTE] Petición rechazada: Faltan datos esenciales de texto del paciente.");
+        console.warn("❌ [REBOTE POST] Datos obligatorios base incompletos.");
         return res.status(400).json({ message: 'Los datos obligatorios del paciente están incompletos.' });
     }
 
     const cleanCurp = curp.trim().toUpperCase();
     const cleanRfc = rfc.trim().toUpperCase();
 
-    // 🔍 VALIDACIÓN DE DUPLICADOS: El CURP no puede repetirse.
     const sqlCheckPatient = `SELECT id FROM preventive_patients WHERE curp = ?`;
     pool.query(sqlCheckPatient, [cleanCurp], (errCheck, resCheck) => {
         if (errCheck) {
@@ -1111,15 +1108,14 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
             return res.status(500).json({ message: 'Error interno del servidor al validar identidades.' });
         }
 
-        if (resCheck && resCheck.length > 0) {
+        if (resCheck.length > 0) {
             return res.status(400).json({ message: 'El CURP ya corresponde a un paciente registrado en el sistema.' });
         }
 
-        // 🚀 VALORES SEGUROS POR DEFECTO: Si 'gender' llegó ausente o vacío, le inyectamos un valor aceptado por tu base de datos
+        // 🚀 BLINDAJE DE RESPALDO: Si la variable gender no viaja en el JSON o viene undefined, MySQL usa el valor por defecto
         const pacienteGenderSeguro = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
         const edadPacienteNumerica = age ? parseInt(age) : 0;
 
-        // Arreglo de inserción limpio y alineado con Clever Cloud
         const patientData = [
             cleanRfc, cleanCurp, firstName.trim().toUpperCase(),
             lastNamePaternal.trim().toUpperCase(), lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '',
@@ -1134,24 +1130,19 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
 
         pool.query(sqlInsertPatient, patientData, (errPat, resultPat) => {
             if (errPat) {
-                console.error('Error al persistir paciente preventivo en Clever Cloud:', errPat);
+                console.error('Error al persistir paciente preventivo:', errPat);
                 return res.status(500).json({ message: 'No se pudo guardar el expediente del paciente.' });
             }
 
             const idDelPaciente = resultPat.insertId;
 
-            // 🚀 EVALUACIÓN DEL ESCENARIO DE MENOR DE EDAD
-            // Forzamos la validación booleana o de texto para que responda bien si viaja como string
             if (isMinor === true || isMinor === 'true') {
-                
-                // Opción A: Se seleccionó un tutor ya existente en el catálogo
                 if (companionSelectionType === 'EXISTING' && selectedCompanionId && selectedCompanionId !== "") {
                     const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
                     pool.query(sqlLink, [idDelPaciente, parseInt(selectedCompanionId)], () => {
                         return res.status(201).json({ message: 'Menor de edad registrado y vinculado con éxito al tutor seleccionado.' });
                     });
                 } 
-                // Opción B: Es un acompañante totalmente nuevo
                 else if (companionSelectionType === 'CREATE') {
                     if (!companionRfc || !companionCurp || !companionFirstName || !companionPaternal || !companionAge) {
                         return res.status(400).json({ message: 'Los datos del nuevo acompañante están incompletos.' });
@@ -1214,8 +1205,6 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
                     return res.status(201).json({ message: 'Menor de edad registrado. Pendiente vincular un tutor.' });
                 }
             } else {
-                // 🚀 ESCENARIO ACTUAL: Es un derechohabiente adulto independiente. Concluye de forma exitosa aquí.
-                console.log("✅ [ÉXITO] Paciente adulto registrado correctamente en la nube.");
                 return res.status(201).json({ message: 'Expediente de derechohabiente adulto guardado correctamente.' });
             }
         });
