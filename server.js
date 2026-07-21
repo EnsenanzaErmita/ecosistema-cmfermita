@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.41.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.42.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1127,13 +1127,95 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
             return res.status(500).json({ message: 'Error interno de base de datos al guardar.' });
         }
 
+        const idDelPaciente = resultPat.insertId;
+
         // Si es adulto (isMinor false), responde de inmediato terminando el hilo de ejecución
-        if (!isMinor) {
+        if (!isMinor || isMinor === 'false') {
             return res.status(201).json({ message: `Expediente guardado con éxito. Valor auditado en BD: [${textoGenderFinal}]` });
         }
 
-        // Manejo secundario simplificado para menores
-        return res.status(201).json({ message: 'Registro de menor guardado en bitácora base.' });
+        // =========================================================================
+        // 🚀 INICIO DEL FLUJO RELACIONAL DE TRES NIVELES (PACIENTE MENOR DE EDAD)
+        // =========================================================================
+        
+        // Opción A: Se vinculó un tutor que ya existe en el catálogo general
+        if (companionSelectionType === 'EXISTING' && selectedCompanionId && selectedCompanionId !== "") {
+            const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
+            pool.query(sqlLink, [idDelPaciente, parseInt(selectedCompanionId)], (errLink) => {
+                if (errLink) return res.status(500).json({ message: 'Error interno al enlazar con el tutor seleccionado.' });
+                return res.status(201).json({ message: 'Menor de edad registrado y vinculado con éxito al tutor seleccionado.' });
+            });
+        } 
+        // Opción B: Se registró un acompañante TOTALMENTE NUEVO
+        else if (companionSelectionType === 'CREATE') {
+            if (!companionRfc || !companionCurp || !companionFirstName || !companionPaternal || !companionAge || !companionGender) {
+                return res.status(400).json({ message: 'Los datos obligatorios del nuevo acompañante están incompletos.' });
+            }
+
+            const cleanCompCurp = companionCurp.trim().toUpperCase();
+            const cleanCompRfc = companionRfc.trim().toUpperCase();
+            const tutorGenderSeguro = companionGender.trim().toUpperCase();
+            const edadTutorNumerica = companionAge ? parseInt(companionAge) : 0;
+
+            // ACCIÓN 1: Registrar al acompañante en el catálogo general de tutores (preventive_companions)
+            const sqlInsertComp = `
+                INSERT IGNORE INTO preventive_companions 
+                (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, gender, phone, email, relationship) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            pool.query(sqlInsertComp, [
+                cleanCompRfc, cleanCompCurp, companionFirstName.trim().toUpperCase(),
+                companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
+                edadTutorNumerica, tutorGenderSeguro, companionPhone.trim(), companionEmail.trim().toLowerCase(), companionRelationship
+            ], (errC, resultComp) => {
+                if (errC) {
+                    console.error('Error al insertar tutor en el catálogo:', errC);
+                    return res.status(500).json({ message: 'Error al registrar al acompañante en su catálogo.' });
+                }
+
+                // Función interna encapsulada para resolver identidades y enlazar las 3 tablas de forma asíncrona
+                const registrarTutorComoPacienteYEnlazar = (idDelTutor) => {
+                    
+                    // ACCIÓN 2: Clonar al tutor en el padrón general de pacientes (preventive_patients)
+                    const sqlTutorComoPaciente = `
+                        INSERT IGNORE INTO preventive_patients 
+                        (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, gender, phone, email) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `;
+                    pool.query(sqlTutorComoPaciente, [
+                        cleanCompRfc, cleanCompCurp, companionFirstName.trim().toUpperCase(),
+                        companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
+                        edadTutorNumerica, tutorGenderSeguro, companionPhone.trim(), companionEmail.trim().toLowerCase()
+                    ], (errClone) => {
+                        if (errClone) console.error('Aviso: El tutor ya existía previamente en pacientes generales.');
+
+                        // ACCIÓN 3: Insertar el enlace definitivo en la tabla intermedia (preventive_patient_companions)
+                        const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
+                        pool.query(sqlLink, [idDelPaciente, idDelTutor], (errLink) => {
+                            if (errLink) return res.status(500).json({ message: 'Expediente creado pero falló el enlace relacional del tutor.' });
+                            return res.status(201).json({ message: 'Expediente del menor guardado. El acompañante quedó registrado simultáneamente como tutor y paciente general en la nube.' });
+                        });
+                    });
+                };
+
+                // Si el tutor es nuevo en la base de datos, MySQL nos entrega su ID directo por insertId
+                if (resultComp.insertId !== 0) {
+                    registrarTutorComoPacienteYEnlazar(resultComp.insertId);
+                } else {
+                    // 🚀 CORRECCIÓN DE EXTRACCIÓN SEGURA: Accedemos al índice [0] del renglón para que Clever Cloud no trone
+                    pool.query('SELECT id FROM preventive_companions WHERE curp = ?', [cleanCompCurp], (errCId, resCId) => {
+                        if (!errCId && resCId && resCId.length > 0) {
+                            registrarTutorComoPacienteYEnlazar(resCId[0].id);
+                        } else {
+                            return res.status(500).json({ message: 'Error interno de sincronización con el tutor existente.' });
+                        }
+                    });
+                }
+            });
+        } else {
+            return res.status(201).json({ message: 'Menor de edad registrado. Pendiente vincular un tutor.' });
+        }
     });
 });
 
