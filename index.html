@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.35.0
+        v1.36.0
     </div>
 
 
@@ -1477,7 +1477,7 @@
                 </div>
 
 
-<!-- 🚀 CAMPO DE TEXTO LIBRE HOMOLOGADO -->
+<!-- 🚀 CONFIGURACIÓN IDÉNTICA AL INPUT DE NOMBRE -->
 <div>
     <label for="prev-gender" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Género / Identidad (*):</label>
     <input type="text" id="prev-gender" required placeholder="Ej. HOMBRE, MUJER, NO BINARIO" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase; background: white;">
@@ -3760,34 +3760,35 @@ async function guardarPacientePreventivaNube(event) {
     const valorEdadPaciente = document.getElementById('prev-age').value;
     const edadPacienteNumerica = valorEdadPaciente ? parseInt(valorEdadPaciente) : 0;
 
-    // 🏛️ PAYLOAD ALINEADO LETRA POR LETRA CON TU DESESTRUCTURACIÓN DEL BACKEND
     const payload = {
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
         rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
-        firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
-        lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
-        lastNameMaternal: document.getElementById('prev-maternal') ? document.getElementById('prev-maternal').value.trim().toUpperCase() : '',
-        age: edadPacienteNumerica,
         
-        // 🚀 Inyección obligatoria con la g minúscula idéntica a tu req.body del backend
-        gender: valorGenderReal, 
+        // El ejemplo perfecto que sí funciona:
+        firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
+        
+        lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
+        lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
+        age: document.getElementById('prev-age').value ? parseInt(document.getElementById('prev-age').value) : 0,
+        
+        // 🚀 REPLICADO EXACTO: Copia fiel de la estructura del Nombre (.value.trim().toUpperCase())
+        gender: document.getElementById('prev-gender').value.trim().toUpperCase(),
         
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
-        isMinor: _esMenorDeEdad,
-        
-        companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
-        selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : null,
-        companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
-        companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value.trim().toUpperCase() : '',
-        companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value.trim().toUpperCase() : '',
-        companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
-        companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
-        companionAge: document.getElementById('prev-comp-age') && document.getElementById('prev-comp-age').value ? parseInt(document.getElementById('prev-comp-age').value) : 0,
-        companionGender: valorCompGenderReal,
-        companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
-        companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
-        companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
+        isMinor: typeof _esMenorDeEdad !== 'undefined' ? _esMenorDeEdad : false,
+        companionSelectionType: 'SELECT',
+        selectedCompanionId: '',
+        companionCurp: '',
+        companionRfc: '',
+        companionFirstName: '',
+        companionPaternal: '',
+        companionMaternal: '',
+        companionAge: 0,
+        companionGender: '',
+        companionPhone: '',
+        companionEmail: '',
+        companionRelationship: 'MADRE'
     };
 
     const url = _modoEdicionActivo 

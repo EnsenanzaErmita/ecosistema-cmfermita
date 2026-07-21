@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.35.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.36.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1099,9 +1099,9 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
     const cleanCurp = curp.trim().toUpperCase();
     const cleanRfc = rfc.trim().toUpperCase();
 
-    // 🚀 DETECTOR TEXTO LIBRE: Si la propiedad llegó vacía o undefined en el JSON, 
-    // le ponemos un texto de rastreo claro en lugar de 'PREFIERO NO DECIRLO' para saber qué pasó.
-    const textoGenderFinal = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'VACÍO_DESDE_FRONT';
+    // 🚀 AJUSTE DE IDENTIDAD IGUAL QUE EL NOMBRE: Captura directamente lo que envíe el input del front
+    // Si viene completamente vacío o nulo por asincronía, le ponemos un string en blanco para que no rompa la BD
+    const textoGenderFinal = gender ? gender.trim().toUpperCase() : '';
 
     const patientData = [
         cleanRfc, 
@@ -1110,7 +1110,7 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
         lastNamePaternal.trim().toUpperCase(), 
         lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '',
         parseInt(age), 
-        textoGenderFinal, // ← 🏛️ Inserción limpia a Clever Cloud
+        textoGenderFinal, // ← 🏛️ Inserción limpia a Clever Cloud (Texto libre puro)
         phone.trim(), 
         email.trim().toLowerCase()
     ];
