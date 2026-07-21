@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.25.0
+        v1.26.0
     </div>
 
 
@@ -3744,19 +3744,13 @@ async function guardarServicioNube(event) {
 
 
 // =========================================================================
-// 🚀 REPARACIÓN ABSOLUTA: DESBLOQUEO INTEGRAL DE SELECTORES (GÉNERO INCLUSIVO)
+// 🚀 REPARACIÓN ABSOLUTA: ENVÍO FRONTEND CON EXTRACCIÓN DE GÉNERO GARANTIZADA
 // =========================================================================
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // 🚀 REPARACIÓN CRÍTICA: Añadimos 'prev-gender' al arreglo de desbloqueo masivo.
-    // Si un select permanece inhabilitado (disabled), el navegador congela la caja,
-    // borra tu selección manual de "HOMBRE" y manda de forma estática el valor 'selected' por defecto.
-    const todosLosIds = [
-        'prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 
-        'prev-maternal', 'prev-age', 'prev-gender', 'prev-phone', 'prev-email' // 📑 ID de género incluido con éxito
-    ];
-    
+    // Desbloqueamos temporalmente todos los inputs antes de extraer el .value
+    const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
     todosLosIds.forEach(id => {
         const input = document.getElementById(id);
         if (input) input.disabled = false;
@@ -3771,7 +3765,26 @@ async function guardarPacientePreventivaNube(event) {
         edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
     }
 
-    // Armamos el payload garantizando la lectura en vivo del valor seleccionado
+    // 🚀 EXTRACCIÓN MULTI-CAPA DE GÉNERO INSTITUCIONAL (EVITA ERRORES DE ID EN HTML)
+    let generoDetectado = 'PREFIERO NO DECIRLO';
+    
+    const select1 = document.getElementById('prev-gender');
+    const select2 = document.getElementById('gender');
+    const inputCurp = document.getElementById('prev-curp');
+
+    if (select1 && select1.value) {
+        generoDetectado = select1.value;
+    } else if (select2 && select2.value) {
+        generoDetectado = select2.value;
+    } else if (inputCurp && inputCurp.value && inputCurp.value.trim().length === 18) {
+        // 🏛️ CAPA DE RESPALDO RENAPO: Si el selector HTML falló por ID desalineado,
+        // extraemos el género registral directo de la posición 11 de la CURP en pantalla.
+        const caracter11 = inputCurp.value.trim().toUpperCase().charAt(10);
+        if (caracter11 === 'H') generoDetectado = 'HOMBRE';
+        else if (caracter11 === 'M') generoDetectado = 'MUJER';
+        else if (caracter11 === 'X') generoDetectado = 'NO BINARIO';
+    }
+
     const payload = {
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
         rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
@@ -3779,7 +3792,7 @@ async function guardarPacientePreventivaNube(event) {
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
         age: edadPacienteNumerica,
-        gender: document.getElementById('prev-gender') ? document.getElementById('prev-gender').value : 'PREFIERO NO DECIRLO', 
+        gender: generoDetectado, // 🚀 FIJADO CON RESPALDO MATEMÁTICO INTEGRAL
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
         isMinor: _esMenorDeEdad,
@@ -3824,8 +3837,8 @@ async function guardarPacientePreventivaNube(event) {
         alert(`Error en la operación: ${err.message}`);
         if (_modoEdicionActivo) {
             alternarBloqueoCamposPreventiva(true);
-            const inputCurp = document.getElementById('prev-curp');
-            if (inputCurp) inputCurp.disabled = true;
+            const inputCurpField = document.getElementById('prev-curp');
+            if (inputCurpField) inputCurpField.disabled = true;
         }
     }
 }
