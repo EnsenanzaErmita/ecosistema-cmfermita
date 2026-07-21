@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.19.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.20.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1291,7 +1291,7 @@ app.get('/api/preventive-patients/search/:curp', (req, res) => {
 
 
 // =========================================================================
-// 🚀 ENDPOINT DE ACTUALIZAR EXPEDIENTE 100% BLINDADO - PARTE 1
+// 🚀 ENDPOINT DE ACTUALIZAR EXPEDIENTE - PARTE 1 (ALINEACIÓN DE COLUMNA GENDER)
 // =========================================================================
 app.put('/api/preventive-patients/update', (req, res) => {
     const { 
@@ -1301,8 +1301,6 @@ app.put('/api/preventive-patients/update', (req, res) => {
         companionAge, companionGender, companionPhone, companionEmail, companionRelationship 
     } = req.body;
 
-    // 🚀 VALIDACIÓN BLINDADA: Validamos únicamente los campos de texto esenciales del paciente.
-    // Quitamos 'gender' de la condición estricta por si el frontend no lo mapeó en el JSON, evitando rebotes.
     if (!curp || !rfc || !firstName || !lastNamePaternal || !age || !phone || !email) {
         console.warn("❌ [REBOTE PUT] Petición rechazada: Faltan datos esenciales de texto.");
         return res.status(400).json({ message: 'Los datos obligatorios para la actualización están incompletos.' });
@@ -1314,17 +1312,24 @@ app.put('/api/preventive-patients/update', (req, res) => {
     const pacienteGenderSeguro = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
     const edadPacienteNumerica = age ? parseInt(age) : 0;
 
-    // PASO A: Actualizar los datos del paciente o menor principal
+    // PASO A: Actualizar los datos del paciente o menor principal (Contiene 8 columnas a modificar)
     const sqlUpdatePatient = `
         UPDATE preventive_patients 
         SET rfc = ?, first_name = ?, last_name_paternal = ?, last_name_maternal = ?, age = ?, gender = ?, phone = ?, email = ?
         WHERE curp = ?
     `;
 
+    // 🚀 REPARACIÓN ABSOLUTA: Agregamos 'pacienteGenderSeguro' en la posición 6 exacta para que coincida con el signo de interrogación
     const patientData = [
-        rfc.trim().toUpperCase(), firstName.trim().toUpperCase(), lastNamePaternal.trim().toUpperCase(), 
-        lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '', edadPacienteNumerica, pacienteGenderSeguro, phone.trim(), email.trim().toLowerCase(),
-        cleanCurp
+        rfc.trim().toUpperCase(), 
+        firstName.trim().toUpperCase(), 
+        lastNamePaternal.trim().toUpperCase(), 
+        lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '', 
+        edadPacienteNumerica, 
+        pacienteGenderSeguro, // ← 📑 Añadido en su posición correcta
+        phone.trim(), 
+        email.trim().toLowerCase(),
+        cleanCurp // ← Pasa al WHERE curp = ? al final
     ];
 
     pool.query(sqlUpdatePatient, patientData, (errUp, resultUp) => {
