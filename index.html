@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.31.0
+        v1.32.0
     </div>
 
 
@@ -3737,13 +3737,12 @@ async function guardarServicioNube(event) {
 
 
 // =========================================================================
-// 🚀 FRONTEND PARTE 2: GUARDADO COMPUESTO (HOMOLOGADO EN CAMELCASE)
+// 🚀 REPARACIÓN ABSOLUTA FRONTEND: HOMOLOGACIÓN DE CAMPOS EN MINÚSCULAS
 // =========================================================================
-
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // Desbloqueamos forzadamente todos los campos antes del mapeo
+    // Habilitamos temporalmente todos los inputs para capturar sus textos
     const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email', 'prev-gender'];
     todosLosIds.forEach(id => {
         const input = document.getElementById(id);
@@ -3759,22 +3758,22 @@ async function guardarPacientePreventivaNube(event) {
         edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
     }
 
-    // Extraemos el valor del sexo directamente de la opción seleccionada por el usuario
-    let sexoFijado = 'PREFIERO NO DECIRLO';
-    const dropDownSexo = document.getElementById('prev-gender');
-    if (dropDownSexo && dropDownSexo.selectedIndex !== -1) {
-        sexoFijado = dropDownSexo.options[dropDownSexo.selectedIndex].value;
-    }
+    // Capturamos el texto libre de forma nativa igual que el nombre (.value)
+    const campoGender = document.getElementById('prev-gender');
+    const valorGenderSeguro = (campoGender && campoGender.value.trim() !== "") ? campoGender.value.trim().toUpperCase() : '';
 
-    // 🚀 ALINEACIÓN DE VARIABLES: 'gender' con G mayúscula para coincidir con tu server.js
+    // 🚀 ALINEACIÓN DE PAQUETE JSON: 'gender' con 'g' minúscula empata con tu server.js
     const payload = {
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
         rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
         firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
-        lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
+        lastNameMaternal: document.getElementById('prev-maternal') ? document.getElementById('prev-maternal').value.trim().toUpperCase() : '',
         age: edadPacienteNumerica,
-        gender: sexoFijado, // 🏛️ CORREGIDO: Empata perfectamente con tu backend
+        
+        // 🏛️ SINO DE INTERROGACIÓN EXACTO CON TU BACKEND (MINÚSCULA)
+        gender: valorGenderSeguro, 
+        
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
         isMinor: _esMenorDeEdad,
@@ -3787,7 +3786,7 @@ async function guardarPacientePreventivaNube(event) {
         companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
         companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
         companionAge: edadTutorNumerica,
-        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value : 'PREFIERO NO DECIRLO',
+        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value.trim().toUpperCase() : '',
         companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
         companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
         companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
