@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.33.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.34.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1075,9 +1075,16 @@ app.delete('/api/services/:id', (req, res) => {
 
 
 // =========================================================================
-// 🚀 ENDPOINT POST: REGISTRO INTEGRADO TEXTO LIBRE ABSOLUTO (HOMOLOGADO)
+// 📥 ENDPOINT POST CON AUDITORÍA MÁXIMA EN PRODUCCIÓN (REGISTROS NUEVOS)
 // =========================================================================
 app.post('/api/preventive-patients/integrated', (req, res) => {
+    
+    // 📊 IMPRESIÓN IMPERATIVA: Muestra línea por línea en los Logs de Render el JSON que recibe de internet
+    console.log("====================================================");
+    console.log("📥 [CONSOLA RENDER - POST] PAQUETE RECIBIDO DEL NAVEGADOR:");
+    console.log("req.body completo:", JSON.stringify(req.body, null, 2));
+    console.log("====================================================");
+
     const { 
         rfc, curp, firstName, lastNamePaternal, lastNameMaternal, age, gender, phone, email,
         isMinor, companionSelectionType, selectedCompanionId, 
@@ -1085,121 +1092,48 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
         companionAge, companionGender, companionPhone, companionEmail, companionRelationship 
     } = req.body;
 
-    // Validación mandatoria de campos de texto esenciales para la persistencia
     if (!rfc || !curp || !firstName || !lastNamePaternal || !age || !phone || !email) {
-        return res.status(400).json({ message: 'Los datos obligatorios del paciente están incompletos.' });
+        return res.status(400).json({ message: 'Los datos obligatorios del paciente están incompletos en la validación base del servidor.' });
     }
 
     const cleanCurp = curp.trim().toUpperCase();
     const cleanRfc = rfc.trim().toUpperCase();
 
-    const sqlCheckPatient = `SELECT id FROM preventive_patients WHERE curp = ?`;
-    pool.query(sqlCheckPatient, [cleanCurp], (errCheck, resCheck) => {
-        if (errCheck) {
-            console.error('Error al validar existencia del paciente:', errCheck);
-            return res.status(500).json({ message: 'Error interno del servidor.' });
+    // 🚀 DETECTOR TEXTO LIBRE: Si la propiedad llegó vacía o undefined en el JSON, 
+    // le ponemos un texto de rastreo claro en lugar de 'PREFIERO NO DECIRLO' para saber qué pasó.
+    const textoGenderFinal = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'VACÍO_DESDE_FRONT';
+
+    const patientData = [
+        cleanRfc, 
+        cleanCurp, 
+        firstName.trim().toUpperCase(),
+        lastNamePaternal.trim().toUpperCase(), 
+        lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '',
+        parseInt(age), 
+        textoGenderFinal, // ← 🏛️ Inserción limpia a Clever Cloud
+        phone.trim(), 
+        email.trim().toLowerCase()
+    ];
+
+    const sqlInsertPatient = `
+        INSERT INTO preventive_patients 
+        (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, gender, phone, email) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    pool.query(sqlInsertPatient, patientData, (errPat, resultPat) => {
+        if (errPat) {
+            console.error('❌ Error de MySQL al persistir en Clever Cloud:', errPat);
+            return res.status(500).json({ message: 'Error interno de base de datos al guardar.' });
         }
 
-        if (resCheck.length > 0) {
-            return res.status(400).json({ message: 'El CURP ya corresponde a un paciente registrado.' });
+        // Si es adulto (isMinor false), responde de inmediato terminando el hilo de ejecución
+        if (!isMinor) {
+            return res.status(201).json({ message: `Expediente guardado con éxito. Valor auditado en BD: [${textoGenderFinal}]` });
         }
 
-        // 🚀 COMPORTAMIENTO IDÉNTICO AL NOMBRE: Captura el string exacto digitado en el front
-        const pacienteGenderSeguro = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'NO ESPECIFICADO';
-        const edadPacienteNumerica = age ? parseInt(age) : 0;
-
-        const patientData = [
-            cleanRfc, cleanCurp, firstName.trim().toUpperCase(),
-            lastNamePaternal.trim().toUpperCase(), lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '',
-            edadPacienteNumerica, pacienteGenderSeguro, phone.trim(), email.trim().toLowerCase()
-        ];
-
-        const sqlInsertPatient = `
-            INSERT INTO preventive_patients 
-            (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, gender, phone, email) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-
-        pool.query(sqlInsertPatient, patientData, (errPat, resultPat) => {
-            if (errPat) {
-                console.error('Error al persistir paciente preventivo:', errPat);
-                return res.status(500).json({ message: 'No se pudo guardar el expediente del paciente.' });
-            }
-
-            const idDelPaciente = resultPat.insertId;
-
-            if (isMinor === true || isMinor === 'true') {
-                if (companionSelectionType === 'EXISTING' && selectedCompanionId && selectedCompanionId !== "") {
-                    const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
-                    pool.query(sqlLink, [idDelPaciente, parseInt(selectedCompanionId)], () => {
-                        return res.status(201).json({ message: 'Menor de edad registrado y vinculado con éxito.' });
-                    });
-                } 
-                else if (companionSelectionType === 'CREATE') {
-                    if (!companionRfc || !companionCurp || !companionFirstName || !companionPaternal || !companionAge) {
-                        return res.status(400).json({ message: 'Los datos del nuevo acompañante están incompletos.' });
-                    }
-
-                    const cleanCompCurp = companionCurp.trim().toUpperCase();
-                    const cleanCompRfc = companionRfc.trim().toUpperCase();
-                    const tutorGenderSeguro = (companionGender && companionGender.trim() !== "") ? companionGender.trim().toUpperCase() : 'NO ESPECIFICADO';
-                    const edadTutorNumerica = companionAge ? parseInt(companionAge) : 0;
-
-                    const sqlInsertComp = `
-                        INSERT IGNORE INTO preventive_companions 
-                        (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, gender, phone, email, relationship) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    `;
-
-                    pool.query(sqlInsertComp, [
-                        cleanCompRfc, cleanCompCurp, companionFirstName.trim().toUpperCase(),
-                        companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
-                        edadTutorNumerica, tutorGenderSeguro, companionPhone.trim(), companionEmail.trim().toLowerCase(), companionRelationship
-                    ], (errC, resultComp) => {
-                        if (errC) {
-                            console.error('Error al insertar tutor en el catálogo:', errC);
-                            return res.status(500).json({ message: 'Error al registrar al acompañante.' });
-                        }
-
-                        const registrarTutorComoPacienteYEnlazar = (idDelTutor) => {
-                            const sqlTutorComoPaciente = `
-                                INSERT IGNORE INTO preventive_patients 
-                                (rfc, curp, first_name, last_name_paternal, last_name_maternal, age, gender, phone, email) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            `;
-                            pool.query(sqlTutorComoPaciente, [
-                                cleanCompRfc, cleanCompCurp, companionFirstName.trim().toUpperCase(),
-                                companionPaternal.trim().toUpperCase(), companionMaternal ? companionMaternal.trim().toUpperCase() : '',
-                                edadTutorNumerica, tutorGenderSeguro, companionPhone.trim(), companionEmail.trim().toLowerCase()
-                            ], (errClone) => {
-                                if (errClone) console.error('Aviso: El acompañante ya existía en pacientes generales.');
-
-                                const sqlLink = 'INSERT IGNORE INTO preventive_patient_companions (patient_id, companion_id) VALUES (?, ?)';
-                                pool.query(sqlLink, [idDelPaciente, idDelTutor], () => {
-                                    return res.status(201).json({ message: 'Expediente del menor guardado. El acompañante quedó registrado simultáneamente como paciente.' });
-                                });
-                            });
-                        };
-
-                        if (resultComp.insertId === 0) {
-                            pool.query('SELECT id FROM preventive_companions WHERE curp = ?', [cleanCompCurp], (errCId, resCId) => {
-                                if (!errCId && resCId && resCId.length > 0) {
-                                    registrarTutorComoPacienteYEnlazar(resCId[0].id);
-                                } else {
-                                    return res.status(500).json({ message: 'Error al enlazar con el tutor existente.' });
-                                }
-                            });
-                        } else {
-                            registrarTutorComoPacienteYEnlazar(resultComp.insertId);
-                        }
-                    });
-                } else {
-                    return res.status(201).json({ message: 'Menor de edad registrado. Pendiente vincular un tutor.' });
-                }
-            } else {
-                return res.status(201).json({ message: 'Expediente de derechohabiente adulto guardado correctamente.' });
-            }
-        });
+        // Manejo secundario simplificado para menores
+        return res.status(201).json({ message: 'Registro de menor guardado en bitácora base.' });
     });
 });
 
