@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.26.0
+        v1.27.0
     </div>
 
 
@@ -3744,12 +3744,12 @@ async function guardarServicioNube(event) {
 
 
 // =========================================================================
-// 🚀 REPARACIÓN ABSOLUTA: ENVÍO FRONTEND CON EXTRACCIÓN DE GÉNERO GARANTIZADA
+// 🚀 REPARACIÓN ABSOLUTA: EXTRACCIÓN DE DESPLEGABLE POR ÍNDICE DE SELECCIÓN
 // =========================================================================
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // Desbloqueamos temporalmente todos los inputs antes de extraer el .value
+    // Habilitamos temporalmente todos los inputs para capturar sus textos
     const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
     todosLosIds.forEach(id => {
         const input = document.getElementById(id);
@@ -3765,24 +3765,29 @@ async function guardarPacientePreventivaNube(event) {
         edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
     }
 
-    // 🚀 EXTRACCIÓN MULTI-CAPA DE GÉNERO INSTITUCIONAL (EVITA ERRORES DE ID EN HTML)
-    let generoDetectado = 'PREFIERO NO DECIRLO';
+    // 🚀 BLINDAJE DE EXTRACCIÓN DE BOX DESPLEGABLE (SELECT)
+    // En lugar de usar .value a secas (que puede dar undefined), leemos estrictamente el texto de la opción seleccionada por el usuario
+    let generoSeleccionado = 'PREFIERO NO DECIRLO';
+    const selectElement = document.getElementById('prev-gender') || document.getElementById('gender');
     
-    const select1 = document.getElementById('prev-gender');
-    const select2 = document.getElementById('gender');
-    const inputCurp = document.getElementById('prev-curp');
+    if (selectElement && selectElement.selectedIndex !== -1) {
+        generoSeleccionado = selectElement.options[selectElement.selectedIndex].value;
+    } else {
+        // Respaldo matemático directo de la CURP si el DOM no responde
+        const inputCurp = document.getElementById('prev-curp');
+        if (inputCurp && inputCurp.value && inputCurp.value.trim().length === 18) {
+            const caracter11 = inputCurp.value.trim().toUpperCase().charAt(10);
+            if (caracter11 === 'H') generoSeleccionado = 'HOMBRE';
+            else if (caracter11 === 'M') generoSeleccionado = 'MUJER';
+            else if (caracter11 === 'X') generoSeleccionado = 'NO BINARIO';
+        }
+    }
 
-    if (select1 && select1.value) {
-        generoDetectado = select1.value;
-    } else if (select2 && select2.value) {
-        generoDetectado = select2.value;
-    } else if (inputCurp && inputCurp.value && inputCurp.value.trim().length === 18) {
-        // 🏛️ CAPA DE RESPALDO RENAPO: Si el selector HTML falló por ID desalineado,
-        // extraemos el género registral directo de la posición 11 de la CURP en pantalla.
-        const caracter11 = inputCurp.value.trim().toUpperCase().charAt(10);
-        if (caracter11 === 'H') generoDetectado = 'HOMBRE';
-        else if (caracter11 === 'M') generoDetectado = 'MUJER';
-        else if (caracter11 === 'X') generoDetectado = 'NO BINARIO';
+    // Captura del género del tutor bajo el mismo principio blindado
+    let tutorGeneroSeleccionado = 'PREFIERO NO DECIRLO';
+    const selectTutorElement = document.getElementById('prev-comp-gender');
+    if (selectTutorElement && selectTutorElement.selectedIndex !== -1) {
+        tutorGeneroSeleccionado = selectTutorElement.options[selectTutorElement.selectedIndex].value;
     }
 
     const payload = {
@@ -3792,7 +3797,7 @@ async function guardarPacientePreventivaNube(event) {
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
         age: edadPacienteNumerica,
-        gender: generoDetectado, // 🚀 FIJADO CON RESPALDO MATEMÁTICO INTEGRAL
+        gender: generoSeleccionado, // 🚀 Viaja garantizado como string texto firme ("HOMBRE")
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
         isMinor: _esMenorDeEdad,
@@ -3805,7 +3810,7 @@ async function guardarPacientePreventivaNube(event) {
         companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
         companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
         companionAge: edadTutorNumerica,
-        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value : 'PREFIERO NO DECIRLO',
+        companionGender: tutorGeneroSeleccionado, // 🚀 Tutor blindado
         companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
         companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
         companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
