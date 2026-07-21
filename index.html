@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.37.0
+        v1.40.0
     </div>
 
 
@@ -4114,61 +4114,6 @@ function evaluarCurpAcompanante(curpVal) {
 
 
 
-// =========================================================================
-// 4. ENVÍO COMPUESTO INTEGRADO HACIA LA API DE RENDER
-// =========================================================================
-function guardarPacientePreventivaNube(event) {
-    event.preventDefault();
-
-    const payload = {
-        curp: document.getElementById('prev-curp').value,
-        rfc: document.getElementById('prev-rfc').value,
-        firstName: document.getElementById('prev-firstname').value,
-        lastNamePaternal: document.getElementById('prev-paternal').value,
-        lastNameMaternal: document.getElementById('prev-maternal').value,
-        age: document.getElementById('prev-age').value,
-        phone: document.getElementById('prev-phone').value,
-        email: document.getElementById('prev-email').value,
-        isMinor: _esMenorDeEdad,
-        
-        companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
-        selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : null,
-        companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value : '',
-        companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value : '',
-        companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value : '',
-        companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value : '',
-        companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value : '',
-        companionAge: document.getElementById('prev-comp-age') ? document.getElementById('prev-comp-age').value : '',
-        companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value : '',
-        companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value : '',
-        companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : ''
-    };
-
-    const url = _modoEdicionActivo 
-        ? `${BASE_URL}/api/preventive-patients/update` 
-        : `${BASE_URL}/api/preventive-patients/integrated`;
-        
-    const metodo = _modoEdicionActivo ? 'PUT' : 'POST';
-
-    fetch(url, {
-        method: metodo,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    .then(res => {
-        if (!res.ok) {
-            return res.json().then(err => { throw new Error(err.message); });
-        }
-        return res.json();
-    })
-    .then(data => {
-        alert(data.message);
-        volverYLimpiarPreventiva(); 
-    })
-    .catch(err => {
-        alert(`Error en la operación: ${err.message}`);
-    });
-}
 
 
 
