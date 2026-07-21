@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.32.0
+        v1.33.0
     </div>
 
 
@@ -3737,32 +3737,35 @@ async function guardarServicioNube(event) {
 
 
 // =========================================================================
-// 🚀 REPARACIÓN ABSOLUTA FRONTEND: HOMOLOGACIÓN DE CAMPOS EN MINÚSCULAS
+// 🏛️ DETECTOR EN PANTALLA: FUNCIÓN FRONTEND CON ALERT EN VIVO
 // =========================================================================
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // Habilitamos temporalmente todos los inputs para capturar sus textos
+    // Desbloqueamos forzadamente todos los inputs para extraer sus valores
     const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email', 'prev-gender'];
     todosLosIds.forEach(id => {
         const input = document.getElementById(id);
         if (input) input.disabled = false;
     });
 
+    // 🚀 LECTURA DIRECTA DEL INPUT LIBRE
+    const cajaGender = document.getElementById('prev-gender');
+    const valorGenderCapturado = cajaGender ? cajaGender.value : 'ELEMENTO NO ENCONTRADO EN EL HTML';
+
+    // 🚨 ALERT MANDATORIO EN PANTALLA: Te mostrará de inmediato lo que se va a mandar
+    alert(
+        `🔍 VERIFICACIÓN DE VALORES EN FRONTEND:\n\n` +
+        `• CURP: ${document.getElementById('prev-curp').value}\n` +
+        `• Nombre: ${document.getElementById('prev-firstname').value}\n` +
+        `• Edad: ${document.getElementById('prev-age').value}\n` +
+        `• LO QUE LLEVA EL GÉNERO: "${valorGenderCapturado}"\n\n` +
+        `PULSA ACEPTAR PARA MANDAR ESTO A RENDER.`
+    );
+
     const valorEdadPaciente = document.getElementById('prev-age').value;
     const edadPacienteNumerica = valorEdadPaciente ? parseInt(valorEdadPaciente) : 0;
 
-    const inputAgeTutor = document.getElementById('prev-comp-age');
-    let edadTutorNumerica = 0;
-    if (inputAgeTutor && inputAgeTutor.value.trim() !== "") {
-        edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
-    }
-
-    // Capturamos el texto libre de forma nativa igual que el nombre (.value)
-    const campoGender = document.getElementById('prev-gender');
-    const valorGenderSeguro = (campoGender && campoGender.value.trim() !== "") ? campoGender.value.trim().toUpperCase() : '';
-
-    // 🚀 ALINEACIÓN DE PAQUETE JSON: 'gender' con 'g' minúscula empata con tu server.js
     const payload = {
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
         rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
@@ -3770,26 +3773,22 @@ async function guardarPacientePreventivaNube(event) {
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal') ? document.getElementById('prev-maternal').value.trim().toUpperCase() : '',
         age: edadPacienteNumerica,
-        
-        // 🏛️ SINO DE INTERROGACIÓN EXACTO CON TU BACKEND (MINÚSCULA)
-        gender: valorGenderSeguro, 
-        
+        gender: valorGenderCapturado.trim().toUpperCase(), // Enlace directo con la G minúscula del backend
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
         isMinor: _esMenorDeEdad,
-        
         companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
         selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : null,
-        companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
-        companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value.trim().toUpperCase() : '',
-        companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value.trim().toUpperCase() : '',
-        companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
-        companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
-        companionAge: edadTutorNumerica,
-        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value.trim().toUpperCase() : '',
-        companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
-        companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
-        companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
+        companionCurp: '',
+        companionRfc: '',
+        companionFirstName: '',
+        companionPaternal: '',
+        companionMaternal: '',
+        companionAge: 0,
+        companionGender: 'PREFIERO NO DECIRLO',
+        companionPhone: '',
+        companionEmail: '',
+        companionRelationship: 'MADRE'
     };
 
     const url = _modoEdicionActivo 
@@ -3811,7 +3810,7 @@ async function guardarPacientePreventivaNube(event) {
         }
 
         const data = await response.json();
-        alert(data.message);
+        alert("Respuesta del Servidor: " + data.message);
         volverYLimpiarPreventiva(); 
 
     } catch (err) {
@@ -3955,104 +3954,6 @@ function alternarBloqueoCamposPreventiva(bloquear) {
 }
 
 
-// =========================================================================
-// 🚀 REPARACIÓN DE MAYÚSCULAS E IDS EN EL FRONTEND (FUNCIÓN DE GUARDADO)
-// =========================================================================
-async function guardarPacientePreventivaNube(event) {
-    event.preventDefault();
-
-    // 🏛️ ALINEACIÓN ABSOLUTA: IDs idénticos a los declarados en tu archivo HTML
-    const todosLosIds = [
-        'prev-curp', 
-        'prev-rfc', 
-        'prev-firstname', // ← Corregido minúscula
-        'prev-paternal',  // ← Corregido minúscula
-        'prev-maternal',  // ← Corregido minúscula
-        'prev-age', 
-        'prev-phone', 
-        'prev-email', 
-        'prev-gender'
-    ];
-    
-    todosLosIds.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) input.disabled = false;
-    });
-
-    const valorEdadPaciente = document.getElementById('prev-age').value;
-    const edadPacienteNumerica = valorEdadPaciente ? parseInt(valorEdadPaciente) : 0;
-
-    const inputAgeTutor = document.getElementById('prev-comp-age');
-    let edadTutorNumerica = 0;
-    if (inputAgeTutor && inputAgeTutor.value.trim() !== "") {
-        edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
-    }
-
-    // Extracción limpia del valor del input de texto libre común
-    const campoGender = document.getElementById('prev-gender');
-    const valorGenderSeguro = (campoGender && campoGender.value.trim() !== "") ? campoGender.value.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
-
-    // 🏛️ PAYLOAD BLINDADO: Mapeo exacto de nombres de variables en camelCase
-    const payload = {
-        curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
-        rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
-        firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
-        lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
-        lastNameMaternal: document.getElementById('prev-maternal') ? document.getElementById('prev-maternal').value.trim().toUpperCase() : '',
-        age: edadPacienteNumerica,
-        
-        // Enlace exacto con la desestructuración de tu backend server.js
-        gender: valorGenderSeguro, 
-        
-        phone: document.getElementById('prev-phone').value.trim(),
-        email: document.getElementById('prev-email').value.trim(),
-        isMinor: _esMenorDeEdad,
-        
-        companionSelectionType: document.getElementById('prev-companion-mode') ? document.getElementById('prev-companion-mode').value : 'SELECT',
-        selectedCompanionId: document.getElementById('prev-companion-select') ? document.getElementById('prev-companion-select').value : null,
-        companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
-        companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value.trim().toUpperCase() : '',
-        companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value.trim().toUpperCase() : '',
-        companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
-        companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
-        companionAge: edadTutorNumerica,
-        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value.trim().toUpperCase() : 'PREFIERO NO DECIRLO',
-        companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
-        companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
-        companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
-    };
-
-    const url = _modoEdicionActivo 
-        ? `${BASE_URL}/api/preventive-patients/update` 
-        : `${BASE_URL}/api/preventive-patients/integrated`;
-        
-    const metodo = _modoEdicionActivo ? 'PUT' : 'POST';
-
-    try {
-        const response = await fetch(url, {
-            method: metodo,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.message);
-        }
-
-        const data = await response.json();
-        alert(data.message);
-        volverYLimpiarPreventiva(); 
-
-    } catch (err) {
-        alert(`Error en la operación: ${err.message}`);
-        if (_modoEdicionActivo) {
-            alternarBloqueoCamposPreventiva(true);
-            const inputCurpField = document.getElementById('prev-curp');
-            if (inputCurpField) inputCurpField.disabled = true;
-        }
-    }
-}
 
 
 function volverYLimpiarPreventiva() {
