@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.42.0
+        v1.43.0
     </div>
 
 
@@ -3744,7 +3744,7 @@ async function guardarServicioNube(event) {
 
 
 // =========================================================================
-// 🚀 REPARACIÓN FRONTERA DEFINITIVA: REGRESO A BOX DESPLEGABLE HOMOLOGADO
+// 🚀 REPARACIÓN FRONTERA DEFINITIVA: CAPTURA DINÁMICA RELACIONAL (HOMOLOGADA)
 // =========================================================================
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
@@ -3756,12 +3756,27 @@ async function guardarPacientePreventivaNube(event) {
         if (input) input.disabled = false;
     });
 
-    // Extracción segura del tutor por si las dudas
+    // Extracción segura de la modalidad de selección del tutor (CREATE o SELECT)
+    const selectMode = document.getElementById('prev-companion-mode');
+    const valorModoTutorReal = selectMode ? selectMode.value : 'SELECT';
+
+    // Extracción segura del tutor seleccionado si viene del catálogo
+    const selectComp = document.getElementById('prev-companion-select');
+    const valorIdTutorReal = selectComp ? selectComp.value : '';
+
+    // Extracción segura de la identidad de género del tutor
     const inputCompGenderFisico = document.getElementById('prev-comp-gender');
     const valorCompGenderReal = (inputCompGenderFisico && inputCompGenderFisico.value.trim() !== "") ? inputCompGenderFisico.value.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
 
     const valorEdadPaciente = document.getElementById('prev-age').value;
     const edadPacienteNumerica = valorEdadPaciente ? parseInt(valorEdadPaciente) : 0;
+
+    // Extracción segura de la edad numérica del tutor
+    const inputAgeTutor = document.getElementById('prev-comp-age');
+    let edadTutorNumerica = 0;
+    if (inputAgeTutor && inputAgeTutor.value.trim() !== "") {
+        edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
+    }
 
     const payload = {
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
@@ -3771,24 +3786,28 @@ async function guardarPacientePreventivaNube(event) {
         lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
         age: document.getElementById('prev-age').value ? parseInt(document.getElementById('prev-age').value) : 0,
         
-        // 🚀 CAPTURA DEL BOX DESPLEGABLE: Lee directamente la opción seleccionada en el HTML (Con g minúscula)
+        // Captura del Box Desplegable del Paciente Principal
         gender: document.getElementById('prev-gender').value,
         
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
         isMinor: typeof _esMenorDeEdad !== 'undefined' ? _esMenorDeEdad : false,
-        companionSelectionType: 'SELECT',
-        selectedCompanionId: '',
-        companionCurp: '',
-        companionRfc: '',
-        companionFirstName: '',
-        companionPaternal: '',
-        companionMaternal: '',
-        companionAge: 0,
+        
+        // 🚀 HOMOLOGACIÓN CRÍTICA: Captura en vivo lo seleccionado en la pantalla
+        companionSelectionType: valorModoTutorReal,
+        selectedCompanionId: valorIdTutorReal,
+        
+        // 🚀 CAPTURA FIEL: Mapeo de campos dinámicos del formulario del tutor nuevo
+        companionCurp: document.getElementById('prev-comp-curp') ? document.getElementById('prev-comp-curp').value.trim().toUpperCase() : '',
+        companionRfc: document.getElementById('prev-comp-rfc') ? document.getElementById('prev-comp-rfc').value.trim().toUpperCase() : '',
+        companionFirstName: document.getElementById('prev-comp-firstname') ? document.getElementById('prev-comp-firstname').value.trim().toUpperCase() : '',
+        companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
+        companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
+        companionAge: edadTutorNumerica,
         companionGender: valorCompGenderReal,
-        companionPhone: '',
-        companionEmail: '',
-        companionRelationship: 'MADRE'
+        companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
+        companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
+        companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
     };
 
     const url = _modoEdicionActivo 
