@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.28.0
+        v1.29.0
     </div>
 
 
@@ -1477,18 +1477,11 @@
                 </div>
 
 
+<!-- 🚀 CAMPO DE TEXTO LIBRE HOMOLOGADO -->
 <div>
     <label for="prev-gender" style="color: var(--verde-issste); font-weight: bold; font-size: 0.85em;">Género / Identidad (*):</label>
-    <select id="prev-gender" required style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; background: white;">
-        <option value="MUJER">MUJER</option>
-        <option value="HOMBRE">HOMBRE</option>
-        <option value="NO BINARIO">NO BINARIO (NBX)</option>
-        <option value="TRANSGÉNERO">TRANSGÉNERO</option>
-        <option value="INTERSEXUAL">INTERSEXUAL</option>
-        <option value="PREFIERO NO DECIRLO" selected>PREFIERO NO DECIRLO</option>
-    </select>
+    <input type="text" id="prev-gender" required placeholder="Ej. HOMBRE, MUJER, NO BINARIO" style="width: 100%; padding: 10px; border: 1px solid var(--verde-issste); border-radius: 4px; box-sizing: border-box; text-transform: uppercase; background: white;">
 </div>
-
 
 
 
@@ -3847,15 +3840,14 @@ let _esMenorDeEdad = false;
 let _modoEdicionActivo = false;
 
 // =========================================================================
-// 🚀 FRONTEND PARTE 1: ALGORTIMO RENAPO Y SEGUIMIENTO DE COMPONENTES
+// 🚀 FRONTEND PARTE 1: EVALUACIÓN DE CURP SIN CÁLCULO DE GÉNERO REGISTRAL
 // =========================================================================
-
 async function evaluarCurpPreventiva(curpVal) {
     if (!curpVal || curpVal.trim() === "" || curpVal.trim().length !== 18) return;
 
     const curp = curpVal.trim().toUpperCase();
 
-    // 1. CALCULAR EDAD DEL PACIENTE (Estándar RENAPO)
+    // 1. CALCULAR EDAD DEL PACIENTE (Únicamente la edad)
     const añoDigitos = parseInt(curp.substring(4, 6));   
     const mesDigitos = parseInt(curp.substring(6, 8));   
     const diaDigitos = parseInt(curp.substring(8, 10));  
@@ -3874,14 +3866,7 @@ async function evaluarCurpPreventiva(curpVal) {
     document.getElementById('prev-age').value = edadCalculada;
     _esMenorDeEdad = edadCalculada <= 17; 
 
-    // Preselección automatizada de género registral basado en la posición 11 de la CURP
-    const caracter11 = curp.charAt(10);
-    const selectGender = document.getElementById('prev-gender');
-    if (selectGender) {
-        if (caracter11 === 'H') selectGender.value = 'HOMBRE';
-        else if (caracter11 === 'M') selectGender.value = 'MUJER';
-        else if (caracter11 === 'X') selectGender.value = 'NO BINARIO';
-    }
+    // 🛑 REMOVIDO: Ya no se altera el input prev-gender con la CURP para respetar preferencias libres.
 
     const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
     const modalAuditoria = document.getElementById('modalAuditoria');
@@ -3932,8 +3917,9 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('prev-email').value = datosPaciente.email || '';
             document.getElementById('prev-age').value = datosPaciente.age || edadCalculada;
             
-            if (selectGender && datosPaciente.gender) {
-                selectGender.value = datosPaciente.gender;
+            // Auto-relleno limpio de texto directo desde la base de datos
+            if (document.getElementById('prev-gender') && datosPaciente.gender) {
+                document.getElementById('prev-gender').value = datosPaciente.gender;
             }
 
             alternarBloqueoCamposPreventiva(true); 
@@ -3961,9 +3947,6 @@ async function evaluarCurpPreventiva(curpVal) {
     }
 }
 
-
-
-// 🚀 REPARACIÓN CRÍTICA: Añadimos 'prev-gender' al ciclo de alternancia de bloqueos
 function alternarBloqueoCamposPreventiva(bloquear) {
     const ids = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email', 'prev-gender'];
     ids.forEach(id => {
@@ -3974,13 +3957,12 @@ function alternarBloqueoCamposPreventiva(bloquear) {
 
 
 // =========================================================================
-// 🚀 FRONTEND PARTE 2: GUARDADO COMPUESTO Y RESET RELACIONAL DE VARIABLES
+// 🚀 FRONTEND PARTE 2: ENVÍO ASOCIADO A CAMPO DE TEXTO COMÚN (.VALUE)
 // =========================================================================
-
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // Desbloqueamos forzadamente todos los campos antes del mapeo
+    // Habilitamos temporalmente todos los inputs del paciente para capturar sus textos
     const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email', 'prev-gender'];
     todosLosIds.forEach(id => {
         const input = document.getElementById(id);
@@ -3996,13 +3978,9 @@ async function guardarPacientePreventivaNube(event) {
         edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
     }
 
-    // 🚀 LECTURA DIRECTA BASADA EN ATRIBUTO DE SELECCIÓN DEL NAVEGADOR
-    // Si la propiedad .value del select se desvincula de forma asíncrona, extraemos el valor de la opción marcada
-    let sexoFijado = 'PREFIERO NO DECIRLO';
-    const dropDownSexo = document.getElementById('prev-gender');
-    if (dropDownSexo && dropDownSexo.selectedIndex !== -1) {
-        sexoFijado = dropDownSexo.options[dropDownSexo.selectedIndex].value;
-    }
+    // 🚀 LECTURA DIRECTA NATAL: Capturamos el string de texto libre común digitado por el usuario
+    const campoGender = document.getElementById('prev-gender');
+    const valorGenderSeguro = (campoGender && campoGender.value.trim() !== "") ? campoGender.value.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
 
     const payload = {
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
@@ -4011,7 +3989,10 @@ async function guardarPacientePreventivaNube(event) {
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
         age: edadPacienteNumerica,
-        gender: sexoFijado, // 🚀 Viaja con éxito garantizado como string plano hacia el backend
+        
+        // 🏛️ FIJADO EXPLICITO EN EL PAYLOAD JSON
+        gender: valorGenderSeguro, 
+        
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
         isMinor: _esMenorDeEdad,
@@ -4024,7 +4005,7 @@ async function guardarPacientePreventivaNube(event) {
         companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
         companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
         companionAge: edadTutorNumerica,
-        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value : 'PREFIERO NO DECIRLO',
+        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value.trim().toUpperCase() : 'PREFIERO NO DECIRLO',
         companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
         companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
         companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
@@ -4061,9 +4042,6 @@ async function guardarPacientePreventivaNube(event) {
         }
     }
 }
-
-
-
 
 function volverYLimpiarPreventiva() {
     document.getElementById('form-paciente-preventiva').reset();
