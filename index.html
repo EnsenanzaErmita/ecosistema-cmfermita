@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.29.0
+        v1.30.0
     </div>
 
 
@@ -3957,13 +3957,24 @@ function alternarBloqueoCamposPreventiva(bloquear) {
 
 
 // =========================================================================
-// 🚀 FRONTEND PARTE 2: ENVÍO ASOCIADO A CAMPO DE TEXTO COMÚN (.VALUE)
+// 🚀 REPARACIÓN DE MAYÚSCULAS E IDS EN EL FRONTEND (FUNCIÓN DE GUARDADO)
 // =========================================================================
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // Habilitamos temporalmente todos los inputs del paciente para capturar sus textos
-    const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email', 'prev-gender'];
+    // 🏛️ ALINEACIÓN ABSOLUTA: IDs idénticos a los declarados en tu archivo HTML
+    const todosLosIds = [
+        'prev-curp', 
+        'prev-rfc', 
+        'prev-firstname', // ← Corregido minúscula
+        'prev-paternal',  // ← Corregido minúscula
+        'prev-maternal',  // ← Corregido minúscula
+        'prev-age', 
+        'prev-phone', 
+        'prev-email', 
+        'prev-gender'
+    ];
+    
     todosLosIds.forEach(id => {
         const input = document.getElementById(id);
         if (input) input.disabled = false;
@@ -3978,19 +3989,20 @@ async function guardarPacientePreventivaNube(event) {
         edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
     }
 
-    // 🚀 LECTURA DIRECTA NATAL: Capturamos el string de texto libre común digitado por el usuario
+    // Extracción limpia del valor del input de texto libre común
     const campoGender = document.getElementById('prev-gender');
     const valorGenderSeguro = (campoGender && campoGender.value.trim() !== "") ? campoGender.value.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
 
+    // 🏛️ PAYLOAD BLINDADO: Mapeo exacto de nombres de variables en camelCase
     const payload = {
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
         rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
         firstName: document.getElementById('prev-firstname').value.trim().toUpperCase(),
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
-        lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
+        lastNameMaternal: document.getElementById('prev-maternal') ? document.getElementById('prev-maternal').value.trim().toUpperCase() : '',
         age: edadPacienteNumerica,
         
-        // 🏛️ FIJADO EXPLICITO EN EL PAYLOAD JSON
+        // Enlace exacto con la desestructuración de tu backend server.js
         gender: valorGenderSeguro, 
         
         phone: document.getElementById('prev-phone').value.trim(),
@@ -4042,6 +4054,7 @@ async function guardarPacientePreventivaNube(event) {
         }
     }
 }
+
 
 function volverYLimpiarPreventiva() {
     document.getElementById('form-paciente-preventiva').reset();

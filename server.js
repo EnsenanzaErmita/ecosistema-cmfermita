@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.29.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 1.30.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1075,11 +1075,10 @@ app.delete('/api/services/:id', (req, res) => {
 
 
 // =========================================================================
-// 🔍 ENDPOINT DE REGISTRO INTEGRADO CON AUDITORÍA PROFUNDA EN POST
+// 🚀 ENDPOINT POST: REGISTRO INTEGRADO BLINDADO (LIBERADO DE FRASES FIJAS)
 // =========================================================================
 app.post('/api/preventive-patients/integrated', (req, res) => {
     
-    // 📊 RECUADRO DE AUDITORÍA: Veremos línea por línea el JSON que manda tu Frontend en registros nuevos
     console.log("====================================================");
     console.log("📥 [AUDITORÍA POST - PACIENTE NUEVO] LLEGADA DE DATOS:");
     console.log("Cuerpo completo (req.body):", JSON.stringify(req.body, null, 2));
@@ -1112,8 +1111,18 @@ app.post('/api/preventive-patients/integrated', (req, res) => {
             return res.status(400).json({ message: 'El CURP ya corresponde a un paciente registrado en el sistema.' });
         }
 
-        // 🚀 BLINDAJE DE RESPALDO: Si la variable gender no viaja en el JSON o viene undefined, MySQL usa el valor por defecto
-        const pacienteGenderSeguro = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
+        // 🚀 REPARACIÓN ABSOLUTA: Removemos la frase restrictiva 'PREFIERO NO DECIRLO'.
+        // Si por error de ID viaja en blanco, lee la posición 11 de la CURP en vivo ("H" o "M") para amarrar el sexo correcto.
+        let pacienteGenderSeguro = 'NO ESPECIFICADO';
+        if (gender && gender.trim() !== "") {
+            pacienteGenderSeguro = gender.trim().toUpperCase();
+        } else if (cleanCurp.length === 18) {
+            const letraSexoCurp = cleanCurp.charAt(10); // Posición 11 de la CURP
+            if (letraSexoCurp === 'H') pacienteGenderSeguro = 'HOMBRE';
+            else if (letraSexoCurp === 'M') pacienteGenderSeguro = 'MUJER';
+            else if (letraSexoCurp === 'X') pacienteGenderSeguro = 'NO BINARIO';
+        }
+
         const edadPacienteNumerica = age ? parseInt(age) : 0;
 
         const patientData = [
@@ -1280,7 +1289,7 @@ app.get('/api/preventive-patients/search/:curp', (req, res) => {
 
 
 // =========================================================================
-// 🔍 ENDPOINT PUT - PARTE 1 CON AUDITORÍA ACTIVA DE ACTUALIZACIÓN
+// 🚀 ENDPOINT PUT: ACTUALIZACIÓN RELACIONAL LIMPIA - PARTE 1
 // =========================================================================
 app.put('/api/preventive-patients/update', (req, res) => {
     const { 
@@ -1296,7 +1305,10 @@ app.put('/api/preventive-patients/update', (req, res) => {
     }
 
     const cleanCurp = curp.trim().toUpperCase();
-    const pacienteGenderSeguro = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
+    
+    // 🚀 REPARACIÓN ABSOLUTA: Eliminamos la frase restrictiva de sobreescritura. 
+    // Ahora procesa fielmente el string de texto libre que reciba del teclado.
+    const pacienteGenderSeguro = (gender && gender.trim() !== "") ? gender.trim().toUpperCase() : 'NO ESPECIFICADO';
     const edadPacienteNumerica = age ? parseInt(age) : 0;
 
     const sqlUpdatePatient = `
@@ -1311,13 +1323,12 @@ app.put('/api/preventive-patients/update', (req, res) => {
         lastNamePaternal.trim().toUpperCase(), 
         lastNameMaternal ? lastNameMaternal.trim().toUpperCase() : '', 
         edadPacienteNumerica, 
-        pacienteGenderSeguro, 
+        pacienteGenderSeguro, // 🏛️ Almacena con éxito el texto libre ("HOMBRE", "MUJER", etc.)
         phone.trim(), 
         email.trim().toLowerCase(),
         cleanCurp
     ];
 
-    // 📊 AUDITORÍA EN CONSOLA: Vemos el arreglo exacto antes de mandarlo a MySQL
     console.log("====================================================");
     console.log("📝 [AUDITORÍA PUT] ENVIANDO ARREGLO A MYSQL:");
     console.log("patientData:", patientData);
@@ -1329,24 +1340,19 @@ app.put('/api/preventive-patients/update', (req, res) => {
             return res.status(500).json({ message: 'No se pudieron actualizar los datos del paciente.' });
         }
 
-        // 📊 AUDITORÍA EN CONSOLA: Vemos qué respondió MySQL (cuántas filas cambiaron)
         console.log("📊 [RESULTADO MYSQL PUT]:");
         console.log("Filas afectadas (affectedRows):", resultUp.affectedRows);
         console.log("Filas modificadas (changedRows):", resultUp.changedRows);
-        console.log("Mensaje de MySQL (message):", resultUp.message);
         console.log("====================================================");
 
-        // Recuperamos el ID interno del paciente que ya existía de forma segura
         pool.query('SELECT id FROM preventive_patients WHERE curp = ?', [cleanCurp], (errId, resId) => {
             if (errId || !resId || resId.length === 0) {
                 return res.status(500).json({ message: 'Error al recuperar identificador del expediente.' });
             }
             const idDelPaciente = resId.id; 
 
-            // PASO B: Evaluación del escenario de menor de edad
             if (isMinor === true || isMinor === 'true') {
                 
-                // Opción A: El tutor ya existía, pero ACTUALIZAMOS sus datos al vuelo
                 if (companionSelectionType === 'EXISTING' && selectedCompanionId && selectedCompanionId !== "") {
                     
                     const sqlUpdateExistingComp = `
@@ -1355,7 +1361,7 @@ app.put('/api/preventive-patients/update', (req, res) => {
                         WHERE id = ?
                     `;
                     
-                    const tutorGenderSeguro = (companionGender && companionGender.trim() !== "") ? companionGender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
+                    const tutorGenderSeguro = (companionGender && companionGender.trim() !== "") ? companionGender.trim().toUpperCase() : 'NO ESPECIFICADO';
                     const edadTutorNumerica = companionAge ? parseInt(companionAge) : 0;
 
                     const compUpdateData = [
@@ -1391,7 +1397,7 @@ app.put('/api/preventive-patients/update', (req, res) => {
                     });
                 }
                 // =========================================================================
-                // 🚀 ENDPOINT DE ACTUALIZAR EXPEDIENTE 100% BLINDADO - PARTE 2
+                // 🚀 ENDPOINT PUT: ACTUALIZACIÓN RELACIONAL LIMPIA - PARTE 2
                 // =========================================================================
                 // Opción B: Registró un tutor totalmente NUEVO para esta consulta
                 else if (companionSelectionType === 'CREATE') {
@@ -1401,7 +1407,7 @@ app.put('/api/preventive-patients/update', (req, res) => {
 
                     const cleanCompCurp = companionCurp.trim().toUpperCase();
                     const cleanCompRfc = companionRfc.trim().toUpperCase();
-                    const tutorGenderSeguro = (companionGender && companionGender.trim() !== "") ? companionGender.trim().toUpperCase() : 'PREFIERO NO DECIRLO';
+                    const tutorGenderSeguro = (companionGender && companionGender.trim() !== "") ? companionGender.trim().toUpperCase() : 'NO ESPECIFICADO';
                     const edadTutorNumerica = companionAge ? parseInt(companionAge) : 0;
 
                     // Guardamos al tutor en el catálogo
