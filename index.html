@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.27.0
+        v1.28.0
     </div>
 
 
@@ -3744,13 +3744,14 @@ async function guardarServicioNube(event) {
 
 
 // =========================================================================
-// 🚀 REPARACIÓN ABSOLUTA: EXTRACCIÓN DE DESPLEGABLE POR ÍNDICE DE SELECCIÓN
+// 🚀 FRONTEND PARTE 2: GUARDADO COMPUESTO (HOMOLOGADO EN CAMELCASE)
 // =========================================================================
+
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // Habilitamos temporalmente todos los inputs para capturar sus textos
-    const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
+    // Desbloqueamos forzadamente todos los campos antes del mapeo
+    const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email', 'prev-gender'];
     todosLosIds.forEach(id => {
         const input = document.getElementById(id);
         if (input) input.disabled = false;
@@ -3765,31 +3766,14 @@ async function guardarPacientePreventivaNube(event) {
         edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
     }
 
-    // 🚀 BLINDAJE DE EXTRACCIÓN DE BOX DESPLEGABLE (SELECT)
-    // En lugar de usar .value a secas (que puede dar undefined), leemos estrictamente el texto de la opción seleccionada por el usuario
-    let generoSeleccionado = 'PREFIERO NO DECIRLO';
-    const selectElement = document.getElementById('prev-gender') || document.getElementById('gender');
-    
-    if (selectElement && selectElement.selectedIndex !== -1) {
-        generoSeleccionado = selectElement.options[selectElement.selectedIndex].value;
-    } else {
-        // Respaldo matemático directo de la CURP si el DOM no responde
-        const inputCurp = document.getElementById('prev-curp');
-        if (inputCurp && inputCurp.value && inputCurp.value.trim().length === 18) {
-            const caracter11 = inputCurp.value.trim().toUpperCase().charAt(10);
-            if (caracter11 === 'H') generoSeleccionado = 'HOMBRE';
-            else if (caracter11 === 'M') generoSeleccionado = 'MUJER';
-            else if (caracter11 === 'X') generoSeleccionado = 'NO BINARIO';
-        }
+    // Extraemos el valor del sexo directamente de la opción seleccionada por el usuario
+    let sexoFijado = 'PREFIERO NO DECIRLO';
+    const dropDownSexo = document.getElementById('prev-gender');
+    if (dropDownSexo && dropDownSexo.selectedIndex !== -1) {
+        sexoFijado = dropDownSexo.options[dropDownSexo.selectedIndex].value;
     }
 
-    // Captura del género del tutor bajo el mismo principio blindado
-    let tutorGeneroSeleccionado = 'PREFIERO NO DECIRLO';
-    const selectTutorElement = document.getElementById('prev-comp-gender');
-    if (selectTutorElement && selectTutorElement.selectedIndex !== -1) {
-        tutorGeneroSeleccionado = selectTutorElement.options[selectTutorElement.selectedIndex].value;
-    }
-
+    // 🚀 ALINEACIÓN DE VARIABLES: 'gender' con G mayúscula para coincidir con tu server.js
     const payload = {
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
         rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
@@ -3797,7 +3781,7 @@ async function guardarPacientePreventivaNube(event) {
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
         age: edadPacienteNumerica,
-        gender: generoSeleccionado, // 🚀 Viaja garantizado como string texto firme ("HOMBRE")
+        gender: sexoFijado, // 🏛️ CORREGIDO: Empata perfectamente con tu backend
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
         isMinor: _esMenorDeEdad,
@@ -3810,7 +3794,7 @@ async function guardarPacientePreventivaNube(event) {
         companionPaternal: document.getElementById('prev-comp-paternal') ? document.getElementById('prev-comp-paternal').value.trim().toUpperCase() : '',
         companionMaternal: document.getElementById('prev-comp-maternal') ? document.getElementById('prev-comp-maternal').value.trim().toUpperCase() : '',
         companionAge: edadTutorNumerica,
-        companionGender: tutorGeneroSeleccionado, // 🚀 Tutor blindado
+        companionGender: document.getElementById('prev-comp-gender') ? document.getElementById('prev-comp-gender').value : 'PREFIERO NO DECIRLO',
         companionPhone: document.getElementById('prev-comp-phone') ? document.getElementById('prev-comp-phone').value.trim() : '',
         companionEmail: document.getElementById('prev-comp-email') ? document.getElementById('prev-comp-email').value.trim() : '',
         companionRelationship: document.getElementById('prev-comp-relationship') ? document.getElementById('prev-comp-relationship').value : 'MADRE'
@@ -3863,15 +3847,15 @@ let _esMenorDeEdad = false;
 let _modoEdicionActivo = false;
 
 // =========================================================================
-// 🚀 ALGORITMO RENAPO OPTIMIZADO - AUTO-RELLENO SIN SOBREESCRITURAS DE GÉNERO
+// 🚀 FRONTEND PARTE 1: ALGORTIMO RENAPO Y SEGUIMIENTO DE COMPONENTES
 // =========================================================================
+
 async function evaluarCurpPreventiva(curpVal) {
-    // Candado estricto: detiene ejecuciones asíncronas accidentales (ej. al limpiar con .reset())
     if (!curpVal || curpVal.trim() === "" || curpVal.trim().length !== 18) return;
 
     const curp = curpVal.trim().toUpperCase();
 
-    // 1. CALCULAR EDAD DEL PACIENTE (Estándar RENAPO Contexto Julio 2026)
+    // 1. CALCULAR EDAD DEL PACIENTE (Estándar RENAPO)
     const añoDigitos = parseInt(curp.substring(4, 6));   
     const mesDigitos = parseInt(curp.substring(6, 8));   
     const diaDigitos = parseInt(curp.substring(8, 10));  
@@ -3890,7 +3874,7 @@ async function evaluarCurpPreventiva(curpVal) {
     document.getElementById('prev-age').value = edadCalculada;
     _esMenorDeEdad = edadCalculada <= 17; 
 
-    // Preselección automatizada de género registral basado estrictamente en el estándar de la CURP (Posición 11)
+    // Preselección automatizada de género registral basado en la posición 11 de la CURP
     const caracter11 = curp.charAt(10);
     const selectGender = document.getElementById('prev-gender');
     if (selectGender) {
@@ -3906,7 +3890,6 @@ async function evaluarCurpPreventiva(curpVal) {
         const response = await fetch(`${BASE_URL}/api/preventive-patients/search/${curp}`);
         const data = await response.json();
 
-        // CONTROL VISUAL PANEL DE TUTORES RELACIONALES
         const contenedorMenor = document.getElementById('seccion-menor-edad');
         const selectTutor = document.getElementById('prev-companion-select');
         const selectModo = document.getElementById('prev-companion-mode');
@@ -3933,12 +3916,11 @@ async function evaluarCurpPreventiva(curpVal) {
             if (contenedorMenor) contenedorMenor.style.display = 'none';
         }
 
-        // LÓGICA DE AUTO-RELLENO DE IDENTIDAD DEL PACIENTE
         if (data.found) {
             const datosPaciente = data.patient;
 
             if (cuerpoModal && modalAuditoria) {
-                cuerpoModal.innerHTML = `<div style="text-align: center; font-family: sans-serif;"><span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span><h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Expediente Localizado!</h4><p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">El expediente ya se encuentra registrado en Clever Cloud.<br><strong>Los campos se han auto-rellenado y bloqueado por seguridad. Puede modificar el género si lo requiere.</strong></p></div>`;
+                cuerpoModal.innerHTML = `<div style="text-align: center; font-family: sans-serif;"><span style="color: #15803d; font-size: 2.5em; display:block; margin-bottom:5px;">✓</span><h4 style="margin:0; color: #15803d; font-size:1.2em; text-transform:uppercase;">¡Expediente Localizado!</h4><p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">El expediente ya se encuentra registrado en Clever Cloud.</p></div>`;
                 modalAuditoria.style.display = 'flex';
             }
 
@@ -3950,10 +3932,7 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('prev-email').value = datosPaciente.email || '';
             document.getElementById('prev-age').value = datosPaciente.age || edadCalculada;
             
-            // 🚀 REPARACIÓN ABSOLUTA: Si el expediente en la BD dice 'PREFIERO NO DECIRLO' o viene en blanco, 
-            // RESPETAMOS la preselección inteligente que hizo el algoritmo de la CURP ("HOMBRE" / "MUJER") 
-            // permitiendo que el usuario guarde el cambio sin que la BD le regrese el valor anterior de forma asíncrona.
-            if (selectGender && datosPaciente.gender && datosPaciente.gender !== 'PREFIERO NO DECIRLO' && datosPaciente.gender !== '') {
+            if (selectGender && datosPaciente.gender) {
                 selectGender.value = datosPaciente.gender;
             }
 
@@ -3968,7 +3947,7 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('btn-submit-preventiva').innerText = "ACTUALIZAR EXPEDIENTE";
         } else {
             if (cuerpoModal && modalAuditoria) {
-                cuerpoModal.innerHTML = `<div style="text-align: center; font-family: sans-serif;"><span style="color: #b45309; font-size: 2.5em; display:block; margin-bottom:5px;">ℹ️</span><h4 style="margin:0; color: #b45309; font-size:1.2em; text-transform:uppercase;">CURP Libre de Registro</h4><p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">No se detectaron antecedentes de este paciente.<br>Por favor, capture de forma manual los campos requeridos.</p></div>`;
+                cuerpoModal.innerHTML = `<div style="text-align: center; font-family: sans-serif;"><span style="color: #b45309; font-size: 2.5em; display:block; margin-bottom:5px;">ℹ️</span><h4 style="margin:0; color: #b45309; font-size:1.2em; text-transform:uppercase;">CURP Libre de Registro</h4><p style="margin: 10px 0 0 0; font-size: 0.95em; color: #4b5563; line-height: 1.5;">No se detectaron antecedentes. Capture de forma manual.</p></div>`;
                 modalAuditoria.style.display = 'flex';
             }
             alternarBloqueoCamposPreventiva(false);
@@ -3984,8 +3963,9 @@ async function evaluarCurpPreventiva(curpVal) {
 
 
 
+// 🚀 REPARACIÓN CRÍTICA: Añadimos 'prev-gender' al ciclo de alternancia de bloqueos
 function alternarBloqueoCamposPreventiva(bloquear) {
-    const ids = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
+    const ids = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email', 'prev-gender'];
     ids.forEach(id => {
         const input = document.getElementById(id);
         if (input) input.disabled = bloquear;
@@ -3994,15 +3974,14 @@ function alternarBloqueoCamposPreventiva(bloquear) {
 
 
 // =========================================================================
-// 🚀 CONTROLADOR FRONTEND UNIFICADO Y BLINDADO - PARTE 2
+// 🚀 FRONTEND PARTE 2: GUARDADO COMPUESTO Y RESET RELACIONAL DE VARIABLES
 // =========================================================================
 
 async function guardarPacientePreventivaNube(event) {
     event.preventDefault();
 
-    // 🚀 REPARACIÓN CRÍTICA: Desbloqueamos temporalmente los inputs antes de extraer el .value
-    // de lo contrario, el navegador envía los campos inhabilitados como vacíos o indefinidos.
-    const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email'];
+    // Desbloqueamos forzadamente todos los campos antes del mapeo
+    const todosLosIds = ['prev-curp', 'prev-rfc', 'prev-firstname', 'prev-paternal', 'prev-maternal', 'prev-age', 'prev-phone', 'prev-email', 'prev-gender'];
     todosLosIds.forEach(id => {
         const input = document.getElementById(id);
         if (input) input.disabled = false;
@@ -4017,6 +3996,14 @@ async function guardarPacientePreventivaNube(event) {
         edadTutorNumerica = parseInt(inputAgeTutor.value.trim());
     }
 
+    // 🚀 LECTURA DIRECTA BASADA EN ATRIBUTO DE SELECCIÓN DEL NAVEGADOR
+    // Si la propiedad .value del select se desvincula de forma asíncrona, extraemos el valor de la opción marcada
+    let sexoFijado = 'PREFIERO NO DECIRLO';
+    const dropDownSexo = document.getElementById('prev-gender');
+    if (dropDownSexo && dropDownSexo.selectedIndex !== -1) {
+        sexoFijado = dropDownSexo.options[dropDownSexo.selectedIndex].value;
+    }
+
     const payload = {
         curp: document.getElementById('prev-curp').value.trim().toUpperCase(),
         rfc: document.getElementById('prev-rfc').value.trim().toUpperCase(),
@@ -4024,7 +4011,7 @@ async function guardarPacientePreventivaNube(event) {
         lastNamePaternal: document.getElementById('prev-paternal').value.trim().toUpperCase(),
         lastNameMaternal: document.getElementById('prev-maternal').value.trim().toUpperCase(),
         age: edadPacienteNumerica,
-        gender: document.getElementById('prev-gender') ? document.getElementById('prev-gender').value : 'PREFIERO NO DECIRLO',
+        gender: sexoFijado, // 🚀 Viaja con éxito garantizado como string plano hacia el backend
         phone: document.getElementById('prev-phone').value.trim(),
         email: document.getElementById('prev-email').value.trim(),
         isMinor: _esMenorDeEdad,
@@ -4067,14 +4054,16 @@ async function guardarPacientePreventivaNube(event) {
 
     } catch (err) {
         alert(`Error en la operación: ${err.message}`);
-        // Restablecemos el bloqueo de protección en pantalla si la petición fue rebotada
         if (_modoEdicionActivo) {
             alternarBloqueoCamposPreventiva(true);
-            const inputCurp = document.getElementById('prev-curp');
-            if (inputCurp) inputCurp.disabled = true;
+            const inputCurpField = document.getElementById('prev-curp');
+            if (inputCurpField) inputCurpField.disabled = true;
         }
     }
 }
+
+
+
 
 function volverYLimpiarPreventiva() {
     document.getElementById('form-paciente-preventiva').reset();
