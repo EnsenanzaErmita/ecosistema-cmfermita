@@ -4301,15 +4301,6 @@ function evaluarCurpAcompanante(curpVal) {
 
 
 
-
-
-
-
-
-
-
-
-
 // Mezcla de forma inteligente los tutores pasados del menor con el catálogo global completo
 function inyectarCatálogoTutoresConHistorico(historicos, globales) {
     const select = document.getElementById('prev-companion-select');
@@ -4340,6 +4331,279 @@ function inyectarCatálogoTutoresConHistorico(historicos, globales) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================================
+// 💉 MODULO VACUNACIÓN - PARTE 1: RUTEO, LIMPIEZA Y BÚSQUEDA RELACIONAL
+// =========================================================================
+
+// Variable global de control clínico para el filtrado de biológicos por edad
+let _edadPacienteVacunacionGlobal = 0;
+
+/**
+ * 🚀 Conmutador de navegación para abrir el formulario de vacunación
+ */
+function abrirModuloAplicacionVacunas() {
+    if (typeof activarModulo === 'function') {
+        activarModulo('modulo-aplicacion-vacunas-preventiva', null);
+    } else {
+        // Alternancia de respaldo si tu ruteador nativo usa el DOM directo
+        const views = document.querySelectorAll('.view');
+        views.forEach(v => v.style.display = 'none');
+        const moduloVac = document.getElementById('modulo-aplicacion-vacunas-preventiva');
+        if (moduloVac) moduloVac.style.display = 'block';
+    }
+}
+
+/**
+ * 🚀 Reseteo absoluto de estados y contenedores al volver al panel principal
+ */
+function volverYLimpiarVacunacion() {
+    // Limpieza de textos y cajas nativas
+    const formularioVacunas = document.getElementById('form-aplicacion-vacunas');
+    if (formularioVacunas) formularioVacunas.reset();
+    
+    const inputBuscarCurp = document.getElementById('vac-buscar-curp');
+    if (inputBuscarCurp) inputBuscarCurp.value = '';
+
+    // Re-bloqueo preventivo de la sección de tutores relacionales
+    const seccionTutorVac = document.getElementById('vac-seccion-tutor');
+    if (seccionTutorVac) seccionTutorVac.style.display = 'none';
+
+    // Restablece el dropdown de biológicos a su estado inicial de invitación
+    const selectBiologico = document.getElementById('vac-biologico-select');
+    if (selectBiologico) {
+        selectBiologico.innerHTML = '<option value="" disabled selected>-- Primero ingrese la CURP para filtrar biológicos --</option>';
+    }
+
+    _edadPacienteVacunacionGlobal = 0;
+
+    // Regresa visualmente al menú de tarjetas institucional
+    if (typeof activarModulo === 'function') {
+        activarModulo('panel-medicina-preventiva', null);
+    } else {
+        const views = document.querySelectorAll('.view');
+        views.forEach(v => v.style.display = 'none');
+        const panelPrincipal = document.getElementById('panel-medicina-preventiva') || document.getElementById('modulo-preventiva-main');
+        if (panelPrincipal) panelPrincipal.style.display = 'block';
+    }
+}
+
+/**
+ * 🚀 Buscador en Padrón: Conexión asíncrona Clever Cloud basada en CURP
+ */
+// Variable global para memorizar la edad del paciente en la consulta de vacunas
+let _edadPacienteVacunacionGlobal = 0;
+
+/**
+ * 🚀 FUNCIÓN DEL BOTÓN BUSCAR: Se ejecuta de forma imperativa al hacer clic
+ */
+async function ejecutarBusquedaPadrónVacunas() {
+    const inputCurp = document.getElementById('vac-buscar-curp');
+    
+    // Validamos que la caja no esté vacía y cumpla los 18 caracteres
+    if (!inputCurp || inputCurp.value.trim().length !== 18) {
+        alert("Por favor, ingrese una CURP válida de 18 caracteres para realizar la búsqueda.");
+        return;
+    }
+
+    const curp = inputCurp.value.trim().toUpperCase();
+
+    try {
+        // Consultamos tu endpoint existente de búsqueda en Clever Cloud
+        const response = await fetch(`${BASE_URL}/api/preventive-patients/search/${curp}`);
+        const data = await response.json();
+
+        if (data.found) {
+            const datosPaciente = data.patient;
+            _edadPacienteVacunacionGlobal = datosPaciente.age || 0;
+
+            // 🏛️ AUTO-RELLENO DE LOS CAMPOS VERDES BLOQUEADOS
+            document.getElementById('vac-pac-rfc').value = datosPaciente.rfc || '';
+            document.getElementById('vac-pac-firstname').value = datosPaciente.first_name || '';
+            document.getElementById('vac-pac-paternal').value = datosPaciente.last_name_paternal || '';
+            document.getElementById('vac-pac-maternal').value = datosPaciente.last_name_maternal || '';
+            document.getElementById('vac-pac-age').value = _edadPacienteVacunacionGlobal;
+            document.getElementById('vac-pac-gender').value = datosPaciente.gender || 'NO ESPECIFICADO';
+            document.getElementById('vac-pac-phone').value = datosPaciente.phone || '';
+            document.getElementById('vac-pac-email').value = datosPaciente.email || '';
+
+            // Revisamos de forma relacional si es un menor de edad
+            const seccionTutorVac = document.getElementById('vac-seccion-tutor');
+            if (_edadPacienteVacunacionGlobal <= 17) {
+                if (seccionTutorVac) seccionTutorVac.style.display = 'grid'; // Muestra los campos del tutor
+
+                // Si tiene un acompañante registrado en la tabla intermedia, lo pintamos
+                if (data.companions) {
+                    const tutor = data.companions;
+                    document.getElementById('vac-tut-curp').value = tutor.curp || '';
+                    document.getElementById('vac-tut-fullname').value = `${tutor.first_name} ${tutor.last_name_paternal} ${tutor.last_name_maternal || ''}`.toUpperCase();
+                    document.getElementById('vac-tut-relationship').value = tutor.relationship || 'TUTOR RESPONSABLE';
+                    document.getElementById('vac-tut-phone').value = tutor.phone || '';
+                }
+            } else {
+                if (seccionTutorVac) seccionTutorVac.style.display = 'none'; // Se oculta si es adulto
+            }
+
+            // Llamamos a la matriz para que filtre las vacunas aptas para su edad
+            if (typeof filtrarBiologicosAptosPorEdad === 'function') {
+                filtrarBiologicosAptosPorEdad(_edadPacienteVacunacionGlobal);
+            }
+
+        } else {
+            // 🛑 Temporal: Si no lo encuentra, solo mandamos un alert común por el momento
+            alert(`La CURP [${curp}] no se encuentra registrada en el sistema.`);
+        }
+
+    } catch (error) {
+        console.error('Error asíncrono en buscador de vacunación:', error);
+    }
+}
+
+
+
+
+
+// =========================================================================
+// 💉 MODULO VACUNACIÓN - PARTE 2: MATRIZ CLÍNICA Y GUARDADO DE CONSULTA
+// =========================================================================
+
+/**
+ * 🚀 MATRIZ INSTITUCIONAL DE INMUNIZACIONES: Inyecta vacunas según la edad demográfica
+ */
+function filtrarBiologicosAptosPorEdad(edad) {
+    const selectBiologico = document.getElementById('vac-biologico-select');
+    if (!selectBiologico) return;
+
+    // Limpiamos el dropdown dejando una invitación limpia de captura activa
+    selectBiologico.innerHTML = '<option value="" disabled selected>-- Seleccione un Biológico Disponible --</option>';
+
+    let catalogoApto = [];
+
+    // Categoría A: Cartilla Nacional de Niñez y Adolescencia (0 a 17 años)
+    if (edad <= 17) {
+        catalogoApto = [
+            { id: "BCG", name: "BCG (Tuberculosis - Única dosis al nacer)" },
+            { id: "HEPATITIS_B_INFANTIL", name: "HEPATITIS B (Dosis Infantil)" },
+            { id: "HEXAVALENTE", name: "HEXAVALENTE ACELULAR (Difteria, Tétanos, Tos ferina, Polio, Hib, Hep B)" },
+            { id: "ROTAVIRUS", name: "ROTAVIRUS (Prevención de diarreas graves)" },
+            { id: "NEUMOCOCICA_CONJUGADA", name: "NEUMOCOCICA CONJUGADA (Infecciones por Neumococo)" },
+            { id: "INFLUENZA_ESTACIONAL", name: "INFLUENZA ESTACIONAL (Dosis Pediátrica)" },
+            { id: "SRP", name: "SRP (Sarampión, Rubéola y Parotiditis / Paperas)" },
+            { id: "VPH", name: "VPH (Virus del Papiloma Humano - Adolescentes)" },
+            { id: "TDPA", name: "TDPA (Tétanos, Difteria, Tos Ferina acelular - A partir de los 10 años)" }
+        ];
+    } 
+    // Categoría B: Cartilla Nacional de Adulto Mayor (60 años o más)
+    else if (edad >= 60) {
+        catalogoApto = [
+            { id: "NEUMOCOCICA_POLIVALENTE", name: "NEUMOCOCICA POLIVALENTE (Protección contra neumonía en el adulto mayor)" },
+            { id: "INFLUENZA_ESTACIONAL", name: "INFLUENZA ESTACIONAL (Dosis Adulto - Refuerzo Anual)" },
+            { id: "TD", name: "TD (Tétanos y Difteria - Refuerzo cada 10 años)" },
+            { id: "COVID_19_REFUERZO", name: "COVID-19 (Refuerzo anual estacional / Inmunización activa)" }
+        ];
+    } 
+    // Categoría C: Cartilla Nacional de la Mujer y el Hombre (Adultos de 18 a 59 años)
+    else {
+        catalogoApto = [
+            { id: "TD", name: "TD (Tétanos y Difteria - Esquema o refuerzo)" },
+            { id: "SR", name: "SR (Sarampión y Rubéola - Doble viral si no cuenta con antecedente vacunal)" },
+            { id: "HEPATITIS_B_ADULTO", name: "HEPATITIS B (Dosis Adulto - Grupos de riesgo o rezago)" },
+            { id: "INFLUENZA_ESTACIONAL", name: "INFLUENZA ESTACIONAL (Aplicación invernal en población con comorbilidades)" },
+            { id: "COVID_19_ADULTO", name: "COVID-19 (Esquema primario o rezago institucional)" }
+        ];
+    }
+
+    // Inyectamos las opciones filtradas al elemento <select>
+    catalogoApto.forEach(vacuna => {
+        const option = document.createElement('option');
+        option.value = vacuna.id;
+        option.textContent = vacuna.name.toUpperCase();
+        selectBiologico.appendChild(option);
+    });
+}
+
+/**
+ * 🚀 TRANSMISIÓN TRANSACCIONAL: Envío del registro de vacunación a Render
+ */
+async function guardarAplicacionVacunaNube(event) {
+    event.preventDefault();
+
+    // Habilitamos temporalmente los campos demográficos bloqueados solo para extraer la CURP
+    const inputCurpPadrón = document.getElementById('vac-buscar-curp');
+    if (!inputCurpPadrón || inputCurpPadrón.value.trim().length !== 18) {
+        alert("Error de validación: Debe buscar una CURP válida del padrón antes de registrar.");
+        return;
+    }
+
+    const curpPaciente = inputCurpPadrón.value.trim().toUpperCase();
+
+    // Extraemos los campos de captura activa del formulario clínico
+    const selectVacuna = document.getElementById('vac-biologico-select');
+    const selectDosis = document.getElementById('vac-dosis');
+    const inputLote = document.getElementById('vac-lote');
+    const inputObs = document.getElementById('vac-observaciones');
+
+    const payload = {
+        curp: curpPaciente,
+        vaccineId: selectVacuna ? selectVacuna.value : '',
+        dose: selectDosis ? selectDosis.value : 'UNICA',
+        lotNumber: inputLote ? inputLote.value.trim().toUpperCase() : '',
+        observations: inputObs ? inputObs.value.trim().toUpperCase() : 'SIN EVENTUALIDADES',
+        ageAtApplication: _edadPacienteVacunacionGlobal
+    };
+
+    // Alertas preventivas previas al fetch
+    if (!payload.vaccineId || !payload.lotNumber) {
+        alert("Los datos obligatorios de la inmunización (Vacuna y Número de Lote) están incompletos.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/preventive-vaccines/apply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.message || 'Error desconocido en el servidor de Render.');
+        }
+
+        const data = await response.json();
+        alert(data.message); // Notifica el éxito institucional
+        volverYLimpiarVacunacion(); // Limpia el formulario y regresa al panel
+
+    } catch (error) {
+        alert(`Error en la operación de vacunación: ${error.message}`);
+    }
+}
+
+
+
+
+
+
+    // 🚀 ASIGNACIÓN GLOBAL: Registramos las nuevas funciones en el objeto window 
+    // para que el HTML real las pueda invocar desde el atributo onclick sin errores de referencia.
+    window.ejecutarBusquedaPadrónVacunas = ejecutarBusquedaPadrónVacunas;
+    window.volverYLimpiarVacunacion = volverYLimpiarVacunacion;
+    if (typeof filtrarBiologicosAptosPorEdad === 'function') {
+        window.filtrarBiologicosAptosPorEdad = filtrarBiologicosAptosPorEdad;
+    }
 
     // 📑 AGREGA ESTAS DOS LÍNEAS NUEVAS AQUÍ:
     window.evaluarCurpAcompanante = evaluarCurpAcompanante;
