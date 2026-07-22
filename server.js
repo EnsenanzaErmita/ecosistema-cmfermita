@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.0.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.1.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1425,6 +1425,283 @@ app.put('/api/preventive-patients/update', (req, res) => {
         });
     });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================================
+// 💉 MODULO VACUNACIÓN - PARTE 1: RUTEO, LIMPIEZA Y BÚSQUEDA RELACIONAL
+// =========================================================================
+
+// Variable global de control clínico para el filtrado de biológicos por edad
+let _edadPacienteVacunacionGlobal = 0;
+
+/**
+ * 🚀 Conmutador de navegación para abrir el formulario de vacunación
+ */
+function abrirModuloAplicacionVacunas() {
+    if (typeof activarModulo === 'function') {
+        activarModulo('modulo-aplicacion-vacunas-preventiva', null);
+    } else {
+        // Alternancia de respaldo si tu ruteador nativo usa el DOM directo
+        const views = document.querySelectorAll('.view');
+        views.forEach(v => v.style.display = 'none');
+        const moduloVac = document.getElementById('modulo-aplicacion-vacunas-preventiva');
+        if (moduloVac) moduloVac.style.display = 'block';
+    }
+}
+
+/**
+ * 🚀 Reseteo absoluto de estados y contenedores al volver al panel principal
+ */
+function volverYLimpiarVacunacion() {
+    // Limpieza de textos y cajas nativas
+    const formularioVacunas = document.getElementById('form-aplicacion-vacunas');
+    if (formularioVacunas) formularioVacunas.reset();
+    
+    const inputBuscarCurp = document.getElementById('vac-buscar-curp');
+    if (inputBuscarCurp) inputBuscarCurp.value = '';
+
+    // Re-bloqueo preventivo de la sección de tutores relacionales
+    const seccionTutorVac = document.getElementById('vac-seccion-tutor');
+    if (seccionTutorVac) seccionTutorVac.style.display = 'none';
+
+    // Restablece el dropdown de biológicos a su estado inicial de invitación
+    const selectBiologico = document.getElementById('vac-biologico-select');
+    if (selectBiologico) {
+        selectBiologico.innerHTML = '<option value="" disabled selected>-- Primero ingrese la CURP para filtrar biológicos --</option>';
+    }
+
+    _edadPacienteVacunacionGlobal = 0;
+
+    // Regresa visualmente al menú de tarjetas institucional
+    if (typeof activarModulo === 'function') {
+        activarModulo('panel-medicina-preventiva', null);
+    } else {
+        const views = document.querySelectorAll('.view');
+        views.forEach(v => v.style.display = 'none');
+        const panelPrincipal = document.getElementById('panel-medicina-preventiva') || document.getElementById('modulo-preventiva-main');
+        if (panelPrincipal) panelPrincipal.style.display = 'block';
+    }
+}
+
+/**
+ * 🚀 Buscador en Padrón: Conexión asíncrona Clever Cloud basada en CURP
+ */
+async function evaluarCurpParaVacunacion(curpVal) {
+    if (!curpVal || curpVal.trim() === "" || curpVal.trim().length !== 18) {
+        // Si borran la CURP o está incompleta, limpiamos los campos demográficos de solo lectura
+        const camposLimpieza = ['vac-pac-rfc', 'vac-pac-firstname', 'vac-pac-paternal', 'vac-pac-maternal', 'vac-pac-age', 'vac-pac-gender', 'vac-pac-phone', 'vac-pac-email', 'vac-tut-curp', 'vac-tut-fullname', 'vac-tut-relationship', 'vac-tut-phone'];
+        camposLimpieza.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) input.value = '';
+        });
+        const seccionTutorVac = document.getElementById('vac-seccion-tutor');
+        if (seccionTutorVac) seccionTutorVac.style.display = 'none';
+        return;
+    }
+
+    const curp = curpVal.trim().toUpperCase();
+
+    try {
+        // Consultamos tu endpoint existente de búsqueda de pacientes preventivos
+        const response = await fetch(`${BASE_URL}/api/preventive-patients/search/${curp}`);
+        const data = await response.json();
+
+        if (data.found) {
+            const datosPaciente = data.patient;
+            _edadPacienteVacunacionGlobal = datosPaciente.age || 0;
+
+            // 🏛️ AUTO-RELLENO IDENTIDAD PACIENTE PRINCIPAL
+            document.getElementById('vac-pac-rfc').value = datosPaciente.rfc || '';
+            document.getElementById('vac-pac-firstname').value = datosPaciente.first_name || '';
+            document.getElementById('vac-pac-paternal').value = datosPaciente.last_name_paternal || '';
+            document.getElementById('vac-pac-maternal').value = datosPaciente.last_name_maternal || '';
+            document.getElementById('vac-pac-age').value = _edadPacienteVacunacionGlobal;
+            document.getElementById('vac-pac-gender').value = datosPaciente.gender || 'NO ESPECIFICADO';
+            document.getElementById('vac-pac-phone').value = datosPaciente.phone || '';
+            document.getElementById('vac-pac-email').value = datosPaciente.email || '';
+
+            const seccionTutorVac = document.getElementById('vac-seccion-tutor');
+
+            // 🏛️ EVALUACIÓN RELACIONAL DE MINORÍA DE EDAD
+            if (_edadPacienteVacunacionGlobal <= 17) {
+                if (seccionTutorVac) seccionTutorVac.style.display = 'grid'; // Despliega la rejilla guinda
+
+                // Si el menor tiene un tutor histórico enlazado en la tabla intermedia, lo pintamos directo
+                if (data.companions && data.companions.length > 0) {
+                    const tutorHistorico = data.companions[0];
+                    document.getElementById('vac-tut-curp').value = tutorHistorico.curp || '';
+                    document.getElementById('vac-tut-fullname').value = `${tutorHistorico.first_name} ${tutorHistorico.last_name_paternal} ${tutorHistorico.last_name_maternal || ''}`.toUpperCase();
+                    document.getElementById('vac-tut-relationship').value = tutorHistorico.relationship || 'TUTOR RESPONSABLE';
+                    document.getElementById('vac-tut-phone').value = tutorHistorico.phone || '';
+                } else {
+                    // Si no tiene relaciones previas, notificamos la condición en los campos fijos
+                    document.getElementById('vac-tut-curp').value = 'SIN REGISTRO';
+                    document.getElementById('vac-tut-fullname').value = 'ACUDA AL MÓDULO DE ALTA PARA VINCULAR UN TUTOR OBLIGATORIO';
+                    document.getElementById('vac-tut-relationship').value = 'N/A';
+                    document.getElementById('vac-tut-phone').value = 'N/A';
+                }
+            } else {
+                if (seccionTutorVac) seccionTutorVac.style.display = 'none'; // Oculta si es adulto
+            }
+
+            // 🚀 EJECUTA FILTRADO CLÍNICO: Rellena el dropdown basado en la edad recuperada
+            filtrarBiologicosAptosPorEdad(_edadPacienteVacunacionGlobal);
+
+        } else {
+            // CURP no localizada en la base de datos de Clever Cloud
+            const camposLimpieza = ['vac-pac-rfc', 'vac-pac-firstname', 'vac-pac-paternal', 'vac-pac-maternal', 'vac-pac-age', 'vac-pac-gender', 'vac-pac-phone', 'vac-pac-email', 'vac-tut-curp', 'vac-tut-fullname', 'vac-tut-relationship', 'vac-tut-phone'];
+            camposLimpieza.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) input.value = '';
+            });
+            
+            const seccionTutorVac = document.getElementById('vac-seccion-tutor');
+            if (seccionTutorVac) seccionTutorVac.style.display = 'none';
+
+            const selectBiologico = document.getElementById('vac-biologico-select');
+            if (selectBiologico) {
+                selectBiologico.innerHTML = '<option value="" disabled selected>⚠️ El paciente no está registrado en el padrón de Medicina Preventiva. Regístrelo primero para habilitar vacunas. </option>';
+            }
+        }
+
+    } catch (error) {
+        console.error('Error asíncrono en búsqueda del padrón de vacunación:', error);
+    }
+}
+// =========================================================================
+// 💉 MODULO VACUNACIÓN - PARTE 2: MATRIZ CLÍNICA Y GUARDADO DE CONSULTA
+// =========================================================================
+
+/**
+ * 🚀 MATRIZ INSTITUCIONAL DE INMUNIZACIONES: Inyecta vacunas según la edad demográfica
+ */
+function filtrarBiologicosAptosPorEdad(edad) {
+    const selectBiologico = document.getElementById('vac-biologico-select');
+    if (!selectBiologico) return;
+
+    // Limpiamos el dropdown dejando una invitación limpia de captura activa
+    selectBiologico.innerHTML = '<option value="" disabled selected>-- Seleccione un Biológico Disponible --</option>';
+
+    let catalogoApto = [];
+
+    // Categoría A: Cartilla Nacional de Niñez y Adolescencia (0 a 17 años)
+    if (edad <= 17) {
+        catalogoApto = [
+            { id: "BCG", name: "BCG (Tuberculosis - Única dosis al nacer)" },
+            { id: "HEPATITIS_B_INFANTIL", name: "HEPATITIS B (Dosis Infantil)" },
+            { id: "HEXAVALENTE", name: "HEXAVALENTE ACELULAR (Difteria, Tétanos, Tos ferina, Polio, Hib, Hep B)" },
+            { id: "ROTAVIRUS", name: "ROTAVIRUS (Prevención de diarreas graves)" },
+            { id: "NEUMOCOCICA_CONJUGADA", name: "NEUMOCOCICA CONJUGADA (Infecciones por Neumococo)" },
+            { id: "INFLUENZA_ESTACIONAL", name: "INFLUENZA ESTACIONAL (Dosis Pediátrica)" },
+            { id: "SRP", name: "SRP (Sarampión, Rubéola y Parotiditis / Paperas)" },
+            { id: "VPH", name: "VPH (Virus del Papiloma Humano - Adolescentes)" },
+            { id: "TDPA", name: "TDPA (Tétanos, Difteria, Tos Ferina acelular - A partir de los 10 años)" }
+        ];
+    } 
+    // Categoría B: Cartilla Nacional de Adulto Mayor (60 años o más)
+    else if (edad >= 60) {
+        catalogoApto = [
+            { id: "NEUMOCOCICA_POLIVALENTE", name: "NEUMOCOCICA POLIVALENTE (Protección contra neumonía en el adulto mayor)" },
+            { id: "INFLUENZA_ESTACIONAL", name: "INFLUENZA ESTACIONAL (Dosis Adulto - Refuerzo Anual)" },
+            { id: "TD", name: "TD (Tétanos y Difteria - Refuerzo cada 10 años)" },
+            { id: "COVID_19_REFUERZO", name: "COVID-19 (Refuerzo anual estacional / Inmunización activa)" }
+        ];
+    } 
+    // Categoría C: Cartilla Nacional de la Mujer y el Hombre (Adultos de 18 a 59 años)
+    else {
+        catalogoApto = [
+            { id: "TD", name: "TD (Tétanos y Difteria - Esquema o refuerzo)" },
+            { id: "SR", name: "SR (Sarampión y Rubéola - Doble viral si no cuenta con antecedente vacunal)" },
+            { id: "HEPATITIS_B_ADULTO", name: "HEPATITIS B (Dosis Adulto - Grupos de riesgo o rezago)" },
+            { id: "INFLUENZA_ESTACIONAL", name: "INFLUENZA ESTACIONAL (Aplicación invernal en población con comorbilidades)" },
+            { id: "COVID_19_ADULTO", name: "COVID-19 (Esquema primario o rezago institucional)" }
+        ];
+    }
+
+    // Inyectamos las opciones filtradas al elemento <select>
+    catalogoApto.forEach(vacuna => {
+        const option = document.createElement('option');
+        option.value = vacuna.id;
+        option.textContent = vacuna.name.toUpperCase();
+        selectBiologico.appendChild(option);
+    });
+}
+
+/**
+ * 🚀 TRANSMISIÓN TRANSACCIONAL: Envío del registro de vacunación a Render
+ */
+async function guardarAplicacionVacunaNube(event) {
+    event.preventDefault();
+
+    // Habilitamos temporalmente los campos demográficos bloqueados solo para extraer la CURP
+    const inputCurpPadrón = document.getElementById('vac-buscar-curp');
+    if (!inputCurpPadrón || inputCurpPadrón.value.trim().length !== 18) {
+        alert("Error de validación: Debe buscar una CURP válida del padrón antes de registrar.");
+        return;
+    }
+
+    const curpPaciente = inputCurpPadrón.value.trim().toUpperCase();
+
+    // Extraemos los campos de captura activa del formulario clínico
+    const selectVacuna = document.getElementById('vac-biologico-select');
+    const selectDosis = document.getElementById('vac-dosis');
+    const inputLote = document.getElementById('vac-lote');
+    const inputObs = document.getElementById('vac-observaciones');
+
+    const payload = {
+        curp: curpPaciente,
+        vaccineId: selectVacuna ? selectVacuna.value : '',
+        dose: selectDosis ? selectDosis.value : 'UNICA',
+        lotNumber: inputLote ? inputLote.value.trim().toUpperCase() : '',
+        observations: inputObs ? inputObs.value.trim().toUpperCase() : 'SIN EVENTUALIDADES',
+        ageAtApplication: _edadPacienteVacunacionGlobal
+    };
+
+    // Alertas preventivas previas al fetch
+    if (!payload.vaccineId || !payload.lotNumber) {
+        alert("Los datos obligatorios de la inmunización (Vacuna y Número de Lote) están incompletos.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/preventive-vaccines/apply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.message || 'Error desconocido en el servidor de Render.');
+        }
+
+        const data = await response.json();
+        alert(data.message); // Notifica el éxito institucional
+        volverYLimpiarVacunacion(); // Limpia el formulario y regresa al panel
+
+    } catch (error) {
+        alert(`Error en la operación de vacunación: ${error.message}`);
+    }
+}
+
+
+
+
+
+
 
 
 
