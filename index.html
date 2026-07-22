@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.43.0
+        v2.0.0
     </div>
 
 
@@ -1348,6 +1348,8 @@
 </div>
 
 
+ <!-- Busca el cierre de tu último panel (el de médicos en formación) -->
+    </div> <!-- Fin de panel-medicos-formacion -->
 
 
 
@@ -1387,6 +1389,15 @@
             <p>Alta de derechohabientes en programas de vacunación, detección oportuna y seguimiento crónico-degenerativo.</p>
             <button onclick="activarModulo('modulo-registro-pacientes-preventiva', this)" class="btn-save" style="background: var(--verde-issste); color: white !important;">ABRIR FORMULARIO DE REGISTRO</button>
         </div>
+
+
+	<!-- 💉 TARJETA NUEVA: REGISTRO DE VACUNAS -->
+	<div class="card" style="border-top: 8px solid #611232; text-align: center;">
+    	    <h3 style="color: #611232; margin-top: 0; font-size: 1.50em;">Registro de Vacunas</h3>
+    	    <p>Inmunizaciones, control de dosis aplicadas, número de lote de fabricación y catálogo de biológicos disponibles.</p>
+    	    <button onclick="activarModulo('modulo-aplicacion-vacunas-preventiva', this)" class="btn-save" style="background: #611232; color: white !important;">ABRIR FORMULARIO DE VACUNAS</button>
+	</div>
+
     </div>
 </div>
 
@@ -1606,8 +1617,163 @@
 
 
 
- <!-- Busca el cierre de tu último panel (el de médicos en formación) -->
-    </div> <!-- Fin de panel-medicos-formacion -->
+
+
+
+
+
+<!-- ========================================================================= -->
+<!-- VISTA C: FORMULARIO DE APLICACIÓN Y REGISTRO DE VACUNAS - PARTE 1        -->
+<!-- ========================================================================= -->
+<div id="modulo-aplicacion-vacunas-preventiva" class="view" style="display: none;">
+    
+    <!-- Barra superior con limpieza automática al volver -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #611232; margin-bottom: 20px; padding-bottom: 10px;">
+        <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Inmunizaciones y Vacunación</h2>
+        <button onclick="volverYLimpiarVacunacion()" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">← Volver al Panel</button>
+    </div>
+
+    <!-- Encabezado Informativo Simétrico -->
+    <div style="background-color: #611232; display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
+        <span style="font-weight: bold; font-size: 1.2em;">Aplicación de Biológicos e Inmunizaciones</span>
+        <span style="text-align: right; font-size: 0.85em;">Cartilla Nacional de Salud 💉</span>
+    </div>
+
+    <!-- Disparador de Búsqueda Inteligente por CURP -->
+    <div style="background: #fbf8f3; border: 1px solid #e1d3bf; border-left: 5px solid #611232; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 15px; align-items: center; border-right: 1px solid #eee; border-bottom: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <div>
+            <label for="vac-buscar-curp" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">BÚSQUEDA INTELIGENTE POR CURP (*):</label>
+            <input type="text" id="vac-buscar-curp" maxlength="18" placeholder="Ingrese la CURP del derechohabiente para validar padrón" oninput="evaluarCurpParaVacunacion(this.value)" style="width: 100%; padding: 12px; border: 2px solid #b38e5d; border-radius: 4px; box-sizing: border-box; font-family: monospace; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; font-size: 1.1em; outline: none; background: white;">
+        </div>
+        <div style="font-size: 0.85em; color: #4b5563; line-height: 1.4; padding-left: 15px; border-left: 2px dashed #e1d3bf;">
+            💡 <strong>Nota del Sistema:</strong> Al ingresar una CURP válida, el motor extraerá los datos históricos del expediente del paciente y configurará los biológicos aptos para la edad.
+        </div>
+    </div>
+
+    <form id="form-aplicacion-vacunas" onsubmit="guardarAplicacionVacunaNube(event)">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+        <!-- ========================================================================= -->
+        <!-- SECCIÓN 1: IDENTIDAD DEL PACIENTE (BLOQUEADA DE SOLO LECTURA)             -->
+        <!-- ========================================================================= -->
+        <div style="background: #f0fdf4; border-left: 5px solid var(--verde-issste); border-radius: 6px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0;">
+            <h3 style="color: var(--verde-issste); margin-top:0; font-size: 1.05em; border-bottom: 1px solid rgba(19,78,44,0.1); padding-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; font-family: sans-serif;">1. Datos Demográficos del Paciente (Solo Lectura)</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">RFC del Paciente:</label>
+                    <input type="text" id="vac-pac-rfc" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Nombre(s):</label>
+                    <input type="text" id="vac-pac-firstname" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Apellido Paterno:</label>
+                    <input type="text" id="vac-pac-paternal" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Apellido Materno:</label>
+                    <input type="text" id="vac-pac-maternal" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Edad Registrada (Años):</label>
+                    <input type="number" id="vac-pac-age" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Género / Identidad:</label>
+                    <input type="text" id="vac-pac-gender" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Teléfono de Contacto:</label>
+                    <input type="text" id="vac-pac-phone" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Correo Electrónico:</label>
+                    <input type="text" id="vac-pac-email" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: lowercase;">
+                </div>
+            </div>
+        </div>
+        <!-- ========================================================================= -->
+        <!-- SECCIÓN 2: CONTROL DE ACOMPAÑANTES (SOLO MENORES DE EDAD - INICIA OCULTO) -->
+        <!-- ========================================================================= -->
+        <div id="vac-seccion-tutor" style="display: none; background: #fdf2f4; border-left: 5px solid #611232; border-radius: 6px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border-right: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; border-top: 1px solid #fbcfe8;">
+            <h3 style="color: #611232; margin-top:0; font-size: 1.05em; border-bottom: 1px solid rgba(97,12,50,0.1); padding-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; font-family: sans-serif;">2. Información del Acompañante / Tutor Vinculado (Solo Lectura)</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">CURP del Tutor:</label>
+                    <input type="text" id="vac-tut-curp" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Nombre Completo del Tutor:</label>
+                    <input type="text" id="vac-tut-fullname" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Parentesco Relacional:</label>
+                    <input type="text" id="vac-tut-relationship" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Teléfono de Emergencia Tutor:</label>
+                    <input type="text" id="vac-tut-phone" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box;">
+                </div>
+            </div>
+        </div>
+        <!-- ========================================================================= -->
+        <!-- SECCIÓN 3: DETALLES DE INMUNIZACIÓN (CAPTURA ACTIVA DE CONSULTA)          -->
+        <!-- ========================================================================= -->
+        <div style="background: white; border: 1px solid #e1d3bf; border-left: 5px solid #b38e5d; border-radius: 6px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0;">
+            <h3 style="color: #611232; margin-top:0; font-size: 1.05em; border-bottom: 1px solid #e1d3bf; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; font-family: sans-serif;">3. Detalles de Inmunización (Captura de Consulta)</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-top: 15px;">
+                
+                <!-- DROPDOWN DE BIOLÓGICOS (SE FILTRARÁ DINÁMICAMENTE POR JAVASCRIPT) -->
+                <div>
+                    <label for="vac-biologico-select" style="display: block; font-size: 0.8em; font-weight: bold; color: #611232; margin-bottom: 5px; font-family: sans-serif;">Selección de Vacuna / Biológico (*):</label>
+                    <select id="vac-biologico-select" required style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white; outline: none; font-weight: bold; color: #334155;">
+                        <option value="" disabled selected>-- Primero ingrese la CURP para filtrar biológicos --</option>
+                    </select>
+                </div>
+
+                <!-- DROPDOWN DE SELECCIÓN DE DOSIS -->
+                <div>
+                    <label for="vac-dosis" style="display: block; font-size: 0.8em; font-weight: bold; color: #611232; margin-bottom: 5px; font-family: sans-serif;">Esquema / Dosis Aplicada (*):</label>
+                    <select id="vac-dosis" required style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; background: white; outline: none; color: #334155;">
+                        <option value="UNICA" selected>ÚNICA DOSIS</option>
+                        <option value="1RA">1RA DOSIS</option>
+                        <option value="2DA">2DA DOSIS</option>
+                        <option value="3RA">3RA DOSIS</option>
+                        <option value="REFUERZO">REFUERZO ANUAL / ESTACIONAL</option>
+                    </select>
+                </div>
+
+                <!-- INPUT PARA NÚMERO DE LOTE -->
+                <div>
+                    <label for="vac-lote" style="display: block; font-size: 0.8em; font-weight: bold; color: #611232; margin-bottom: 5px; font-family: sans-serif;">Número de Lote de Fabricación (*):</label>
+                    <input type="text" id="vac-lote" required placeholder="Ej. LT-2026-X4" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; text-transform: uppercase; color: #334155;">
+                </div>
+
+                <!-- INPUT PARA OBSERVACIONES CLÍNICAS -->
+                <div>
+                    <label for="vac-observaciones" style="display: block; font-size: 0.8em; font-weight: bold; color: #611232; margin-bottom: 5px; font-family: sans-serif;">Observaciones Clínicas / Reacciones:</label>
+                    <input type="text" id="vac-observaciones" placeholder="Ej. Sin eventualidades / Monitoreo post-vacuna" style="width: 100%; padding: 10px; border: 1px solid #b38e5d; border-radius: 4px; box-sizing: border-box; text-transform: uppercase; color: #334155;">
+                </div>
+            </div>
+
+            <!-- BOTÓN DE GUARDADO TRANSACCIONAL -->
+            <div style="margin-top: 25px; text-align: right;">
+                <button type="submit" id="btn-submit-vacunacion" style="background-color: var(--verde-issste); color: white; border: none; padding: 12px 35px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;" onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='var(--verde-issste)'">REGISTRAR APLICACIÓN DE BIOLÓGICO</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+
+
+
+
+
+
 
     <!-- 🟢 INYECTA ESTA ETIQUETA AQUÍ PARA CERRAR LA SECCIÓN PRINCIPAL DE LA PÁGINA -->
     </div> <!-- Cierre legítimo de class="main-content" o class="container" -->
