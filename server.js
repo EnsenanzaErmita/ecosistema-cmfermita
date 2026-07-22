@@ -1,4 +1,4 @@
-console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.1.0');
+console.log('ESTA ES LA VERSIÓN NUEVA DEL ARCHIVO 2.3.0');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -1499,23 +1499,25 @@ function volverYLimpiarVacunacion() {
 /**
  * 🚀 Buscador en Padrón: Conexión asíncrona Clever Cloud basada en CURP
  */
-async function evaluarCurpParaVacunacion(curpVal) {
-    if (!curpVal || curpVal.trim() === "" || curpVal.trim().length !== 18) {
-        // Si borran la CURP o está incompleta, limpiamos los campos demográficos de solo lectura
-        const camposLimpieza = ['vac-pac-rfc', 'vac-pac-firstname', 'vac-pac-paternal', 'vac-pac-maternal', 'vac-pac-age', 'vac-pac-gender', 'vac-pac-phone', 'vac-pac-email', 'vac-tut-curp', 'vac-tut-fullname', 'vac-tut-relationship', 'vac-tut-phone'];
-        camposLimpieza.forEach(id => {
-            const input = document.getElementById(id);
-            if (input) input.value = '';
-        });
-        const seccionTutorVac = document.getElementById('vac-seccion-tutor');
-        if (seccionTutorVac) seccionTutorVac.style.display = 'none';
+// Variable global para memorizar la edad del paciente en la consulta de vacunas
+let _edadPacienteVacunacionGlobal = 0;
+
+/**
+ * 🚀 FUNCIÓN DEL BOTÓN BUSCAR: Se ejecuta de forma imperativa al hacer clic
+ */
+async function ejecutarBusquedaPadrónVacunas() {
+    const inputCurp = document.getElementById('vac-buscar-curp');
+    
+    // Validamos que la caja no esté vacía y cumpla los 18 caracteres
+    if (!inputCurp || inputCurp.value.trim().length !== 18) {
+        alert("Por favor, ingrese una CURP válida de 18 caracteres para realizar la búsqueda.");
         return;
     }
 
-    const curp = curpVal.trim().toUpperCase();
+    const curp = inputCurp.value.trim().toUpperCase();
 
     try {
-        // Consultamos tu endpoint existente de búsqueda de pacientes preventivos
+        // Consultamos tu endpoint existente de búsqueda en Clever Cloud
         const response = await fetch(`${BASE_URL}/api/preventive-patients/search/${curp}`);
         const data = await response.json();
 
@@ -1523,7 +1525,7 @@ async function evaluarCurpParaVacunacion(curpVal) {
             const datosPaciente = data.patient;
             _edadPacienteVacunacionGlobal = datosPaciente.age || 0;
 
-            // 🏛️ AUTO-RELLENO IDENTIDAD PACIENTE PRINCIPAL
+            // 🏛️ AUTO-RELLENO DE LOS CAMPOS VERDES BLOQUEADOS
             document.getElementById('vac-pac-rfc').value = datosPaciente.rfc || '';
             document.getElementById('vac-pac-firstname').value = datosPaciente.first_name || '';
             document.getElementById('vac-pac-paternal').value = datosPaciente.last_name_paternal || '';
@@ -1533,54 +1535,42 @@ async function evaluarCurpParaVacunacion(curpVal) {
             document.getElementById('vac-pac-phone').value = datosPaciente.phone || '';
             document.getElementById('vac-pac-email').value = datosPaciente.email || '';
 
+            // Revisamos de forma relacional si es un menor de edad
             const seccionTutorVac = document.getElementById('vac-seccion-tutor');
-
-            // 🏛️ EVALUACIÓN RELACIONAL DE MINORÍA DE EDAD
             if (_edadPacienteVacunacionGlobal <= 17) {
-                if (seccionTutorVac) seccionTutorVac.style.display = 'grid'; // Despliega la rejilla guinda
+                if (seccionTutorVac) seccionTutorVac.style.display = 'grid'; // Muestra los campos del tutor
 
-                // Si el menor tiene un tutor histórico enlazado en la tabla intermedia, lo pintamos directo
-                if (data.companions && data.companions.length > 0) {
-                    const tutorHistorico = data.companions[0];
-                    document.getElementById('vac-tut-curp').value = tutorHistorico.curp || '';
-                    document.getElementById('vac-tut-fullname').value = `${tutorHistorico.first_name} ${tutorHistorico.last_name_paternal} ${tutorHistorico.last_name_maternal || ''}`.toUpperCase();
-                    document.getElementById('vac-tut-relationship').value = tutorHistorico.relationship || 'TUTOR RESPONSABLE';
-                    document.getElementById('vac-tut-phone').value = tutorHistorico.phone || '';
-                } else {
-                    // Si no tiene relaciones previas, notificamos la condición en los campos fijos
-                    document.getElementById('vac-tut-curp').value = 'SIN REGISTRO';
-                    document.getElementById('vac-tut-fullname').value = 'ACUDA AL MÓDULO DE ALTA PARA VINCULAR UN TUTOR OBLIGATORIO';
-                    document.getElementById('vac-tut-relationship').value = 'N/A';
-                    document.getElementById('vac-tut-phone').value = 'N/A';
+                // Si tiene un acompañante registrado en la tabla intermedia, lo pintamos
+                if (data.companions) {
+                    const tutor = data.companions;
+                    document.getElementById('vac-tut-curp').value = tutor.curp || '';
+                    document.getElementById('vac-tut-fullname').value = `${tutor.first_name} ${tutor.last_name_paternal} ${tutor.last_name_maternal || ''}`.toUpperCase();
+                    document.getElementById('vac-tut-relationship').value = tutor.relationship || 'TUTOR RESPONSABLE';
+                    document.getElementById('vac-tut-phone').value = tutor.phone || '';
                 }
             } else {
-                if (seccionTutorVac) seccionTutorVac.style.display = 'none'; // Oculta si es adulto
+                if (seccionTutorVac) seccionTutorVac.style.display = 'none'; // Se oculta si es adulto
             }
 
-            // 🚀 EJECUTA FILTRADO CLÍNICO: Rellena el dropdown basado en la edad recuperada
-            filtrarBiologicosAptosPorEdad(_edadPacienteVacunacionGlobal);
+            // Llamamos a la matriz para que filtre las vacunas aptas para su edad
+            if (typeof filtrarBiologicosAptosPorEdad === 'function') {
+                filtrarBiologicosAptosPorEdad(_edadPacienteVacunacionGlobal);
+            }
 
         } else {
-            // CURP no localizada en la base de datos de Clever Cloud
-            const camposLimpieza = ['vac-pac-rfc', 'vac-pac-firstname', 'vac-pac-paternal', 'vac-pac-maternal', 'vac-pac-age', 'vac-pac-gender', 'vac-pac-phone', 'vac-pac-email', 'vac-tut-curp', 'vac-tut-fullname', 'vac-tut-relationship', 'vac-tut-phone'];
-            camposLimpieza.forEach(id => {
-                const input = document.getElementById(id);
-                if (input) input.value = '';
-            });
-            
-            const seccionTutorVac = document.getElementById('vac-seccion-tutor');
-            if (seccionTutorVac) seccionTutorVac.style.display = 'none';
-
-            const selectBiologico = document.getElementById('vac-biologico-select');
-            if (selectBiologico) {
-                selectBiologico.innerHTML = '<option value="" disabled selected>⚠️ El paciente no está registrado en el padrón de Medicina Preventiva. Regístrelo primero para habilitar vacunas. </option>';
-            }
+            // 🛑 Temporal: Si no lo encuentra, solo mandamos un alert común por el momento
+            alert(`La CURP [${curp}] no se encuentra registrada en el sistema.`);
         }
 
     } catch (error) {
-        console.error('Error asíncrono en búsqueda del padrón de vacunación:', error);
+        console.error('Error asíncrono en buscador de vacunación:', error);
     }
 }
+
+
+
+
+
 // =========================================================================
 // 💉 MODULO VACUNACIÓN - PARTE 2: MATRIZ CLÍNICA Y GUARDADO DE CONSULTA
 // =========================================================================
@@ -1696,6 +1686,15 @@ async function guardarAplicacionVacunaNube(event) {
         alert(`Error en la operación de vacunación: ${error.message}`);
     }
 }
+
+
+
+
+
+
+
+
+
 
 
 
