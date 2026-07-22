@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.3.0
+        v2.4.0
     </div>
 
 
@@ -4350,7 +4350,10 @@ function inyectarCatálogoTutoresConHistorico(historicos, globales) {
 // =========================================================================
 
 // Variable global de control clínico para el filtrado de biológicos por edad
-let _edadPacienteVacunacionGlobal = 0;
+if (typeof _edadPacienteVacunacionGlobal === 'undefined') {
+    window._edadPacienteVacunacionGlobal = 0;
+}
+
 
 /**
  * 🚀 Conmutador de navegación para abrir el formulario de vacunación
@@ -4401,11 +4404,6 @@ function volverYLimpiarVacunacion() {
     }
 }
 
-/**
- * 🚀 Buscador en Padrón: Conexión asíncrona Clever Cloud basada en CURP
- */
-// Variable global para memorizar la edad del paciente en la consulta de vacunas
-let _edadPacienteVacunacionGlobal = 0;
 
 /**
  * 🚀 FUNCIÓN DEL BOTÓN BUSCAR: Se ejecuta de forma imperativa al hacer clic
@@ -4597,8 +4595,7 @@ async function guardarAplicacionVacunaNube(event) {
 
 
 
-    // 🚀 ASIGNACIÓN GLOBAL: Registramos las nuevas funciones en el objeto window 
-    // para que el HTML real las pueda invocar desde el atributo onclick sin errores de referencia.
+    // Tus asignaciones globales limpias al final del script:
     window.ejecutarBusquedaPadrónVacunas = ejecutarBusquedaPadrónVacunas;
     window.volverYLimpiarVacunacion = volverYLimpiarVacunacion;
     if (typeof filtrarBiologicosAptosPorEdad === 'function') {
