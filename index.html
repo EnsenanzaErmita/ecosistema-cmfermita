@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.1.0
+        v2.2.0
     </div>
 
 
@@ -1634,21 +1634,29 @@
     </div>
 
     <!-- Encabezado Informativo Simétrico -->
-    <div style="background-color: #611232; display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
+    <div style="background-color: #611232; display: g0rid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: center; color: white; padding: 15px; border-radius: 8px 8px 0 0; font-family: 'Segoe UI', sans-serif;">
         <span style="font-weight: bold; font-size: 1.2em;">Aplicación de Biológicos e Inmunizaciones</span>
         <span style="text-align: right; font-size: 0.85em;">Cartilla Nacional de Salud 💉</span>
     </div>
 
-    <!-- Disparador de Búsqueda Inteligente por CURP -->
-    <div style="background: #fbf8f3; border: 1px solid #e1d3bf; border-left: 5px solid #611232; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 15px; align-items: center; border-right: 1px solid #eee; border-bottom: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        <div>
-            <label for="vac-buscar-curp" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px;">BÚSQUEDA INTELIGENTE POR CURP (*):</label>
-            <input type="text" id="vac-buscar-curp" maxlength="18" placeholder="Ingrese la CURP del derechohabiente para validar padrón" oninput="evaluarCurpParaVacunacion(this.value)" style="width: 100%; padding: 12px; border: 2px solid #b38e5d; border-radius: 4px; box-sizing: border-box; font-family: monospace; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; font-size: 1.1em; outline: none; background: white;">
+
+
+    <!-- 🚀 DISPARADOR DE BÚSQUEDA INTEGRAL CON BOTÓN DE ACCIÓN -->
+    <div style="background: #fbf8f3; border: 1px solid #e1d3bf; border-left: 5px solid #611232; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: flex-end; gap: 10px; width: 100%;">
+            <div style="flex: 1;">
+                <label for="vac-buscar-curp" style="display: block; font-size: 0.85em; font-weight: bold; color: #611232; margin-bottom: 5px; font-family: sans-serif;">BÚSQUEDA INTELIGENTE POR CURP (*):</label>
+                <input type="text" id="vac-buscar-curp" maxlength="18" placeholder="Ingrese la CURP del derechohabiente" style="width: 100%; padding: 12px; border: 2px solid #b38e5d; border-radius: 4px; box-sizing: border-box; font-family: monospace; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; font-size: 1.1em; outline: none; background: white;">
+            </div>
+            <!-- Botón Buscar físico para detonar la acción de forma imperativa -->
+            <button type="button" onclick="ejecutarBusquedaPadrónVacunas()" style="background: #611232; color: white; border: none; padding: 14px 25px; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.9em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: 48px; box-sizing: border-box;">Buscar Paciente</button>
         </div>
-        <div style="font-size: 0.85em; color: #4b5563; line-height: 1.4; padding-left: 15px; border-left: 2px dashed #e1d3bf;">
-            💡 <strong>Nota del Sistema:</strong> Al ingresar una CURP válida, el motor extraerá los datos históricos del expediente del paciente y configurará los biológicos aptos para la edad.
+        <div style="font-size: 0.85em; color: #4b5563; line-height: 1.4; padding-left: 15px; border-left: 2px dashed #e1d3bf; font-family: sans-serif;">
+            💡 <strong>Eficiencia de Registro:</strong> Si la CURP no existe en el padrón, el sistema lo redireccionará de forma automática al módulo de Alta transfiriendo el identificador.
         </div>
     </div>
+
+
 
     <form id="form-aplicacion-vacunas" onsubmit="guardarAplicacionVacunaNube(event)">
         <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
