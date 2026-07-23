@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v3.2.0
+        v3.3.0
     </div>
 
 
@@ -4105,8 +4105,6 @@ async function evaluarCurpPreventiva(curpVal) {
     document.getElementById('prev-age').value = edadCalculada;
     _esMenorDeEdad = edadCalculada <= 17; 
 
-    // 🛑 REMOVIDO: Ya no se altera el input prev-gender con la CURP para respetar preferencias libres.
-
     const cuerpoModal = document.getElementById('cuerpoModalAuditoria');
     const modalAuditoria = document.getElementById('modalAuditoria');
 
@@ -4123,17 +4121,27 @@ async function evaluarCurpPreventiva(curpVal) {
             if (selectModo) selectModo.disabled = false;
             if (selectTutor) selectTutor.disabled = false;
 
+            // 🚀 EVALUACIÓN CORRECTA DE RELACIONES HISTÓRICAS
             if (data.found && data.companions && data.companions.length > 0) {
+                // Si el menor existe y tiene tutores, inyecta su catálogo histórico
                 inyectarCatálogoTutoresConHistorico(data.companions, _tutorsCatalogGlobal || []);
             } else {
-                _tutorsCatalogGlobal = data.availableCompanions || [];
-                selectTutor.innerHTML = '<option value="" disabled selected>-- Seleccione del Catálogo --</option>';
-                if (_tutorsCatalogGlobal.length === 0) {
-                    selectTutor.innerHTML += '<option value="">Sin tutores registrados. Elija crear uno NUEVO.</option>';
-                } else {
-                    _tutorsCatalogGlobal.forEach(t => {
-                        selectTutor.innerHTML += `<option value="${t.id}">${t.full_name.toUpperCase()} (${t.relationship})</option>`;
-                    });
+                // 🔒 SOLUCIÓN ABSOLUTA: Si el menor no existe en la BD (es un registro nuevo),
+                // NO debe heredar tutores de otras familias. Vaciamos el catálogo general.
+                _tutorsCatalogGlobal = []; 
+                
+                selectTutor.innerHTML = `
+                    <option value="" disabled selected>-- Este menor no cuenta con tutores relacionados --</option>
+                    <option value="NUEVO_TUTOR">➕ VINCULAR UN TUTOR NUEVO PARA ESTE EXPEDIENTE</option>
+                `;
+
+                // Forzamos al selector de modo a cambiar visualmente a "CREAR" para agilizar la captura
+                if (selectModo) {
+                    selectModo.value = 'CREATE';
+                    // Si cuentas con un disparador onchange nativo en tu HTML, lo forzamos a ejecutarse:
+                    if (typeof selectModo.onchange === 'function') {
+                        selectModo.onchange();
+                    }
                 }
             }
         } else {
@@ -4156,7 +4164,6 @@ async function evaluarCurpPreventiva(curpVal) {
             document.getElementById('prev-email').value = datosPaciente.email || '';
             document.getElementById('prev-age').value = datosPaciente.age || edadCalculada;
             
-            // Auto-relleno limpio de texto directo desde la base de datos
             if (document.getElementById('prev-gender') && datosPaciente.gender) {
                 document.getElementById('prev-gender').value = datosPaciente.gender;
             }
