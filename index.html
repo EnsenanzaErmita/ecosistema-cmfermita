@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v3.1.0
+        v3.2.0
     </div>
 
 
@@ -1712,10 +1712,19 @@
                     <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">CURP del Tutor:</label>
                     <input type="text" id="vac-tut-curp" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
                 </div>
+
+
+
+                <!-- 🚀 REEMPLAZO INTERACTIVO: SELECTOR DINÁMICO DE TUTORES -->
                 <div>
-                    <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Nombre Completo del Tutor:</label>
-                    <input type="text" id="vac-tut-fullname" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
+                    <label for="vac-tut-fullname" style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Nombre Completo del Tutor (*):</label>
+                    <select id="vac-tut-fullname" onchange="actualizarDatosTutorSeleccionado(this)" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: white; font-weight: bold; color: #334155; box-sizing: border-box; outline: none;">
+                        <option value="" disabled selected>-- Seleccione un tutor del listado --</option>
+                    </select>
                 </div>
+
+
+
                 <div>
                     <label style="display: block; font-size: 0.8em; font-weight: bold; color: #4b5563; margin-bottom: 5px; font-family: sans-serif;">Parentesco Relacional:</label>
                     <input type="text" id="vac-tut-relationship" disabled style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #eaedf0; font-weight: bold; color: #334155; box-sizing: border-box; text-transform: uppercase;">
@@ -4444,13 +4453,12 @@ function volverYLimpiarVacunacion() {
 }
 
 
-/**
- * 🚀 FUNCIÓN DEL BOTÓN BUSCAR: Se ejecuta de forma imperativa al hacer clic
- */
+
+
+
 async function ejecutarBusquedaPadrónVacunas() {
     const inputCurp = document.getElementById('vac-buscar-curp');
     
-    // Validamos que la caja no esté vacía y cumpla los 18 caracteres
     if (!inputCurp || inputCurp.value.trim().length !== 18) {
         alert("Por favor, ingrese una CURP válida de 18 caracteres para realizar la búsqueda.");
         return;
@@ -4459,7 +4467,6 @@ async function ejecutarBusquedaPadrónVacunas() {
     const curp = inputCurp.value.trim().toUpperCase();
 
     try {
-        // Consultamos tu endpoint existente de búsqueda en Clever Cloud
         const response = await fetch(`${BASE_URL}/api/preventive-patients/search/${curp}`);
         const data = await response.json();
 
@@ -4467,7 +4474,7 @@ async function ejecutarBusquedaPadrónVacunas() {
             const datosPaciente = data.patient;
             _edadPacienteVacunacionGlobal = datosPaciente.age || 0;
 
-            // 🏛️ AUTO-RELLENO DE LOS CAMPOS VERDES BLOQUEADOS
+            // Auto-relleno demográfico de campos verdes bloqueados
             document.getElementById('vac-pac-rfc').value = datosPaciente.rfc || '';
             document.getElementById('vac-pac-firstname').value = datosPaciente.first_name || '';
             document.getElementById('vac-pac-paternal').value = datosPaciente.last_name_paternal || '';
@@ -4477,61 +4484,70 @@ async function ejecutarBusquedaPadrónVacunas() {
             document.getElementById('vac-pac-phone').value = datosPaciente.phone || '';
             document.getElementById('vac-pac-email').value = datosPaciente.email || '';
 
-            // Revisamos de forma relacional si es un menor de edad
             const seccionTutorVac = document.getElementById('vac-seccion-tutor');
-            if (_edadPacienteVacunacionGlobal <= 17) {
-                if (seccionTutorVac) seccionTutorVac.style.display = 'grid'; // Muestra los campos del tutor
+            const selectTutor = document.getElementById('vac-tut-fullname');
 
-                // 🚀 SOLUCIÓN PUNTO 1: Transformar el contenedor en un selector de selección múltiple/opciones
-                // Buscamos la caja donde antes se pintaba el nombre completo del tutor para meter el dropdown interactivo
-                const contenedorNombreTutor = document.getElementById('vac-tut-fullname');
-                if (contenedorNombreTutor) {
-                    // Si el elemento es un input nativo, lo cambiamos temporalmente o inyectamos las opciones
-                    // Para máxima compatibilidad con tu HTML actual, limpiaremos los campos fijos y daremos foco selectivo:
+            if (_edadPacienteVacunacionGlobal <= 17) {
+                if (seccionTutorVac) seccionTutorVac.style.display = 'grid';
+
+                // 🚀 SOLUCIÓN 1: Mapeo dinámico de acompañantes en el select interactivo
+                if (selectTutor) {
+                    selectTutor.innerHTML = '<option value="" disabled selected>-- Seleccione un acompañante del listado --</option>';
+                    
+                    // Limpiamos cajas secundarias del tutor hasta que elijan uno
+                    document.getElementById('vac-tut-curp').value = '';
+                    document.getElementById('vac-tut-relationship').value = '';
+                    document.getElementById('vac-tut-phone').value = '';
+
+                    // Inyectamos las opciones si el backend envía una lista o un objeto
                     if (data.companions && data.companions.length > 0) {
-                        // Si viene un arreglo o un objeto, permitimos mapear al tutor principal o habilitar el campo
+                        data.companions.forEach(tutor => {
+                            const option = document.createElement('option');
+                            option.value = JSON.stringify(tutor);
+                            option.textContent = `${tutor.first_name} ${tutor.last_name_paternal} ${tutor.last_name_maternal || ''} (${tutor.relationship || 'TUTOR'})`.toUpperCase();
+                            selectTutor.appendChild(option);
+                        });
+                    } else if (data.companions && typeof data.companions === 'object' && data.companions.curp) {
                         const tutor = data.companions;
-                        document.getElementById('vac-tut-curp').value = tutor.curp || '';
-                        document.getElementById('vac-tut-fullname').value = `${tutor.first_name} ${tutor.last_name_paternal} ${tutor.last_name_maternal || ''}`.toUpperCase();
-                        document.getElementById('vac-tut-relationship').value = tutor.relationship || 'TUTOR RESPONSABLE';
-                        document.getElementById('vac-tut-phone').value = tutor.phone || '';
-                        
-                        // Habilitamos el campo de parentesco por si desean cambiar el acompañante activo en la sesión
-                        document.getElementById('vac-tut-fullname').disabled = false;
-                        document.getElementById('vac-tut-fullname').style.background = '#ffffff';
-                        document.getElementById('vac-tut-fullname').placeholder = "SELECCIONE O RE-ESCRIBA EL ACOMPAÑANTE ACTIVO";
+                        const option = document.createElement('option');
+                        option.value = JSON.stringify(tutor);
+                        option.textContent = `${tutor.first_name} ${tutor.last_name_paternal} ${tutor.last_name_maternal || ''} (${tutor.relationship || 'TUTOR'})`.toUpperCase();
+                        selectTutor.appendChild(option);
                     } else {
-                        document.getElementById('vac-tut-curp').value = 'SIN REGISTRO';
-                        document.getElementById('vac-tut-fullname').value = 'REQUERIDO: VINCULE UN TUTOR EN EL MÓDULO DE ALTA';
-                        document.getElementById('vac-tut-relationship').value = 'N/A';
-                        document.getElementById('vac-tut-phone').value = 'N/A';
+                        selectTutor.innerHTML = '<option value="" disabled selected>⚠️ MENOR SIN TUTORES ENLAZADOS</option>';
                     }
                 }
             } else {
-                if (seccionTutorVac) seccionTutorVac.style.display = 'none'; // Se oculta si es adulto
+                if (seccionTutorVac) seccionTutorVac.style.display = 'none';
             }
 
-            // Llamamos a la matriz para que filtre las vacunas aptas para su edad
             if (typeof filtrarBiologicosAptosPorEdad === 'function') {
                 filtrarBiologicosAptosPorEdad(_edadPacienteVacunacionGlobal);
             }
 
         } else {
-            // 🚀 SOLUCIÓN PUNTO 2: PURGA ABSOLUTA ANTES DE REDIRECCIONAR
-            // Limpiamos los selectores del formulario de alta para que no arrastren relaciones del paciente anterior
+            // 🚀 SOLUCIÓN 2: PURGA TOTAL EN EL ALTA ANTES DE REDIRECCIONAR
+            // Limpiamos el catálogo/select de acompañantes del formulario de alta para que inicie en ceros
             const selectCompAlta = document.getElementById('prev-companion-select');
             if (selectCompAlta) {
                 selectCompAlta.innerHTML = '<option value="" selected disabled>-- Seleccione un acompañante del catálogo --</option>';
             }
+            
+            // Reseteamos todas las cajas de captura del formulario de alta de pacientes
             const formAltaSilencioso = document.getElementById('form-paciente-preventiva');
             if (formAltaSilencioso) formAltaSilencioso.reset();
 
+            // Adicionalmente, si tu formulario nativo maneja una función de limpieza, la detonamos
+            if (typeof volverYLimpiarPreventiva === 'function') {
+                // Forzamos un reset visual controlado de componentes dinámicos
+                const bloqueTutorAlta = document.getElementById('prev-section-companion');
+                if (bloqueTutorAlta) bloqueTutorAlta.style.display = 'none';
+            }
+
             alert(`⚠️ Derechohabiente No Localizado\n\nLa CURP [${curp}] no se encuentra en el padrón clínico.\n\nSerá redirigido al formulario de Registro de Pacientes. La CURP se transferirá automáticamente para evitar la doble captura.`);
             
-            // 1. Activamos la bandera global para memorizar que venimos desde vacunas
             window._origenFlujoVacunacion = true;
 
-            // 2. Transmutación de pantalla: Enviamos al usuario a la vista de alta
             if (typeof activarModulo === 'function') {
                 activarModulo('modulo-registro-pacientes-preventiva', null);
             } else {
@@ -4540,7 +4556,6 @@ async function ejecutarBusquedaPadrónVacunas() {
                 if (modAlta) modAlta.style.display = 'block';
             }
 
-            // 3. Prelleno Automático e inyección transparente en la caja `prev-curp`
             const inputAltaCurp = document.getElementById('prev-curp');
             if (inputAltaCurp) {
                 inputAltaCurp.value = curp;
@@ -4549,11 +4564,26 @@ async function ejecutarBusquedaPadrónVacunas() {
                 }
             }
         }
-
     } catch (error) {
         console.error('Error asíncrono en buscador de vacunación:', error);
     }
 }
+
+/**
+ * 🚀 FUNCIÓN COMPLEMENTARIA: Rellena automáticamente los campos guindas secundarios al cambiar de tutor
+ */
+function actualizarDatosTutorSeleccionado(elementoSelect) {
+    if (!elementoSelect || !elementoSelect.value) return;
+    try {
+        const tutorObj = JSON.parse(elementoSelect.value);
+        document.getElementById('vac-tut-curp').value = tutorObj.curp || '';
+        document.getElementById('vac-tut-relationship').value = (tutorObj.relationship || 'TUTOR RESPONSABLE').toUpperCase();
+        document.getElementById('vac-tut-phone').value = tutorObj.phone || '';
+    } catch (e) {
+        console.error("Error al parsear los datos del acompañante elegido:", e);
+    }
+}
+
 
 
 
@@ -4679,7 +4709,7 @@ async function guardarAplicacionVacunaNube(event) {
 
 
 
-
+    window.actualizarDatosTutorSeleccionado = actualizarDatosTutorSeleccionado;
     // Tus asignaciones globales limpias al final del script:
     window.ejecutarBusquedaPadrónVacunas = ejecutarBusquedaPadrónVacunas;
     window.volverYLimpiarVacunacion = volverYLimpiarVacunacion;
