@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.4.0
+        v3.0.0
     </div>
 
 
@@ -4004,12 +4004,51 @@ async function guardarPacientePreventivaNube(event) {
 
         const data = await response.json();
         alert(data.message);
-        volverYLimpiarPreventiva(); 
+
+        // 🚀 CONTROL DE RETORNO INTELIGENTE INTER-MODULAR
+        if (window._origenFlujoVacunacion === true) {
+            // Apagamos la bandera para futuros registros independientes
+            window._origenFlujoVacunacion = false;
+
+            // Extraemos la CURP que se acaba de guardar con éxito
+            const curpRecienRegistrada = payload.curp;
+
+            // Redireccionamos a la pantalla de Registro de Vacunas
+            if (typeof activarModulo === 'function') {
+                activarModulo('modulo-aplicacion-vacunas-preventiva', null);
+            } else {
+                document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+                const modVac = document.getElementById('modulo-aplicacion-vacunas-preventiva');
+                if (modVac) modVac.style.display = 'block';
+            }
+
+            // Inyectamos la CURP en el buscador de vacunas y disparamos la carga demográfica de inmediato
+            const inputBuscarVacunas = document.getElementById('vac-buscar-curp');
+            if (inputBuscarVacunas && curpRecienRegistrada !== "") {
+                inputBuscarVacunas.value = curpRecienRegistrada;
+                if (typeof ejecutarBusquedaPadrónVacunas === 'function') {
+                    ejecutarBusquedaPadrónVacunas();
+                }
+            }
+
+            // Limpiamos de forma silenciosa el formulario de alta en segundo plano
+            const formAlta = document.getElementById('form-paciente-preventiva');
+            if (formAlta) formAlta.reset();
+            if (typeof alternarBloqueoCamposPreventiva === 'function') {
+                alternarBloqueoCamposPreventiva(false);
+            }
+
+        } else {
+            // 📱 REGISTRO INDEPENDIENTE: Si no venía de vacunas, sigue su curso normal sin desviar
+            volverYLimpiarPreventiva(); 
+        }
 
     } catch (err) {
         alert(`Error en la operación: ${err.message}`);
         if (_modoEdicionActivo) {
-            alternarBloqueoCamposPreventiva(true);
+            if (typeof alternarBloqueoCamposPreventiva === 'function') {
+                alternarBloqueoCamposPreventiva(true);
+            }
             const inputCurpField = document.getElementById('prev-curp');
             if (inputCurpField) inputCurpField.disabled = true;
         }
@@ -4461,8 +4500,29 @@ async function ejecutarBusquedaPadrónVacunas() {
             }
 
         } else {
-            // 🛑 Temporal: Si no lo encuentra, solo mandamos un alert común por el momento
-            alert(`La CURP [${curp}] no se encuentra registrada en el sistema.`);
+            // 🚀 REDIRECCIONAMIENTO AUTOMÁTICO EN CASO DE REGISTRO NUEVO
+            alert(`⚠️ Derechohabiente No Localizado\n\nLa CURP [${curp}] no se encuentra en el padrón clínico.\n\nSerá redirigido al formulario de Registro de Pacientes. La CURP se transferirá automáticamente para evitar la doble captura.`);
+            
+            // 1. Activamos la bandera global para memorizar que venimos desde vacunas
+            window._origenFlujoVacunacion = true;
+
+            // 2. Transmutación de pantalla: Enviamos al usuario a la vista de alta
+            if (typeof activarModulo === 'function') {
+                activarModulo('modulo-registro-pacientes-preventiva', null);
+            } else {
+                document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+                const modAlta = document.getElementById('modulo-registro-pacientes-preventiva');
+                if (modAlta) modAlta.style.display = 'block';
+            }
+
+            // 3. Prelleno Automático e invocación de la consulta RENAPO nativa
+            const inputAltaCurp = document.getElementById('prev-curp');
+            if (inputAltaCurp) {
+                inputAltaCurp.value = curp;
+                if (typeof evaluarCurpPreventiva === 'function') {
+                    evaluarCurpPreventiva(curp);
+                }
+            }
         }
 
     } catch (error) {
