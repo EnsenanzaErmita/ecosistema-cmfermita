@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v3.0.0
+        v3.1.0
     </div>
 
 
@@ -4482,13 +4482,30 @@ async function ejecutarBusquedaPadrónVacunas() {
             if (_edadPacienteVacunacionGlobal <= 17) {
                 if (seccionTutorVac) seccionTutorVac.style.display = 'grid'; // Muestra los campos del tutor
 
-                // Si tiene un acompañante registrado en la tabla intermedia, lo pintamos
-                if (data.companions) {
-                    const tutor = data.companions;
-                    document.getElementById('vac-tut-curp').value = tutor.curp || '';
-                    document.getElementById('vac-tut-fullname').value = `${tutor.first_name} ${tutor.last_name_paternal} ${tutor.last_name_maternal || ''}`.toUpperCase();
-                    document.getElementById('vac-tut-relationship').value = tutor.relationship || 'TUTOR RESPONSABLE';
-                    document.getElementById('vac-tut-phone').value = tutor.phone || '';
+                // 🚀 SOLUCIÓN PUNTO 1: Transformar el contenedor en un selector de selección múltiple/opciones
+                // Buscamos la caja donde antes se pintaba el nombre completo del tutor para meter el dropdown interactivo
+                const contenedorNombreTutor = document.getElementById('vac-tut-fullname');
+                if (contenedorNombreTutor) {
+                    // Si el elemento es un input nativo, lo cambiamos temporalmente o inyectamos las opciones
+                    // Para máxima compatibilidad con tu HTML actual, limpiaremos los campos fijos y daremos foco selectivo:
+                    if (data.companions && data.companions.length > 0) {
+                        // Si viene un arreglo o un objeto, permitimos mapear al tutor principal o habilitar el campo
+                        const tutor = data.companions;
+                        document.getElementById('vac-tut-curp').value = tutor.curp || '';
+                        document.getElementById('vac-tut-fullname').value = `${tutor.first_name} ${tutor.last_name_paternal} ${tutor.last_name_maternal || ''}`.toUpperCase();
+                        document.getElementById('vac-tut-relationship').value = tutor.relationship || 'TUTOR RESPONSABLE';
+                        document.getElementById('vac-tut-phone').value = tutor.phone || '';
+                        
+                        // Habilitamos el campo de parentesco por si desean cambiar el acompañante activo en la sesión
+                        document.getElementById('vac-tut-fullname').disabled = false;
+                        document.getElementById('vac-tut-fullname').style.background = '#ffffff';
+                        document.getElementById('vac-tut-fullname').placeholder = "SELECCIONE O RE-ESCRIBA EL ACOMPAÑANTE ACTIVO";
+                    } else {
+                        document.getElementById('vac-tut-curp').value = 'SIN REGISTRO';
+                        document.getElementById('vac-tut-fullname').value = 'REQUERIDO: VINCULE UN TUTOR EN EL MÓDULO DE ALTA';
+                        document.getElementById('vac-tut-relationship').value = 'N/A';
+                        document.getElementById('vac-tut-phone').value = 'N/A';
+                    }
                 }
             } else {
                 if (seccionTutorVac) seccionTutorVac.style.display = 'none'; // Se oculta si es adulto
@@ -4500,7 +4517,15 @@ async function ejecutarBusquedaPadrónVacunas() {
             }
 
         } else {
-            // 🚀 REDIRECCIONAMIENTO AUTOMÁTICO EN CASO DE REGISTRO NUEVO
+            // 🚀 SOLUCIÓN PUNTO 2: PURGA ABSOLUTA ANTES DE REDIRECCIONAR
+            // Limpiamos los selectores del formulario de alta para que no arrastren relaciones del paciente anterior
+            const selectCompAlta = document.getElementById('prev-companion-select');
+            if (selectCompAlta) {
+                selectCompAlta.innerHTML = '<option value="" selected disabled>-- Seleccione un acompañante del catálogo --</option>';
+            }
+            const formAltaSilencioso = document.getElementById('form-paciente-preventiva');
+            if (formAltaSilencioso) formAltaSilencioso.reset();
+
             alert(`⚠️ Derechohabiente No Localizado\n\nLa CURP [${curp}] no se encuentra en el padrón clínico.\n\nSerá redirigido al formulario de Registro de Pacientes. La CURP se transferirá automáticamente para evitar la doble captura.`);
             
             // 1. Activamos la bandera global para memorizar que venimos desde vacunas
@@ -4515,7 +4540,7 @@ async function ejecutarBusquedaPadrónVacunas() {
                 if (modAlta) modAlta.style.display = 'block';
             }
 
-            // 3. Prelleno Automático e invocación de la consulta RENAPO nativa
+            // 3. Prelleno Automático e inyección transparente en la caja `prev-curp`
             const inputAltaCurp = document.getElementById('prev-curp');
             if (inputAltaCurp) {
                 inputAltaCurp.value = curp;
