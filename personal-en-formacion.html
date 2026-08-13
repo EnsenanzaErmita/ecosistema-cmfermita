@@ -196,114 +196,145 @@
 	    <h1>C.M.F. ERMITA - ADMINISTRACIÓN DE SERVICIOS</h1>
 	</header>
 
-    <main>
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--azul-trainees); margin-bottom: 20px; padding-bottom: 10px;">
-            <h2 style="color: var(--guinda-header); margin:0;">Portal de Médicos en Formación</h2>
-            <button onclick="salirAlMenu()" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                ← Salir al Menú Principal
-            </button>
-        </div>
 
-        <div class="teaching-hero">
-            <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
-            <div id="phrase-container-trainees" style="font-size: 1.1em; font-style: italic; color: var(--dorado-calidad); margin-top: 8px; font-weight: 300; min-height: 2.2em; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-in-out;">
-                "Cargando pensamiento institucional..."
+
+
+<main>
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--azul-trainees); margin-bottom: 20px; padding-bottom: 10px;">
+        <h2 style="color: var(--guinda-header); margin:0;">Portal de Médicos en Formación</h2>
+        <button onclick="salirAlMenu()" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            ← Salir al Menú Principal
+        </button>
+    </div>
+
+    <div class="teaching-hero">
+        <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
+        <div id="phrase-container-trainees" style="font-size: 1.1em; font-style: italic; color: var(--dorado-calidad); margin-top: 8px; font-weight: 300; min-height: 2.2em; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-in-out;">
+            "Cargando pensamiento institucional..."
+        </div>
+    </div>
+
+    <div class="login-grid">
+
+        <div id="section-formacion-cards" class="active-view">
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+
+                <div class="card" style="border-top: 8px solid #0284c7; flex: 1; min-width: 280px; max-width: 350px;">
+                    <h3 style="color: #0284c7; text-align: center; margin-bottom: 10px;">MIP</h3>
+                    <p style="font-size: 0.9em; color: #555; text-align: center; margin-bottom: 20px;">
+                        Panel de gestión y registros para Médicos Internos de Pregrado.
+                    </p>
+                    <button class="btn-save" 
+                            style="background: #0284c7; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer;" 
+                            onclick="abrirPanelFormacion('mip')">
+                        Abrir Panel MIP
+                    </button>
+                </div>
+
+                <div class="card" style="border-top: 8px solid #0f766e; flex: 1; min-width: 280px; max-width: 350px;">
+                    <h3 style="color: #0f766e; text-align: center; margin-bottom: 10px;">Pasante</h3>
+                    <p style="font-size: 0.9em; color: #555; text-align: center; margin-bottom: 20px;">
+                        Panel de gestión y control para Pasantes de Servicio Social.
+                    </p>
+                    <button class="btn-save" 
+                            style="background: #0f766e; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer;" 
+                            onclick="abrirPanelFormacion('pasante')">
+                        Abrir Panel Pasante
+                    </button>
+                </div>
+
+                <div class="card" style="border-top: 8px solid #4338ca; flex: 1; min-width: 280px; max-width: 350px;">
+                    <h3 style="color: #4338ca; text-align: center; margin-bottom: 10px;">Residente</h3>
+                    <p style="font-size: 0.9em; color: #555; text-align: center; margin-bottom: 20px;">
+                        Panel de seguimiento e información para Médicos Residentes.
+                    </p>
+                    <button class="btn-save" 
+                            style="background: #4338ca; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer;" 
+                            onclick="abrirPanelFormacion('residente')">
+                        Abrir Panel Residente
+                    </button>
+                </div>
+
             </div>
         </div>
 
-        <div class="login-grid">
-
-            
-
-
-<div id="section-formacion-cards" class="active-view">
-    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-
-        <div class="card" style="border-top: 8px solid #0284c7; flex: 1; min-width: 280px; max-width: 350px;">
-            <h3 style="color: #0284c7; text-align: center; margin-bottom: 10px;">MIP</h3>
-            <p style="font-size: 0.9em; color: #555; text-align: center; margin-bottom: 20px;">
-                Panel de gestión y registros para Médicos Internos de Pregrado.
-            </p>
-            <button class="btn-save" 
-                    style="background: #0284c7; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer;" 
-                    onclick="abrirPanelFormacion('mip')">
-                Abrir Panel MIP
+        <div id="panel-mip" class="panel-formacion-contenido" style="display: none; padding: 20px;">
+            <button onclick="volverAFormacionCards()" style="margin-bottom: 15px; cursor: pointer; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; background: #f3f4f6;">
+                &larr; Volver a Formación
             </button>
+            <h2 style="color: #0284c7; border-bottom: 2px solid #0284c7; padding-bottom: 10px; text-align: center;">Panel de Médicos Internos de Pregrado (MIP)</h2>
+            <div id="contenedor-form-mip"></div>
         </div>
 
-        <div class="card" style="border-top: 8px solid #0f766e; flex: 1; min-width: 280px; max-width: 350px;">
-            <h3 style="color: #0f766e; text-align: center; margin-bottom: 10px;">Pasante</h3>
-            <p style="font-size: 0.9em; color: #555; text-align: center; margin-bottom: 20px;">
-                Panel de gestión y control para Pasantes de Servicio Social.
-            </p>
-            <button class="btn-save" 
-                    style="background: #0f766e; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer;" 
-                    onclick="abrirPanelFormacion('pasante')">
-                Abrir Panel Pasante
+        <div id="panel-pasante" class="panel-formacion-contenido" style="display: none; padding: 20px;">
+            <button onclick="volverAFormacionCards()" style="margin-bottom: 15px; cursor: pointer; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; background: #f3f4f6;">
+                &larr; Volver a Formación
             </button>
+            <h2 style="color: #0f766e; border-bottom: 2px solid #0f766e; padding-bottom: 10px; text-align: center;">Panel de Pasantes de Servicio Social</h2>
+            <div id="contenedor-form-pasante"></div>
         </div>
 
-        <div class="card" style="border-top: 8px solid #4338ca; flex: 1; min-width: 280px; max-width: 350px;">
-            <h3 style="color: #4338ca; text-align: center; margin-bottom: 10px;">Residente</h3>
-            <p style="font-size: 0.9em; color: #555; text-align: center; margin-bottom: 20px;">
-                Panel de seguimiento e información para Médicos Residentes.
-            </p>
-            <button class="btn-save" 
-                    style="background: #4338ca; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer;" 
-                    onclick="abrirPanelFormacion('residente')">
-                Abrir Panel Residente
+        <div id="panel-residente" class="panel-formacion-contenido" style="display: none; padding: 20px;">
+            <button onclick="volverAFormacionCards()" style="margin-bottom: 15px; cursor: pointer; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; background: #f3f4f6;">
+                &larr; Volver a Formación
             </button>
+            <h2 style="color: #4338ca; border-bottom: 2px solid #4338ca; padding-bottom: 10px; text-align: center;">Panel de Médicos Residentes</h2>
+            <div id="contenedor-form-residente"></div>
+        </div>
+
+        <div id="formulario-plantilla-container" style="display: none;">
+            <form id="form-trainee-registration" onsubmit="guardarRegistroTrainee(event)" style="background: #fff; padding: 25px; border-radius: 8px; border: 1px solid #e5e7eb; max-width: 650px; margin: 20px auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                
+                <h3 id="form-trainee-title" style="color: #1e3a8a; margin-top: 0; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; text-align: center;">
+                    Formulario de Registro
+                </h3>
+
+                <input type="hidden" id="trainee_type" name="trainee_type" value="">
+
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">Apellido Paterno *</label>
+                        <input type="text" id="last_name_paternal" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">Apellido Materno *</label>
+                        <input type="text" id="last_name_maternal" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">Nombre(s) *</label>
+                    <input type="text" id="first_name" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">Género *</label>
+                        <select id="gender" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                            <option value="">-- Seleccione --</option>
+                            <option value="Male">Masculino</option>
+                            <option value="Female">Femenino</option>
+                            <option value="Other">Otro</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">Correo Electrónico *</label>
+                        <input type="email" id="email" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-save-trainee" style="background: #1e3a8a; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1em;">
+                    Completar Registro
+                </button>
+            </form>
         </div>
 
     </div>
-</div>
+</main>
 
 
 
 
-<div id="panel-mip" class="panel-formacion-contenido" style="display: none; padding: 20px;">
-    <button onclick="volverAFormacionCards()" style="margin-bottom: 15px; cursor: pointer; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; background: #f3f4f6;">
-        &larr; Volver a Formación
-    </button>
-    <h2 style="color: #0284c7; border-bottom: 2px solid #0284c7; padding-bottom: 10px;">Panel de Médicos Internos de Pregrado (MIP)</h2>
-    <p>Aquí irá el contenido, formularios o tablas pertenecientes a MIP.</p>
-</div>
-
-<div id="panel-pasante" class="panel-formacion-contenido" style="display: none; padding: 20px;">
-    <button onclick="volverAFormacionCards()" style="margin-bottom: 15px; cursor: pointer; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; background: #f3f4f6;">
-        &larr; Volver a Formación
-    </button>
-    <h2 style="color: #0f766e; border-bottom: 2px solid #0f766e; padding-bottom: 10px;">Panel de Pasantes de Servicio Social</h2>
-    <p>Aquí irá el contenido, formularios o tablas pertenecientes a Pasantes.</p>
-</div>
-
-<div id="panel-residente" class="panel-formacion-contenido" style="display: none; padding: 20px;">
-    <button onclick="volverAFormacionCards()" style="margin-bottom: 15px; cursor: pointer; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; background: #f3f4f6;">
-        &larr; Volver a Formación
-    </button>
-    <h2 style="color: #4338ca; border-bottom: 2px solid #4338ca; padding-bottom: 10px;">Panel de Médicos Residentes</h2>
-    <p>Aquí irá el contenido, formularios o tablas pertenecientes a Residentes.</p>
-</div>
-
-
-
-
-
-
-
-
-
-        </div>
-
-        <div id="tarjeta-registro-trainee-container" style="display: none; margin-top: 30px; background: #fff; border: 1px solid var(--azul-trainees); border-top: 5px solid var(--azul-trainees); padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-            <h3 id="titulo-dinamico-registro" style="color: var(--azul-trainees); margin-top: 0; border-bottom: 2px solid var(--azul-trainees); padding-bottom: 8px; text-transform: uppercase;">Formulario de Carga</h3>
-            <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Complete sus datos de adscripción institucional. Los campos marcados con (*) son mandatorios.</p>
-            
-            <div style="padding: 30px; background: #fdfdfd; border: 1px dashed #ccc; text-align: center; color: #777; border-radius: 4px; font-weight: bold;">
-                📋 Formulario de Registro Listo para Modelar los Campos de Carga de Archivos
-            </div>
-        </div>
-    </main>
 
     <footer>
         <p>&copy; 2026 Todos los derechos reservados</p>
@@ -312,102 +343,149 @@
         <p style="font-size: 0.75em; opacity: 0.7; margin-top: 10px;">Clínica de Medicina Familiar Ermita - ISSSTE</p>
     </footer>
 
-    <script>
-        // Protección: Si intentan entrar directo por URL sin haber puesto la contraseña, los regresa al inicio
-        if (!sessionStorage.getItem('trainee_auth')) {
-            window.location.href = '/';
+
+
+<script>
+    // 1. Protección de sesión
+    if (!sessionStorage.getItem('trainee_auth')) {
+        window.location.href = '/';
+    }
+
+    // 2. Lógica del carrusel de frases
+    const frasesInstitucionales = [
+        '"La enseñanza médica de excelencia es la base de la medicina del mañana."',
+        '"Compromiso, ética y vocación en el servicio a nuestra comunidad."',
+        '"La formación continua fortalece la calidad de la atención médica."',
+        '"Investigación, ciencia y calidez humana al servicio del paciente."'
+    ];
+    
+    let indiceFrase = 0;
+    function iniciarCarruselFrases() {
+        const container = document.getElementById('phrase-container-trainees');
+        if (!container) return;
+
+        setInterval(() => {
+            container.style.opacity = 0;
+            setTimeout(() => {
+                indiceFrase = (indiceFrase + 1) % frasesInstitucionales.length;
+                container.innerText = frasesInstitucionales[indiceFrase];
+                container.style.opacity = 1;
+            }, 800);
+        }, 5000);
+    }
+
+    function salirAlMenu() {
+        sessionStorage.removeItem('trainee_auth'); // Limpia el permiso
+        window.location.href = '/';
+    }
+
+    window.onload = iniciarCarruselFrases;
+
+    // 3. Abrir Panel de Formación y Mover Formulario
+    function abrirPanelFormacion(tipo) {
+        const rolLower = tipo.trim().toLowerCase();
+
+        // Ocultar la vista principal de tarjetas
+        const vistaTarjetas = document.getElementById('section-formacion-cards');
+        if (vistaTarjetas) {
+            vistaTarjetas.style.display = 'none';
         }
 
-        // LÓGICA DEL CARRUSEL DE FRASES INSTITUCIONALES
-        const frasesInstitucionales = [
-            '"La enseñanza médica de excelencia es la base de la medicina del mañana."',
-            '"Compromiso, ética y vocación en el servicio a nuestra comunidad."',
-            '"La formación continua fortalece la calidad de la atención médica."',
-            '"Investigación, ciencia y calidez humana al servicio del paciente."'
-        ];
-        
-        let indiceFrase = 0;
-        function iniciarCarruselFrases() {
-            const container = document.getElementById('phrase-container-trainees');
-            if (!container) return;
+        // Ocultar todos los paneles dinámicos
+        document.querySelectorAll('.panel-formacion-contenido').forEach(panel => {
+            panel.style.display = 'none';
+        });
 
-            setInterval(() => {
-                container.style.opacity = 0;
-                setTimeout(() => {
-                    indiceFrase = (indiceFrase + 1) % frasesInstitucionales.length;
-                    container.innerText = frasesInstitucionales[indiceFrase];
-                    container.style.opacity = 1;
-                }, 800);
-            }, 5000);
+        // Mover el formulario al panel que corresponde
+        const formElement = document.getElementById('form-trainee-registration');
+        const targetPanel = document.getElementById(`panel-${rolLower}`);
+
+        if (targetPanel && formElement) {
+            // Inserta el formulario al final del contenido del panel abierto
+            targetPanel.appendChild(formElement);
+            
+            // Actualizar campos e identificadores internos del formulario
+            const rolUpper = tipo.trim().toUpperCase();
+            document.getElementById('trainee_type').value = rolUpper;
+            
+            const tituloForm = document.getElementById('form-trainee-title');
+            if (tituloForm) {
+                tituloForm.innerText = `Registro de Personal: ${rolUpper}`;
+            }
+
+            targetPanel.style.display = 'block';
+        } else {
+            alert(`No se encontró la vista del panel para: ${tipo}`);
+        }
+    }
+
+    // 4. Volver al menú de tarjetas
+    function volverAFormacionCards() {
+        // Ocultar todos los paneles
+        document.querySelectorAll('.panel-formacion-contenido').forEach(panel => {
+            panel.style.display = 'none';
+        });
+
+        // Devolver el formulario a su contenedor oculto o base
+        const formElement = document.getElementById('form-trainee-registration');
+        const baseContainer = document.getElementById('formulario-plantilla-container') || document.querySelector('main');
+        if (formElement && baseContainer) {
+            baseContainer.appendChild(formElement);
         }
 
-        function abrirRegistroFormacion(tipo) {
-            const container = document.getElementById('tarjeta-registro-trainee-container');
-            const titulo = document.getElementById('titulo-dinamico-registro');
-            if (container && titulo) {
-                titulo.innerText = `Formulario de Carga - Médico ${tipo}`;
-                container.style.display = 'block';
-                container.scrollIntoView({ behavior: 'smooth' });
+        // Mostrar menú de tarjetas
+        const vistaTarjetas = document.getElementById('section-formacion-cards');
+        if (vistaTarjetas) {
+            vistaTarjetas.style.display = 'block';
+        }
+    }
+
+    // 5. Lógica para guardar el registro (envío al servidor)
+    async function guardarRegistroTrainee(e) {
+        e.preventDefault();
+
+        const btnSubmit = document.getElementById('btn-save-trainee');
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = 'Guardando registro...';
+        }
+
+        const payload = {
+            trainee_type: document.getElementById('trainee_type').value,
+            last_name_paternal: document.getElementById('last_name_paternal').value.trim(),
+            last_name_maternal: document.getElementById('last_name_maternal').value.trim(),
+            first_name: document.getElementById('first_name').value.trim(),
+            gender: document.getElementById('gender').value,
+            email: document.getElementById('email').value.trim()
+        };
+
+        try {
+            const response = await fetch('/api/trainees/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Error al guardar el registro.');
+            }
+
+            alert('¡Registro exitoso! Se han guardado los datos correctamente.');
+            document.getElementById('form-trainee-registration').reset();
+            volverAFormacionCards();
+
+        } catch (error) {
+            alert(error.message);
+            console.error('Error en registro de trainee:', error);
+        } finally {
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = 'Completar Registro';
             }
         }
-
-        function salirAlMenu() {
-            sessionStorage.removeItem('trainee_auth'); // Limpia el permiso
-            window.location.href = '/';
-        }
-
-        window.onload = iniciarCarruselFrases;
-
-
-
-
-
-// Función para ocultar tarjetas y abrir el panel elegido
-function abrirPanelFormacion(tipo) {
-    const rolLower = tipo.trim().toLowerCase();
-
-    // 1. Ocultamos la vista principal con las 3 tarjetas
-    const vistaTarjetas = document.getElementById('section-formacion-cards');
-    if (vistaTarjetas) {
-        vistaTarjetas.style.display = 'none';
     }
-
-    // 2. Ocultamos todos los paneles por prevención
-    document.querySelectorAll('.panel-formacion-contenido').forEach(panel => {
-        panel.style.display = 'none';
-    });
-
-    // 3. Mostramos el panel seleccionado
-    const targetPanel = document.getElementById(`panel-${rolLower}`);
-    if (targetPanel) {
-        targetPanel.style.display = 'block';
-    } else {
-        alert(`No se encontró la vista del panel para: ${tipo}`);
-    }
-}
-
-// Función para regresar del panel hacia el menú de tarjetas
-function volverAFormacionCards() {
-    // Ocultamos todos los paneles
-    document.querySelectorAll('.panel-formacion-contenido').forEach(panel => {
-        panel.style.display = 'none';
-    });
-
-    // Volvemos a mostrar el menú con las 3 tarjetas
-    const vistaTarjetas = document.getElementById('section-formacion-cards');
-    if (vistaTarjetas) {
-        vistaTarjetas.style.display = 'block';
-    }
-}
-
-
-
-
-
-
-
-
-
-    </script>
+</script>
 </body>
 </html>

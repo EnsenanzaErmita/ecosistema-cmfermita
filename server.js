@@ -1433,7 +1433,67 @@ app.put('/api/preventive-patients/update', (req, res) => {
 
 
 
+// Ruta para registrar personal en formación y enviar correo
+app.post('/api/trainees/register', async (req, res) => {
+    const { trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email } = req.body;
 
+    // 1. Validar que no falte ningún campo obligatorio
+    if (!trainee_type || !last_name_paternal || !last_name_maternal || !first_name || !gender || !email) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Todos los campos son obligatorios.' 
+        });
+    }
+
+    try {
+        // 2. Insertar en la tabla de Clever Cloud
+        const sql = `
+            INSERT INTO trainees 
+            (trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        
+        await db.query(sql, [
+            trainee_type, 
+            last_name_paternal, 
+            last_name_maternal, 
+            first_name, 
+            gender, 
+            email
+        ]);
+
+        // 3. Configurar y enviar el correo de confirmación
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: `Confirmación de Registro - (${trainee_type})`,
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                    <h2 style="color: #1e3a8a;">¡Registro Exitoso!</h2>
+                    <p>Estimado(a) <strong>${first_name} ${last_name_paternal} ${last_name_maternal}</strong>,</p>
+                    <p>Confirmamos que tu registro como <strong>${trainee_type}</strong> se ha completado correctamente en el sistema.</p>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                    <p style="font-size: 0.85em; color: #666;">Este es un correo automático, por favor no responda a este mensaje.</p>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        // 4. Respuesta de éxito al cliente
+        res.status(200).json({ 
+            success: true, 
+            message: 'Registro guardado y correo enviado exitosamente.' 
+        });
+
+    } catch (error) {
+        console.error('Error en /api/trainees/register:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error interno del servidor al procesar el registro.' 
+        });
+    }
+});
 
 
 
