@@ -346,6 +346,15 @@
 
 
 <script>
+
+
+    // =========================================================================
+    // CONFIGURACIÓN GLOBAL Y CONEXIÓN CON RENDER
+    // =========================================================================
+    const BASE_URL = 'https://ecosistema-cmfermita.onrender.com'; // Enlace absoluto oficial hacia tu backend
+
+
+
     // 1. Protección de sesión
     if (!sessionStorage.getItem('trainee_auth')) {
         window.location.href = '/';
