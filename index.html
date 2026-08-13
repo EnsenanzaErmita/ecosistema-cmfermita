@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v3.3.0
+        v1.3.0
     </div>
 
 
@@ -2007,7 +2007,20 @@
 
 
 
+<div id="modal-login-trainees" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center;">
+    <div class="card" style="background: white; width: 90%; max-width: 420px; padding: 25px; border-radius: 8px; border-top: 6px solid #1e3a8a; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        
+        <button type="button" onclick="cerrarLoginTrainees()" style="position: absolute; top: 10px; right: 15px; border: none; background: transparent; font-size: 1.5em; cursor: pointer; color: #666;">&times;</button>
+        
+        <h3 style="color: #1e3a8a; margin-top: 0; text-align: center; font-size: 1.3em;">Acceso Médicos en Formación</h3>
+        <p style="font-size: 0.88em; color: #555; text-align: center;">Ingrese la clave digital autorizada enviada a su correo electrónico:</p>
 
+        <form onsubmit="procesarLoginTrainee(event)">
+            <input type="password" id="trainee-key-input" placeholder="••••••••" required autocomplete="off" style="width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; text-align: center; font-size: 1.1em; letter-spacing: 2px;">
+            <button type="submit" style="width: 100%; padding: 10px; background: #1e3a8a; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">VALIDAR CREDENCIAL</button>
+        </form>
+    </div>
+</div>
 
 
 
@@ -3756,15 +3769,6 @@ async function alternarVigenciaClaveTrainee(id, estadoActual) {
 // INTERRUPTORES DE SESIÓN Y VISTAS PARA MÉDICOS EN FORMACIÓN (JS)
 // =========================================================================
 
-function abrirLoginTrainees() {
-    document.getElementById('trainee-key-input').value = '';
-    document.getElementById('login-trainees-modal').style.display = 'flex';
-}
-
-function cerrarLoginTrainees() {
-    document.getElementById('login-trainees-modal').style.display = 'none';
-}
-
 // Procesa la clave y valida directamente contra el nuevo endpoint de Render
 async function procesarLoginTrainee(e) {
     e.preventDefault();
@@ -3781,13 +3785,12 @@ async function procesarLoginTrainee(e) {
         if (!response.ok) throw new Error(data.message || 'Error al validar credencial.');
 
         cerrarLoginTrainees();
-        alert('¡Credencial autorizada con éxito!\nAcceso concedido al Portal de Adiestramiento.');
-
-        // Ocultamos el contenedor general si es que aplica, y encendemos el sub-panel
-        activarModulo('panel-medicos-formacion', null);
         
-        // Escondemos la tarjeta de registro dinámico inferior para que aparezca limpia al iniciar
-        document.getElementById('tarjeta-registro-trainee-container').style.display = 'none';
+        // 1. Guardamos la bandera de acceso concedido
+        sessionStorage.setItem('trainee_auth', 'true');
+
+        // 2. Redirigimos a la nueva página independiente
+        window.location.href = '/personal-en-formacion';
 
     } catch (error) {
         alert(error.message);

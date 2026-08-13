@@ -7,205 +7,256 @@
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <style>
+<style>
+
+
         :root {
-            --azul-trainees: #1e3a8a;
-            --dorado-calidad: #b45309;
-            --guinda-header: #611232;
-            --fondo-gris: #f3f4f6;
+            --guinda: #611232;
+            --gris-oscuro: #98989a;
+            --gris-claro: #f4f4f4;
+            --blanco: #ffffff;
+            --negro-footer: #111111;
+            --verde-issste: #285c4d;
+            --dorado-calidad: #b38e5d;
+            --azul-issste: #1d4ed8;
+            --morado-issste: #800080;
+            /* Variables faltantes agregadas para los estatus */
+            --amarillo: #b45309;
+            --verde: #15803d;
+            --rojo: #b91c1c;
+	    --azul-admin: #374151;
+	    --azul-trainees: #1e3a8a;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--fondo-gris);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+        html, body { height: 100%; margin: 0; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--gris-claro); 
+            display: flex; 
+            flex-direction: column; 
         }
 
-        /* 1. ENCABEZADO INSTITUCIONAL */
-        header {
-            background-color: var(--guinda-header);
-            color: white;
-            padding: 15px 20px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        header { background-color: var(--guinda); color: var(--blanco); padding: 20px; text-align: center; border-bottom: 4px solid var(--gris-oscuro); }
+
+        .main-content { flex: 1; padding: 20px; }        
+        .container { max-width: 1300px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* LOGIN GRID - 4 SECCIONES */
+        .login-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+
+        .card { 
+    padding: 25px; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    background: #fff; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    transition: transform 0.2s; 
+    min-height: 280px; /* Asegura un tamaño uniforme mínimo para todas las tarjetas */
+    height: auto; /* Permite que la tarjeta se estire si agregas más texto a futuro */
+    box-sizing: border-box; /* Evita que el padding altere las dimensiones reales */
+}
+
+
+
+.card p {
+    font-size: 0.85em; 
+    text-align: center;
+    color: #555;
+    margin-top: 10px;
+    margin-bottom: auto; /* 💡 TRUCO CLAVE: Empuja magnéticamente al botón hacia la parte inferior de la tarjeta */
+    padding-bottom: 15px;
+}
+
+
+
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { margin-top: 0; font-size: 1.2em; border-bottom: 2px solid var(--gris-claro); padding-bottom: 10px; }
+        
+        /* Colores por Rol */
+        .card-admin { border-top: 8px solid var(--azul-admin); }
+        .card-doctor { border-top: 8px solid #5d8ab3; } 
+        .card-staff { border-top: 8px solid var(--guinda); }
+        .card-patient { border-top: 8px solid var(--guinda); }
+        .card-rol { border: 2px solid #ddd; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .card-coord { border-top: 8px solid var(--morado-issste); }
+        .card-archivo { border-top: 8px solid var(--guinda); }
+        .card-office { border-top: 8px solid #db2777 !important; } 
+        .card-assign { border-top: 8px solid #ea580c !important; } 
+
+        .teaching-hero { background: #fdfaf6; border: 2px solid var(--dorado-calidad); padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 25px; }
+
+	/* ESTILO PARA LOS PENSAMIENTOS INSTITUCIONALES EN EL HERO */
+	#phrase-container {
+	    font-size: 1.1em;
+	    font-style: italic;
+	    color: var(--dorado-calidad); /* Letras blancas para contrastar con el fondo guinda del hero */
+	    margin-top: 8px;
+	    font-weight: 300;
+	    transition: opacity 0.8s ease-in-out; /* Transición suave de 0.8 segundos */
+	    opacity: 1;
+	    min-height: 2.2em; /* Evita que el diseño de la caja salte si la frase es larga */
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    max-width: 700px;
+	    margin-left: auto;
+	    margin-right: auto;
+	}
+
+
+        /* PIE DE PÁGINA */
+        footer { background-color: var(--negro-footer); color: var(--blanco); text-align: center; padding: 25px 10px; font-size: 0.95em; border-top: 3px solid var(--dorado-calidad); }
+        footer strong { color: var(--dorado-calidad); }
+
+        /* NAVEGACIÓN PANEL ARCHIVO */
+        .nav-archivo { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            margin-bottom: 25px; 
+            background: #f0f0f0; 
+            padding: 15px; 
+            border-radius: 8px; 
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 1.4em;
-            letter-spacing: 1px;
+        .btn-nav { 
+            padding: 12px 15px; 
+            border: none; 
+            background: var(--gris-oscuro); 
+            color: white; 
+            cursor: pointer; 
+            font-weight: bold; 
+            border-radius: 4px; 
+            flex: 1; 
+            min-width: 180px;
         }
 
-        header p {
-            margin: 5px 0 0 0;
-            font-size: 0.85em;
-            opacity: 0.9;
-        }
+        .btn-nav.active { background: var(--guinda); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-nav:hover { background: var(--dorado-calidad); }
 
-        main {
-            flex: 1;
-            max-width: 1000px;
-            width: 100%;
-            margin: 20px auto;
-            padding: 0 15px;
-            box-sizing: border-box;
-        }
+        /* SECCIONES DE CONTENIDO */
+        .section-content { display: none; padding: 25px; border: 1px solid #ddd; border-radius: 8px; background: #fff; margin-top: 10px; }
+        .section-content.active { display: block; animation: fadeIn 0.4s; }
 
-        /* CONTENEDOR DE CREDENCIAL/LOGIN */
-        .card-auth {
-            background: white;
-            max-width: 450px;
-            margin: 40px auto;
-            padding: 30px;
-            border-radius: 8px;
-            border-top: 6px solid var(--azul-trainees);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .card-auth input {
-            width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 1em;
-            text-align: center;
-            letter-spacing: 2px;
+        /* FORMULARIOS Y TABLAS */
+        .header-registro {
+            color: white; padding: 15px; border-radius: 8px 8px 0 0;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: center;
         }
+        .form-box { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border: 1px solid #eee; border-top: none; }
+        
+        /* CORRECCIÓN RESPONSIVA: Cambiado de columnas fijas a adaptables con auto-fit */
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+        label { display: block; font-size: 0.8em; font-weight: bold; color: #555; margin-bottom: 5px; }
+        
+        /* UNIFICACIÓN: Removido el duplicado inferior y mantenido una sola regla limpia */
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--gris-oscuro); border-radius: 4px; box-sizing: border-box; margin-top: 5px; }
+        .full-width { grid-column: span 3; }
+        
+        .btn-save { padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-action { padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
 
-        .login-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f4f4f4; color: var(--guinda); }
 
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
+        .panel-nuevo { background: #eff6ff; border-left: 5px solid var(--azul-issste); }
+        .panel-nuevo label { color: var(--azul-issste); }
+        .panel-actual { background: #fdf0f5; border-left: 5px solid var(--guinda); }
 
-        .btn-save {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
+        /* Badges corregidos con las nuevas variables del root */
+        .badge { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; display: inline-block; }
+        .badge-pendiente { background: #fef3c7; color: var(--amarillo); }
+        .badge-aprobada { background: #dcfce7; color: var(--verde); }
+        .badge-rechazada { background: #fee2e2; color: var(--rojo); }
 
-        .btn-save:hover {
-            opacity: 0.9;
-        }
+        .view { display: none; }
+        .active-view { display: block !important; }
 
-        .teaching-hero {
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #e5e7eb;
-            margin-bottom: 20px;
-        }
+        .error-msg { color: #cc0000; font-weight: bold; margin-top: 10px; display: none; }
 
-        /* 1. FOOTER INSTITUCIONAL */
-        footer {
-            background-color: #1f2937;
-            color: #9ca3af;
-            text-align: center;
-            padding: 15px 20px;
-            font-size: 0.85em;
-            margin-top: auto;
-        }
-    </style>
+
+	@keyframes pulse {
+	    0% { transform: scale(1); }
+	    50% { transform: scale(1.05); box-shadow: 0 2px 10px rgba(220,38,38,0.5); }
+	    100% { transform: scale(1); }
+	}
+
+
+</style>
 </head>
 <body>
 
-    <header>
-        <h1>C.M.F. ERMITA - ADMINISTRACIÓN DE SERVICIOS</h1>
-        <p>Coordinación de Enseñanza y Calidad — Personal en Formación</p>
-    </header>
+	<header>
+	    <h1>C.M.F. ERMITA - ADMINISTRACIÓN DE SERVICIOS</h1>
+	</header>
 
     <main>
-
-        <div id="seccion-login-trainees" class="card-auth">
-            <h3 style="color: var(--azul-trainees); margin-top: 0; font-size: 1.4em;">Acceso Médicos en Formación</h3>
-            <p style="font-size: 0.9em; color: #666;">Ingrese la clave digital autorizada enviada a su correo electrónico:</p>
-            
-            <form onsubmit="validarCredencialTrainee(event)">
-                <input type="password" id="input-clave-trainee" placeholder="••••••••" required autocomplete="off">
-                <button type="submit" class="btn-save" style="background: var(--azul-trainees); color: white;">VALIDAR CREDENCIAL</button>
-            </form>
-            
-            <button onclick="window.location.href='/'" style="background: transparent; color: #666; border: none; margin-top: 15px; cursor: pointer; text-decoration: underline; font-size: 0.85em;">
-                ← Regresar al Menú Principal
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--azul-trainees); margin-bottom: 20px; padding-bottom: 10px;">
+            <h2 style="color: var(--guinda-header); margin:0;">Portal de Médicos en Formación</h2>
+            <button onclick="salirAlMenu()" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                ← Salir al Menú Principal
             </button>
         </div>
 
-        <div id="panel-medicos-formacion" style="display: none;">
+        <div class="teaching-hero">
+            <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
+            <div id="phrase-container-trainees" style="font-size: 1.1em; font-style: italic; color: var(--dorado-calidad); margin-top: 8px; font-weight: 300; min-height: 2.2em; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-in-out;">
+                "Cargando pensamiento institucional..."
+            </div>
+        </div>
+
+        <div class="login-grid">
             
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--azul-trainees); margin-bottom: 20px; padding-bottom: 10px;">
-                <h2 style="color: var(--guinda-header); margin:0; font-family: 'Segoe UI', sans-serif;">Portal de Médicos en Formación</h2>
-                <button onclick="cerrarSesionTrainee()" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-trainees)'" onmouseout="this.style.background='#98989a'">
-                    ← Salir del Portal
-                </button>
+            <div class="card">
+                <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.40em; margin-top: 0;">Médicos Internos (MIP)</h3>
+                <p style="font-size: 0.9em; color: #555;">Registro de adscripción, bitácora de rotación hospitalaria y entrega de documentos base de pregrado.</p>
+                <button onclick="abrirRegistroFormacion('MIP')" class="btn-save">ABRIR REGISTRO MIP</button>
             </div>
 
-            <div class="teaching-hero">
-                <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
-                <div id="phrase-container-trainees" style="font-size: 1.1em; font-style: italic; color: var(--dorado-calidad); margin-top: 8px; font-weight: 300; min-height: 2.2em; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-in-out;">
-                    "Cargando pensamiento institucional..."
-                </div>
+            <div class="card">
+                <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.40em; margin-top: 0;">Médicos Pasantes</h3>
+                <p style="font-size: 0.9em; color: #555;">Control de programas comunitarios, informes mensuales de actividades y validación académica.</p>
+                <button onclick="abrirRegistroFormacion('PASANTE')" class="btn-save">ABRIR REGISTRO PASANTE</button>
             </div>
 
-            <div class="login-grid">
-                
-                <div class="card" style="border-top: 8px solid var(--azul-trainees);">
-                    <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.40em; margin-top: 0;">Médicos Internos (MIP)</h3>
-                    <p style="font-size: 0.9em; color: #555;">Registro de adscripción, bitácora de rotación hospitalaria y entrega de documentos base de pregrado.</p>
-                    <button onclick="abrirRegistroFormacion('MIP')" class="btn-save" style="background: var(--azul-trainees); color: white;">ABRIR REGISTRO MIP</button>
-                </div>
-
-                <div class="card" style="border-top: 8px solid var(--azul-trainees);">
-                    <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.40em; margin-top: 0;">Médicos Pasantes</h3>
-                    <p style="font-size: 0.9em; color: #555;">Control de programas comunitarios, informes mensuales de actividades y validación académica.</p>
-                    <button onclick="abrirRegistroFormacion('PASANTE')" class="btn-save" style="background: var(--azul-trainees); color: white;">ABRIR REGISTRO PASANTE</button>
-                </div>
-
-                <div class="card" style="border-top: 8px solid var(--azul-trainees);">
-                    <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.40em; margin-top: 0;">Médicos Residentes</h3>
-                    <p style="font-size: 0.9em; color: #555;">Control de protocolos de investigación clínica, asignación de guardias y bitácora de calidad.</p>
-                    <button onclick="abrirRegistroFormacion('RESIDENTE')" class="btn-save" style="background: var(--azul-trainees); color: white;">ABRIR REGISTRO RESIDENTE</button>
-                </div>
-
-            </div>
-
-            <div id="tarjeta-registro-trainee-container" style="display: none; margin-top: 30px; background: #fff; border: 1px solid var(--azul-trainees); border-top: 5px solid var(--azul-trainees); padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                <h3 id="titulo-dinamico-registro" style="color: var(--azul-trainees); margin-top: 0; border-bottom: 2px solid var(--azul-trainees); padding-bottom: 8px; text-transform: uppercase;">Formulario de Carga</h3>
-                <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Complete sus datos de adscripción institucional. Los campos marcados con (*) son mandatorios.</p>
-                
-                <div style="padding: 30px; background: #fdfdfd; border: 1px dashed #ccc; text-align: center; color: #777; border-radius: 4px; font-weight: bold;">
-                    📋 Formulario de Registro Listo para Modelar los Campos de Carga de Archivos
-                </div>
+            <div class="card">
+                <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.40em; margin-top: 0;">Médicos Residentes</h3>
+                <p style="font-size: 0.9em; color: #555;">Control de protocolos de investigación clínica, asignación de guardias y bitácora de calidad.</p>
+                <button onclick="abrirRegistroFormacion('RESIDENTE')" class="btn-save">ABRIR REGISTRO RESIDENTE</button>
             </div>
 
         </div>
 
+        <div id="tarjeta-registro-trainee-container" style="display: none; margin-top: 30px; background: #fff; border: 1px solid var(--azul-trainees); border-top: 5px solid var(--azul-trainees); padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h3 id="titulo-dinamico-registro" style="color: var(--azul-trainees); margin-top: 0; border-bottom: 2px solid var(--azul-trainees); padding-bottom: 8px; text-transform: uppercase;">Formulario de Carga</h3>
+            <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Complete sus datos de adscripción institucional. Los campos marcados con (*) son mandatorios.</p>
+            
+            <div style="padding: 30px; background: #fdfdfd; border: 1px dashed #ccc; text-align: center; color: #777; border-radius: 4px; font-weight: bold;">
+                📋 Formulario de Registro Listo para Modelar los Campos de Carga de Archivos
+            </div>
+        </div>
     </main>
 
     <footer>
-        <p>C.M.F. ERMITA &copy; 2026 — Clínica de Medicina Familiar con Especialidad</p>
+        <p>&copy; 2026 Todos los derechos reservados</p>
+        <p>Desarrollado por: <strong>González Zamudio Manuel Alejandro</strong></p>
+        <p>Colaboración: <strong>Aldana Rodríguez Said Israel</strong></p>
+        <p style="font-size: 0.75em; opacity: 0.7; margin-top: 10px;">Clínica de Medicina Familiar Ermita - ISSSTE</p>
     </footer>
 
     <script>
-        // 2. LÓGICA DEL CARRUSEL DE FRASES INSTITUCIONALES
+        // Protección: Si intentan entrar directo por URL sin haber puesto la contraseña, los regresa al inicio
+        if (!sessionStorage.getItem('trainee_auth')) {
+            window.location.href = '/';
+        }
+
+        // LÓGICA DEL CARRUSEL DE FRASES INSTITUCIONALES
         const frasesInstitucionales = [
             '"La enseñanza médica de excelencia es la base de la medicina del mañana."',
             '"Compromiso, ética y vocación en el servicio a nuestra comunidad."',
@@ -214,7 +265,6 @@
         ];
         
         let indiceFrase = 0;
-
         function iniciarCarruselFrases() {
             const container = document.getElementById('phrase-container-trainees');
             if (!container) return;
@@ -229,68 +279,22 @@
             }, 5000);
         }
 
-        // 3. VALIDACIÓN DE CREDENCIAL ENVIADA POR CORREO
-        async function validarCredencialTrainee(event) {
-            event.preventDefault();
-            const passInput = document.getElementById('input-clave-trainee').value.trim();
-
-            if (!passInput) return;
-
-            try {
-                // Petición al backend
-                const respuesta = await fetch('/api/trainee-auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ passkey: passInput })
-                });
-
-                const data = await respuesta.json();
-
-                if (respuesta.ok && data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Credencial Autorizada',
-                        text: 'Bienvenido al Portal de Médicos en Formación',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-
-                    // Ocultar login y mostrar panel principal
-                    document.getElementById('seccion-login-trainees').style.display = 'none';
-                    document.getElementById('panel-medicos-formacion').style.display = 'block';
-
-                    // Iniciar el carrusel de frases
-                    iniciarCarruselFrases();
-
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Acceso Denegado',
-                        text: data.message || 'La clave digital es incorrecta o ha expirado.'
-                    });
-                }
-            } catch (error) {
-                console.error('Error al validar credencial:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error de Conexión',
-                    text: 'No se pudo validar la credencial en este momento. Intente de nuevo.'
-                });
-            }
-        }
-
         function abrirRegistroFormacion(tipo) {
             const container = document.getElementById('tarjeta-registro-trainee-container');
             const titulo = document.getElementById('titulo-dinamico-registro');
-            
-            titulo.innerText = `Formulario de Carga - Médico ${tipo}`;
-            container.style.display = 'block';
-            container.scrollIntoView({ behavior: 'smooth' });
+            if (container && titulo) {
+                titulo.innerText = `Formulario de Carga - Médico ${tipo}`;
+                container.style.display = 'block';
+                container.scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
-        function cerrarSesionTrainee() {
+        function salirAlMenu() {
+            sessionStorage.removeItem('trainee_auth'); // Limpia el permiso
             window.location.href = '/';
         }
+
+        window.onload = iniciarCarruselFrases;
     </script>
 </body>
 </html>
