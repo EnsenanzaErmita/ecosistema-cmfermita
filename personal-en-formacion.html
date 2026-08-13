@@ -212,24 +212,86 @@
         </div>
 
         <div class="login-grid">
+
             
-            <div class="card">
-                <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.40em; margin-top: 0;">Médicos Internos (MIP)</h3>
-                <p style="font-size: 0.9em; color: #555;">Registro de adscripción, bitácora de rotación hospitalaria y entrega de documentos base de pregrado.</p>
-                <button onclick="abrirRegistroFormacion('MIP')" class="btn-save">ABRIR REGISTRO MIP</button>
-            </div>
 
-            <div class="card">
-                <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.40em; margin-top: 0;">Médicos Pasantes</h3>
-                <p style="font-size: 0.9em; color: #555;">Control de programas comunitarios, informes mensuales de actividades y validación académica.</p>
-                <button onclick="abrirRegistroFormacion('PASANTE')" class="btn-save">ABRIR REGISTRO PASANTE</button>
-            </div>
 
-            <div class="card">
-                <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.40em; margin-top: 0;">Médicos Residentes</h3>
-                <p style="font-size: 0.9em; color: #555;">Control de protocolos de investigación clínica, asignación de guardias y bitácora de calidad.</p>
-                <button onclick="abrirRegistroFormacion('RESIDENTE')" class="btn-save">ABRIR REGISTRO RESIDENTE</button>
-            </div>
+<div id="section-formacion-cards" class="active-view">
+    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+
+        <div class="card" style="border-top: 8px solid #0284c7; flex: 1; min-width: 280px; max-width: 350px;">
+            <h3 style="color: #0284c7; text-align: center; margin-bottom: 10px;">MIP</h3>
+            <p style="font-size: 0.9em; color: #555; text-align: center; margin-bottom: 20px;">
+                Panel de gestión y registros para Médicos Internos de Pregrado.
+            </p>
+            <button class="btn-save" 
+                    style="background: #0284c7; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer;" 
+                    onclick="abrirPanelFormacion('mip')">
+                Abrir Panel MIP
+            </button>
+        </div>
+
+        <div class="card" style="border-top: 8px solid #0f766e; flex: 1; min-width: 280px; max-width: 350px;">
+            <h3 style="color: #0f766e; text-align: center; margin-bottom: 10px;">Pasante</h3>
+            <p style="font-size: 0.9em; color: #555; text-align: center; margin-bottom: 20px;">
+                Panel de gestión y control para Pasantes de Servicio Social.
+            </p>
+            <button class="btn-save" 
+                    style="background: #0f766e; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer;" 
+                    onclick="abrirPanelFormacion('pasante')">
+                Abrir Panel Pasante
+            </button>
+        </div>
+
+        <div class="card" style="border-top: 8px solid #4338ca; flex: 1; min-width: 280px; max-width: 350px;">
+            <h3 style="color: #4338ca; text-align: center; margin-bottom: 10px;">Residente</h3>
+            <p style="font-size: 0.9em; color: #555; text-align: center; margin-bottom: 20px;">
+                Panel de seguimiento e información para Médicos Residentes.
+            </p>
+            <button class="btn-save" 
+                    style="background: #4338ca; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer;" 
+                    onclick="abrirPanelFormacion('residente')">
+                Abrir Panel Residente
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+<div id="panel-mip" class="panel-formacion-contenido" style="display: none; padding: 20px;">
+    <button onclick="volverAFormacionCards()" style="margin-bottom: 15px; cursor: pointer; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; background: #f3f4f6;">
+        &larr; Volver a Formación
+    </button>
+    <h2 style="color: #0284c7; border-bottom: 2px solid #0284c7; padding-bottom: 10px;">Panel de Médicos Internos de Pregrado (MIP)</h2>
+    <p>Aquí irá el contenido, formularios o tablas pertenecientes a MIP.</p>
+</div>
+
+<div id="panel-pasante" class="panel-formacion-contenido" style="display: none; padding: 20px;">
+    <button onclick="volverAFormacionCards()" style="margin-bottom: 15px; cursor: pointer; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; background: #f3f4f6;">
+        &larr; Volver a Formación
+    </button>
+    <h2 style="color: #0f766e; border-bottom: 2px solid #0f766e; padding-bottom: 10px;">Panel de Pasantes de Servicio Social</h2>
+    <p>Aquí irá el contenido, formularios o tablas pertenecientes a Pasantes.</p>
+</div>
+
+<div id="panel-residente" class="panel-formacion-contenido" style="display: none; padding: 20px;">
+    <button onclick="volverAFormacionCards()" style="margin-bottom: 15px; cursor: pointer; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; background: #f3f4f6;">
+        &larr; Volver a Formación
+    </button>
+    <h2 style="color: #4338ca; border-bottom: 2px solid #4338ca; padding-bottom: 10px;">Panel de Médicos Residentes</h2>
+    <p>Aquí irá el contenido, formularios o tablas pertenecientes a Residentes.</p>
+</div>
+
+
+
+
+
+
+
+
 
         </div>
 
@@ -295,6 +357,57 @@
         }
 
         window.onload = iniciarCarruselFrases;
+
+
+
+
+
+// Función para ocultar tarjetas y abrir el panel elegido
+function abrirPanelFormacion(tipo) {
+    const rolLower = tipo.trim().toLowerCase();
+
+    // 1. Ocultamos la vista principal con las 3 tarjetas
+    const vistaTarjetas = document.getElementById('section-formacion-cards');
+    if (vistaTarjetas) {
+        vistaTarjetas.style.display = 'none';
+    }
+
+    // 2. Ocultamos todos los paneles por prevención
+    document.querySelectorAll('.panel-formacion-contenido').forEach(panel => {
+        panel.style.display = 'none';
+    });
+
+    // 3. Mostramos el panel seleccionado
+    const targetPanel = document.getElementById(`panel-${rolLower}`);
+    if (targetPanel) {
+        targetPanel.style.display = 'block';
+    } else {
+        alert(`No se encontró la vista del panel para: ${tipo}`);
+    }
+}
+
+// Función para regresar del panel hacia el menú de tarjetas
+function volverAFormacionCards() {
+    // Ocultamos todos los paneles
+    document.querySelectorAll('.panel-formacion-contenido').forEach(panel => {
+        panel.style.display = 'none';
+    });
+
+    // Volvemos a mostrar el menú con las 3 tarjetas
+    const vistaTarjetas = document.getElementById('section-formacion-cards');
+    if (vistaTarjetas) {
+        vistaTarjetas.style.display = 'block';
+    }
+}
+
+
+
+
+
+
+
+
+
     </script>
 </body>
 </html>
