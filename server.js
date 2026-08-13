@@ -1430,26 +1430,33 @@ app.put('/api/preventive-patients/update', (req, res) => {
 
 
 
-
-
-
-// ENDPOINT: Registrar Médico en Formación y notificar por correo
-// ENDPOINT: Registrar Médico en Formación (Con validación de RFC único)
+// ENDPOINT: Registrar Médico en Formación (Con validación de RFC único y Servicio/Módulo asignado)
 app.post('/api/trainees/register', (req, res) => {
-    const { trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email, rfc } = req.body;
+    // 1. Extraemos los campos del req.body (incluyendo service_category)
+    const { 
+        trainee_type, 
+        last_name_paternal, 
+        last_name_maternal, 
+        first_name, 
+        gender, 
+        email, 
+        rfc,
+        service_category 
+    } = req.body;
 
-    // 1. Validar que todos los campos requeridos estén presentes
-    if (!trainee_type || !last_name_paternal || !last_name_maternal || !first_name || !gender || !email || !rfc) {
+    // 2. Validar que todos los campos requeridos estén presentes
+    if (!trainee_type || !last_name_paternal || !last_name_maternal || !first_name || !gender || !email || !rfc || !service_category) {
         return res.status(400).json({ 
             success: false, 
-            message: 'Todos los campos, incluyendo el RFC, son obligatorios.' 
+            message: 'Todos los campos, incluyendo el RFC y el Servicio/Módulo, son obligatorios.' 
         });
     }
 
     const emailTrim = email.trim().toLowerCase();
     const rfcTrim = rfc.trim().toUpperCase();
+    const serviceTrim = service_category.trim();
 
-    // 2. VERIFICACIÓN DE DUPLICIDAD POR RFC
+    // 3. VERIFICACIÓN DE DUPLICIDAD POR RFC
     const sqlCheckRfc = 'SELECT id, first_name, last_name_paternal FROM trainees WHERE rfc = ?';
     pool.query(sqlCheckRfc, [rfcTrim], (errCheck, resultsCheck) => {
         if (errCheck) {
@@ -1468,11 +1475,11 @@ app.post('/api/trainees/register', (req, res) => {
             });
         }
 
-        // 3. Inserción en la base de datos (Clever Cloud)
+        // 4. Inserción en la base de datos (Clever Cloud)
         const sqlInsert = `
             INSERT INTO trainees 
-            (trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email, rfc) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email, rfc, service_category) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         pool.query(sqlInsert, [
@@ -1482,7 +1489,8 @@ app.post('/api/trainees/register', (req, res) => {
             first_name.trim(), 
             gender, 
             emailTrim,
-            rfcTrim
+            rfcTrim,
+            serviceTrim
         ], (err, result) => {
             if (err) {
                 console.error('Error al insertar médico en formación en BD:', err);
@@ -1492,7 +1500,7 @@ app.post('/api/trainees/register', (req, res) => {
                 });
             }
 
-            // 4. Envío de Correo por la API de Brevo
+            // 5. Envío de Correo por la API de Brevo
             const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
             sendSmtpEmail.subject = `🏛️ Confirmación de Registro (${trainee_type}) - C.M.F. Ermita`;
             sendSmtpEmail.htmlContent = `
@@ -1506,7 +1514,8 @@ app.post('/api/trainees/register', (req, res) => {
                         <p>Confirmamos que su registro como médico en formación (<strong>${trainee_type}</strong>) se ha completado exitosamente.</p>
                         
                         <div style="background: white; border-left: 5px solid #611232; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0;">
-                            <p style="margin: 0; font-size: 0.9em;"><strong>RFC Registrado:</strong> ${rfcTrim}</p>
+                            <p style="margin: 0; font-size: 0.9em;"><strong>Servicio / Módulo Asignado:</strong> ${serviceTrim}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9em;"><strong>RFC Registrado:</strong> ${rfcTrim}</p>
                             <p style="margin: 5px 0 0 0; font-size: 0.9em;"><strong>Correo Vinculado:</strong> ${emailTrim}</p>
                         </div>
 
@@ -1543,6 +1552,73 @@ app.post('/api/trainees/register', (req, res) => {
 
 
 
+
+// 1. OBTENER LISTA DE EMPLEADOS CON SU ESTADO DE FORMADOR (Para el Panel Admin)
+app.get('/api/trainers/manage', (req, res) => {
+    const sql = `
+        SELECT e.id, e.first_name, e.last_name_paternal, e.last_name_maternal, e.category,
+               IF(t.id IS NOT NULL, 1, 0) AS is_trainer
+        FROM employees e
+        LEFT JOIN trainers t ON e.id = t.employee_id
+        ORDER BY e.last_name_paternal ASC
+    `;
+    pool.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error al obtener empleados.' });
+        res.json({ success: true, data: results });
+    });
+});
+
+// 2. GUARDAR / ACTUALIZAR SELECCIÓN DE FORMADORES (Panel Admin)
+app.post('/api/trainers/update', (req, res) => {
+    const { trainer_employee_ids } = req.body; // Array de IDs seleccionados [1, 5, 8]
+
+    pool.getConnection((err, connection) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error de conexión.' });
+
+        connection.beginTransaction((errTx) => {
+            if (errTx) { connection.release(); return res.status(500).json({ success: false, message: 'Error en transacción.' }); }
+
+            // Limpiamos los formadores actuales
+            connection.query('DELETE FROM trainers', (errDel) => {
+                if (errDel) {
+                    return connection.rollback(() => { connection.release(); res.status(500).json({ success: false, message: 'Error al resetear formadores.' }); });
+                }
+
+                if (!trainer_employee_ids || trainer_employee_ids.length === 0) {
+                    return connection.commit(() => { connection.release(); res.json({ success: true, message: 'Formadores actualizados correctamente.' }); });
+                }
+
+                // Insertamos los nuevos seleccionados
+                const values = trainer_employee_ids.map(id => [id]);
+                connection.query('INSERT INTO trainers (employee_id) VALUES ?', [values], (errIns) => {
+                    if (errIns) {
+                        return connection.rollback(() => { connection.release(); res.status(500).json({ success: false, message: 'Error al insertar nuevos formadores.' }); });
+                    }
+                    connection.commit(() => {
+                        connection.release();
+                        res.json({ success: true, message: 'Formadores actualizados con éxito.' });
+                    });
+                });
+            });
+        });
+    });
+});
+
+// 3. OBTENER CATEGORÍAS/SERVICIOS ÚNICOS DE LOS FORMADORES ACTIVOS (Para el Formulario Trainee)
+app.get('/api/trainers/categories', (req, res) => {
+    const sql = `
+        SELECT DISTINCT e.category 
+        FROM employees e
+        INNER JOIN trainers t ON e.id = t.employee_id
+        WHERE e.category IS NOT NULL AND TRIM(e.category) != ''
+        ORDER BY e.category ASC
+    `;
+    pool.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'Error al cargar servicios.' });
+        const categories = results.map(row => row.category);
+        res.json({ success: true, categories });
+    });
+});
 
 
 

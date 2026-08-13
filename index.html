@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.13.0
+        v1.14.0
     </div>
 
 
@@ -1046,46 +1046,60 @@
 <!-- PANTALLA PRINCIPAL DEL ADMINISTRADOR MAESTRO                              -->
 <!-- ========================================================================= -->
 <div id="panel-administrador" class="view" style="display: none; padding: 20px;">
-    <!-- Barra superior ejecutiva -->
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #374151; margin-bottom: 20px; padding-bottom: 10px;">
         <h2 style="color: #374151; margin:0; font-family: 'Segoe UI', sans-serif;">Panel General de Administración</h2>
         <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-admin)'" onmouseout="this.style.background='#98989a'">← Volver al Menú Principal</button>
     </div>
 
-    <!-- REJILLA DE DISEÑO (GRID): CONTENEDOR DE LAS TARJETA MAESTRAS -->
     <div class="login-grid" style="margin-top: 20px;">
         
-        <!-- TARJETA 1: ADMINISTRACIÓN DE USUARIOS -->
         <div class="card" style="border-top: 8px solid #374151; background: #f9fafb; text-align: center;">
             <h3 style="color: #374151; margin-top: 0; font-size: 1.50em;">Administración de Usuarios</h3>
             <p>Alta de personal interno, asignación de claves privadas y control relacional de roles institucionales.</p>
             <button onclick="activarModulo('panel-control-usuarios', this); deInmediatoCargarRolesYUsuarios();" class="btn-save" style="background: #374151; color: white !important;">GESTIONAR USUARIOS Y ROLES</button>
         </div>
 
-
-
-
-
-        <!-- NUEVA TARJETA: ALTA DE EMPLEADOS DIRECTA (ADMIN) -->
         <div class="card" style="border-top: 8px solid #374151; background: #f9fafb; text-align: center;">
             <h3 style="color: #374151; margin-top: 0; font-size: 1.50em;">Alta de Empleados</h3>
             <p>Registro directo de personal médico, enfermería y administrativos en la plantilla general del sistema.</p>
             <button onclick="activarModulo('modulo-personal', this)" class="btn-save" style="background: #374151; color: white !important;">ABRIR FORMULARIO DE ALTA</button>
         </div>
 
-
-
-        
-        <!-- TARJETA 2: GESTIÓN DE MÉDICOS EN FORMACIÓN (MIP'S, PASANTES, RESIDENTES) -->
         <div class="card" style="border-top: 8px solid #7c3aed; background: #faf5ff; text-align: center;">
             <h3 style="color: #7c3aed; margin-top: 0; font-size: 1.50em;">MIP'S, Pasantes y Residentes</h3>
             <p>Generación de claves de acceso digital por correo electrónico y control de vigencias del personal.</p>
             <button onclick="activarModulo('panel-control-trainees', this); cargarCatalogoClavesTrainees();" class="btn-save" style="background: #7c3aed; color: white !important;">GENERACIÓN DE CLAVES INTERNAS</button>
         </div>
 
-    </div> <!-- Cierre legítimo de la rejilla (grid) de dos columnas -->
-</div> <!-- Cierre absoluto de la pantalla id="panel-administrador" -->
+        <div class="card" style="border-top: 8px solid #059669; background: #ecfdf5; text-align: center;">
+            <h3 style="color: #059669; margin-top: 0; font-size: 1.50em;">Asignación de Formadores</h3>
+            <p>Marcar trabajadores encargados de autorizar permisos y rotaciones del personal en formación.</p>
+            <button onclick="abrirModalFormadores();" class="btn-save" style="background: #059669; color: white !important;">GESTIONAR FORMADORES</button>
+        </div>
 
+    </div> </div> <div id="modal-asignar-formadores" class="modal" style="display:none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div style="background-color: #fff; margin: 5% auto; padding: 25px; border-radius: 8px; width: 90%; max-width: 650px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #059669; padding-bottom: 10px; margin-bottom: 15px;">
+            <h3 style="margin: 0; color: #059669; font-family: 'Segoe UI', sans-serif;">👨‍🏫 Asignación de Médicos Formadores</h3>
+            <button onclick="cerrarModalFormadores()" style="background: transparent; border: none; font-size: 1.5em; cursor: pointer; color: #6b7280;">&times;</button>
+        </div>
+        <p style="font-size: 0.9em; color: #4b5563; margin-bottom: 15px;">
+            Seleccione las casillas de los empleados que fungirán como encargados de módulo. Sus categorías activas formarán la lista de servicios disponibles en el formulario de registro.
+        </p>
+        
+        <div id="lista-empleados-formadores" style="max-height: 320px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 6px; padding: 10px; background: #f9fafb;">
+            </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button onclick="cerrarModalFormadores()" style="background: #6b7280; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                Cancelar
+            </button>
+            <button onclick="guardarFormadoresSeleccionados()" style="background: #059669; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                Guardar Cambios
+            </button>
+        </div>
+    </div>
+</div>
 
 
 
@@ -4685,6 +4699,122 @@ async function guardarAplicacionVacunaNube(event) {
         alert(`Error en la operación de vacunación: ${error.message}`);
     }
 }
+
+
+
+
+
+
+
+
+
+
+// =========================================================================
+// FUNCIONES DE FRONTEND PARA GESTIÓN DE FORMADORES (ADMIN)
+// =========================================================================
+
+// PUNTO A: Abrir el modal del administrador y cargar la lista de empleados
+async function abrirModalFormadores() {
+    const modal = document.getElementById('modal-asignar-formadores');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+    
+    const contenedor = document.getElementById('lista-empleados-formadores');
+    if (!contenedor) return;
+    
+    contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">Cargando plantilla de personal...</p>';
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/trainers/manage`);
+        const data = await response.json();
+
+        if (data.success) {
+            if (data.data.length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">No hay empleados registrados en el sistema.</p>';
+                return;
+            }
+
+            // Pintamos dinámicamente cada empleado con un checkbox
+            // Si is_trainer === 1, se marca automáticamente con el atributo "checked"
+            contenedor.innerHTML = data.data.map(emp => `
+                <div style="padding: 10px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: normal;">
+                        <input type="checkbox" class="chk-trainer" value="${emp.id}" ${emp.is_trainer === 1 ? 'checked' : ''}>
+                        <span>${emp.first_name} ${emp.last_name_paternal} ${emp.last_name_maternal}</span>
+                    </label>
+                    <span style="font-size: 0.85em; background: #e5e7eb; padding: 3px 10px; border-radius: 12px; color: #374151;">
+                        ${emp.category || 'Sin Categoría'}
+                    </span>
+                </div>
+            `).join('');
+        } else {
+            contenedor.innerHTML = '<p style="color: red; text-align:center;">Error al cargar la plantilla de personal.</p>';
+        }
+    } catch (error) {
+        console.error('Error al conectar con el servidor para formadores:', error);
+        contenedor.innerHTML = '<p style="color: red; text-align:center;">Error de conexión con el servidor.</p>';
+    }
+}
+
+// PUNTO B: Recopilar los checkboxes seleccionados y guardarlos mediante POST
+async function guardarFormadoresSeleccionados() {
+    const checkboxes = document.querySelectorAll('.chk-trainer:checked');
+    const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/trainers/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ trainer_employee_ids: selectedIds })
+        });
+        
+        const data = await response.json();
+        alert(data.message);
+        
+        if (data.success) {
+            cerrarModalFormadores();
+        }
+    } catch (error) {
+        console.error('Error al guardar la selección de formadores:', error);
+        alert('Ocurrió un error al intentar guardar los formadores.');
+    }
+}
+
+// Función auxiliar para cerrar la modal de administración
+function cerrarModalFormadores() {
+    const modal = document.getElementById('modal-asignar-formadores');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// PUNTO C: Cargar los servicios/categorías en el menú desplegable del formulario de Trainees
+async function cargarServiciosFormadores() {
+    const select = document.getElementById('service_category');
+    if (!select) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/trainers/categories`);
+        const data = await response.json();
+
+        if (data.success && data.categories.length > 0) {
+            // Llenamos el <select> con las categorías obtenidas del servidor
+            select.innerHTML = '<option value="">-- Seleccione un servicio --</option>' + 
+                data.categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        } else {
+            select.innerHTML = '<option value="">No hay servicios de formadores disponibles</option>';
+        }
+    } catch (error) {
+        console.error('Error al cargar servicios formadores:', error);
+        select.innerHTML = '<option value="">Error al cargar servicios</option>';
+    }
+}
+
+
+
+
+
 
 
 

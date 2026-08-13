@@ -329,6 +329,13 @@
                     </div>
                 </div>
 
+<div class="form-group">
+    <label for="service_category">Servicio / Módulo al que rotará:</label>
+    <select id="service_category" name="service_category" required>
+        <option value="">Cargando servicios disponibles...</option>
+    </select>
+</div>
+
                 <button type="submit" id="btn-save-trainee" style="background: #1e3a8a; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1em;">
                     Completar Registro
                 </button>
@@ -353,109 +360,109 @@
 
 <script>
 
+// =========================================================================
+// CONFIGURACIÓN GLOBAL Y CONEXIÓN CON RENDER
+// =========================================================================
+const BASE_URL = 'https://ecosistema-cmfermita.onrender.com'; // Enlace absoluto oficial hacia tu backend
 
-    // =========================================================================
-    // CONFIGURACIÓN GLOBAL Y CONEXIÓN CON RENDER
-    // =========================================================================
-    const BASE_URL = 'https://ecosistema-cmfermita.onrender.com'; // Enlace absoluto oficial hacia tu backend
+// 1. Protección de sesión
+if (!sessionStorage.getItem('trainee_auth')) {
+    window.location.href = '/';
+}
 
+// 2. Lógica del carrusel de frases
+const frasesInstitucionales = [
+    '"La enseñanza médica de excelencia es la base de la medicina del mañana."',
+    '"Compromiso, ética y vocación en el servicio a nuestra comunidad."',
+    '"La formación continua fortalece la calidad de la atención médica."',
+    '"Investigación, ciencia y calidez humana al servicio del paciente."'
+];
 
+let indiceFrase = 0;
+function iniciarCarruselFrases() {
+    const container = document.getElementById('phrase-container-trainees');
+    if (!container) return;
 
-    // 1. Protección de sesión
-    if (!sessionStorage.getItem('trainee_auth')) {
-        window.location.href = '/';
+    setInterval(() => {
+        container.style.opacity = 0;
+        setTimeout(() => {
+            indiceFrase = (indiceFrase + 1) % frasesInstitucionales.length;
+            container.innerText = frasesInstitucionales[indiceFrase];
+            container.style.opacity = 1;
+        }, 800);
+    }, 5000);
+}
+
+function salirAlMenu() {
+    sessionStorage.removeItem('trainee_auth'); // Limpia el permiso
+    window.location.href = '/';
+}
+
+window.onload = iniciarCarruselFrases;
+
+// 3. Abrir Panel de Formación y Mover Formulario
+function abrirPanelFormacion(tipo) {
+    const rolLower = tipo.trim().toLowerCase();
+
+    // Ocultar la vista principal de tarjetas
+    const vistaTarjetas = document.getElementById('section-formacion-cards');
+    if (vistaTarjetas) {
+        vistaTarjetas.style.display = 'none';
     }
 
-    // 2. Lógica del carrusel de frases
-    const frasesInstitucionales = [
-        '"La enseñanza médica de excelencia es la base de la medicina del mañana."',
-        '"Compromiso, ética y vocación en el servicio a nuestra comunidad."',
-        '"La formación continua fortalece la calidad de la atención médica."',
-        '"Investigación, ciencia y calidez humana al servicio del paciente."'
-    ];
-    
-    let indiceFrase = 0;
-    function iniciarCarruselFrases() {
-        const container = document.getElementById('phrase-container-trainees');
-        if (!container) return;
+    // Ocultar todos los paneles dinámicos
+    document.querySelectorAll('.panel-formacion-contenido').forEach(panel => {
+        panel.style.display = 'none';
+    });
 
-        setInterval(() => {
-            container.style.opacity = 0;
-            setTimeout(() => {
-                indiceFrase = (indiceFrase + 1) % frasesInstitucionales.length;
-                container.innerText = frasesInstitucionales[indiceFrase];
-                container.style.opacity = 1;
-            }, 800);
-        }, 5000);
-    }
+    // Mover el formulario al panel que corresponde
+    const formElement = document.getElementById('form-trainee-registration');
+    const targetPanel = document.getElementById(`panel-${rolLower}`);
 
-    function salirAlMenu() {
-        sessionStorage.removeItem('trainee_auth'); // Limpia el permiso
-        window.location.href = '/';
-    }
-
-    window.onload = iniciarCarruselFrases;
-
-    // 3. Abrir Panel de Formación y Mover Formulario
-    function abrirPanelFormacion(tipo) {
-        const rolLower = tipo.trim().toLowerCase();
-
-        // Ocultar la vista principal de tarjetas
-        const vistaTarjetas = document.getElementById('section-formacion-cards');
-        if (vistaTarjetas) {
-            vistaTarjetas.style.display = 'none';
+    if (targetPanel && formElement) {
+        // Inserta el formulario al final del contenido del panel abierto
+        targetPanel.appendChild(formElement);
+        
+        // Actualizar campos e identificadores internos del formulario
+        const rolUpper = tipo.trim().toUpperCase();
+        document.getElementById('trainee_type').value = rolUpper;
+        
+        const tituloForm = document.getElementById('form-trainee-title');
+        if (tituloForm) {
+            tituloForm.innerText = `Registro de Personal: ${rolUpper}`;
         }
 
-        // Ocultar todos los paneles dinámicos
-        document.querySelectorAll('.panel-formacion-contenido').forEach(panel => {
-            panel.style.display = 'none';
-        });
+        targetPanel.style.display = 'block';
 
-        // Mover el formulario al panel que corresponde
-        const formElement = document.getElementById('form-trainee-registration');
-        const targetPanel = document.getElementById(`panel-${rolLower}`);
+        // ¡AQUÍ CARGAMOS LOS SERVICIOS DISPONIBLES AUTOMÁTICAMENTE AL ABRIR EL FORMULARIO!
+        cargarServiciosFormadores();
+    } else {
+        alert(`No se encontró la vista del panel para: ${tipo}`);
+    }
+}
 
-        if (targetPanel && formElement) {
-            // Inserta el formulario al final del contenido del panel abierto
-            targetPanel.appendChild(formElement);
-            
-            // Actualizar campos e identificadores internos del formulario
-            const rolUpper = tipo.trim().toUpperCase();
-            document.getElementById('trainee_type').value = rolUpper;
-            
-            const tituloForm = document.getElementById('form-trainee-title');
-            if (tituloForm) {
-                tituloForm.innerText = `Registro de Personal: ${rolUpper}`;
-            }
+// 4. Volver al menú de tarjetas
+function volverAFormacionCards() {
+    // Ocultar todos los paneles
+    document.querySelectorAll('.panel-formacion-contenido').forEach(panel => {
+        panel.style.display = 'none';
+    });
 
-            targetPanel.style.display = 'block';
-        } else {
-            alert(`No se encontró la vista del panel para: ${tipo}`);
-        }
+    // Devolver el formulario a su contenedor oculto o base
+    const formElement = document.getElementById('form-trainee-registration');
+    const baseContainer = document.getElementById('formulario-plantilla-container') || document.querySelector('main');
+    if (formElement && baseContainer) {
+        baseContainer.appendChild(formElement);
     }
 
-    // 4. Volver al menú de tarjetas
-    function volverAFormacionCards() {
-        // Ocultar todos los paneles
-        document.querySelectorAll('.panel-formacion-contenido').forEach(panel => {
-            panel.style.display = 'none';
-        });
-
-        // Devolver el formulario a su contenedor oculto o base
-        const formElement = document.getElementById('form-trainee-registration');
-        const baseContainer = document.getElementById('formulario-plantilla-container') || document.querySelector('main');
-        if (formElement && baseContainer) {
-            baseContainer.appendChild(formElement);
-        }
-
-        // Mostrar menú de tarjetas
-        const vistaTarjetas = document.getElementById('section-formacion-cards');
-        if (vistaTarjetas) {
-            vistaTarjetas.style.display = 'block';
-        }
+    // Mostrar menú de tarjetas
+    const vistaTarjetas = document.getElementById('section-formacion-cards');
+    if (vistaTarjetas) {
+        vistaTarjetas.style.display = 'block';
     }
+}
 
-    // 5. Lógica para guardar el registro (envío al servidor)
+// 5. Lógica para guardar el registro (envío al servidor)
 async function guardarRegistroTrainee(e) {
     e.preventDefault();
 
@@ -465,7 +472,7 @@ async function guardarRegistroTrainee(e) {
         btnSubmit.innerText = 'Guardando registro...';
     }
 
-    // Capturamos todos los campos incluyendo el RFC
+    // Capturamos todos los campos incluyendo el RFC y Categoría de servicio
     const payload = {
         trainee_type: document.getElementById('trainee_type').value,
         last_name_paternal: document.getElementById('last_name_paternal').value.trim(),
@@ -473,7 +480,8 @@ async function guardarRegistroTrainee(e) {
         first_name: document.getElementById('first_name').value.trim(),
         gender: document.getElementById('gender').value,
         email: document.getElementById('email').value.trim(),
-        rfc: document.getElementById('rfc').value.trim().toUpperCase() // <--- RFC en mayúsculas
+        rfc: document.getElementById('rfc').value.trim().toUpperCase(),
+        service_category: document.getElementById('service_category').value
     };
 
     try {
@@ -505,6 +513,109 @@ async function guardarRegistroTrainee(e) {
         }
     }
 }
+
+// 6. Cargar la lista desplegable de servicios basada en formadores activos
+async function cargarServiciosFormadores() {
+    const select = document.getElementById('service_category');
+    if (!select) return;
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/trainers/categories`);
+        const data = await response.json();
+
+        if (data.success && data.categories.length > 0) {
+            select.innerHTML = '<option value="">-- Seleccione un servicio --</option>' + 
+                data.categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        } else {
+            select.innerHTML = '<option value="">No hay servicios de formadores disponibles</option>';
+        }
+    } catch (error) {
+        console.error('Error al cargar servicios:', error);
+        select.innerHTML = '<option value="">Error al cargar servicios</option>';
+    }
+}
+
+// =========================================================================
+// AGREGADO: GESTIÓN DE FORMADORES (PANEL ADMINISTRADOR MAESTRO)
+// =========================================================================
+
+// 7. Abrir el modal de asignación y cargar el listado de empleados
+async function abrirModalFormadores() {
+    const modal = document.getElementById('modal-asignar-formadores');
+    if (modal) modal.style.display = 'block';
+    
+    const contenedor = document.getElementById('lista-empleados-formadores');
+    if (!contenedor) return;
+    
+    contenedor.innerHTML = 'Cargando plantilla de personal...';
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/trainers/manage`);
+        const data = await response.json();
+
+        if (data.success) {
+            if (data.data.length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">No hay empleados registrados.</p>';
+                return;
+            }
+
+            contenedor.innerHTML = data.data.map(emp => `
+                <div style="padding: 8px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" class="chk-trainer" value="${emp.id}" ${emp.is_trainer ? 'checked' : ''}>
+                        <span>${emp.first_name} ${emp.last_name_paternal} ${emp.last_name_maternal}</span>
+                    </label>
+                    <span style="font-size: 0.85em; background: #e5e7eb; padding: 2px 8px; border-radius: 12px; color: #374151;">
+                        ${emp.category || 'Sin Categoría'}
+                    </span>
+                </div>
+            `).join('');
+        } else {
+            contenedor.innerHTML = 'Error al cargar personal.';
+        }
+    } catch (error) {
+        console.error('Error al obtener formadores:', error);
+        contenedor.innerHTML = 'Error al conectar con el servidor.';
+    }
+}
+
+// 8. Guardar la lista de empleados seleccionados como formadores
+async function guardarFormadoresSeleccionados() {
+    const checkboxes = document.querySelectorAll('.chk-trainer:checked');
+    const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/trainers/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ trainer_employee_ids: selectedIds })
+        });
+        const data = await response.json();
+        alert(data.message);
+        if (data.success) {
+            cerrarModalFormadores();
+        }
+    } catch (error) {
+        console.error('Error al guardar formadores:', error);
+        alert('Error al intentar guardar los formadores.');
+    }
+}
+
+// 9. Cerrar el modal de formadores
+function cerrarModalFormadores() {
+    const modal = document.getElementById('modal-asignar-formadores');
+    if (modal) modal.style.display = 'none';
+}
+
+
+
+
+
+
+
+
+
+
 </script>
 </body>
 </html>
