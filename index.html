@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.6.0
+        v1.7.0
     </div>
 
 
@@ -1969,7 +1969,11 @@
     
     <div style="background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 8px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
         
-        <button type="button" onclick="cerrarLoginTrainees()" style="position: absolute; top: 10px; right: 15px; border: none; background: transparent; font-size: 1.5em; cursor: pointer; color: #666;">&times;</button>
+<button type="button" 
+        onclick="cerrarLoginTrainees()" 
+        style="position: absolute; top: 10px; right: 15px; border: none; background: transparent; font-size: 1.5em; cursor: pointer; color: #666;">
+    &times;
+</button>
         
         <h3 style="color: #1e3a8a; text-align: center; margin-top: 0;">Portal de Adiestramiento</h3>
         <p style="font-size: 0.85em; color: #555; text-align: center;">Ingrese la clave digital autorizada de acceso:</p>
@@ -3804,6 +3808,28 @@ async function procesarLoginTrainee(e) {
         console.error('Error en procesarLoginTrainee:', error);
     }
 }
+
+
+
+// Abre el modal de trainees y limpia el input
+function abrirLoginTrainees() {
+    const input = document.getElementById('trainee-key-input');
+    if (input) input.value = '';
+
+    const modal = document.getElementById('login-trainees-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+// Cierra el modal de trainees (resuelve el error 'not defined' y hace funcionar la X)
+function cerrarLoginTrainees() {
+    const modal = document.getElementById('login-trainees-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
 
 
 
