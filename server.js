@@ -1433,11 +1433,11 @@ app.put('/api/preventive-patients/update', (req, res) => {
 
 
 
-// Ruta para registrar personal en formación y enviar correo
-app.post('/api/trainees/register', async (req, res) => {
+// ENDPOINT: Registrar Médico en Formación y notificar por correo
+app.post('/api/trainees/register', (req, res) => {
     const { trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email } = req.body;
 
-    // 1. Validar que no falte ningún campo obligatorio
+    // 1. Validar campos obligatorios
     if (!trainee_type || !last_name_paternal || !last_name_maternal || !first_name || !gender || !email) {
         return res.status(400).json({ 
             success: false, 
@@ -1445,56 +1445,74 @@ app.post('/api/trainees/register', async (req, res) => {
         });
     }
 
-    try {
-        // 2. Insertar en la tabla de Clever Cloud
-        const sql = `
-            INSERT INTO trainees 
-            (trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        `;
-        
-        await db.query(sql, [
-            trainee_type, 
-            last_name_paternal, 
-            last_name_maternal, 
-            first_name, 
-            gender, 
-            email
-        ]);
+    const emailTrim = email.trim().toLowerCase();
 
-        // 3. Configurar y enviar el correo de confirmación
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: `Confirmación de Registro - (${trainee_type})`,
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                    <h2 style="color: #1e3a8a;">¡Registro Exitoso!</h2>
-                    <p>Estimado(a) <strong>${first_name} ${last_name_paternal} ${last_name_maternal}</strong>,</p>
-                    <p>Confirmamos que tu registro como <strong>${trainee_type}</strong> se ha completado correctamente en el sistema.</p>
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-                    <p style="font-size: 0.85em; color: #666;">Este es un correo automático, por favor no responda a este mensaje.</p>
+    // 2. Inserción en la base de datos (Clever Cloud)
+    const sqlInsert = `
+        INSERT INTO trainees 
+        (trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email) 
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    pool.query(sqlInsert, [
+        trainee_type.trim().toUpperCase(), 
+        last_name_paternal.trim(), 
+        last_name_maternal.trim(), 
+        first_name.trim(), 
+        gender, 
+        emailTrim
+    ], (err, result) => {
+        if (err) {
+            console.error('Error al insertar médico en formación en BD:', err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Error en el servidor al intentar registrar la información.' 
+            });
+        }
+
+        // 3. Envío de Correo por la API de Brevo
+        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+        sendSmtpEmail.subject = `🏛️ Confirmación de Registro (${trainee_type}) - C.M.F. Ermita`;
+        sendSmtpEmail.htmlContent = `
+            <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
+                <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
+                    <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad</p>
                 </div>
-            `
-        };
+                <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
+                    <p>Estimado(a) <strong>${first_name} ${last_name_paternal} ${last_name_maternal}</strong>:</p>
+                    <p>Confirmamos que su registro como médico en formación (<strong>${trainee_type}</strong>) se ha completado exitosamente en nuestro sistema.</p>
+                    
+                    <div style="background: white; border-left: 5px solid #611232; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0;">
+                        <span style="font-size: 0.85em; color: #666; display: block; font-weight: bold; text-transform: uppercase;">Correo Vinculado:</span>
+                        <strong style="font-size: 1.1em; color: #611232;">${emailTrim}</strong>
+                    </div>
 
-        await transporter.sendMail(mailOptions);
+                    <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
+                        *Este es un mensaje automático de confirmación.
+                    </p>
+                </div>
+            </div>
+        `;
+        sendSmtpEmail.sender = { "name": "C.M.F. ERMITA - ISSSTE", "email": "cmfermitacalidad@gmail.com" };
+        sendSmtpEmail.to = [{ "email": emailTrim }];
 
-        // 4. Respuesta de éxito al cliente
-        res.status(200).json({ 
-            success: true, 
-            message: 'Registro guardado y correo enviado exitosamente.' 
-        });
-
-    } catch (error) {
-        console.error('Error en /api/trainees/register:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error interno del servidor al procesar el registro.' 
-        });
-    }
+        apiInstance.sendTransacEmail(sendSmtpEmail)
+            .then(() => {
+                return res.status(200).json({ 
+                    success: true, 
+                    message: 'Registro guardado y correo notificado exitosamente.' 
+                });
+            })
+            .catch((errorMail) => {
+                console.error('Error al enviar correo por API de Brevo:', errorMail);
+                return res.status(200).json({ 
+                    success: true, 
+                    message: 'Registro guardado en el sistema, pero no se pudo enviar el correo de notificación.' 
+                });
+            });
+    });
 });
-
 
 
 

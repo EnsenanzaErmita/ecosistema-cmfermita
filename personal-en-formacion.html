@@ -441,51 +441,52 @@
     }
 
     // 5. Lógica para guardar el registro (envío al servidor)
-    async function guardarRegistroTrainee(e) {
-        e.preventDefault();
+async function guardarRegistroTrainee(e) {
+    e.preventDefault();
 
-        const btnSubmit = document.getElementById('btn-save-trainee');
-        if (btnSubmit) {
-            btnSubmit.disabled = true;
-            btnSubmit.innerText = 'Guardando registro...';
+    const btnSubmit = document.getElementById('btn-save-trainee');
+    if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = 'Guardando registro...';
+    }
+
+    const payload = {
+        trainee_type: document.getElementById('trainee_type').value,
+        last_name_paternal: document.getElementById('last_name_paternal').value.trim(),
+        last_name_maternal: document.getElementById('last_name_maternal').value.trim(),
+        first_name: document.getElementById('first_name').value.trim(),
+        gender: document.getElementById('gender').value,
+        email: document.getElementById('email').value.trim()
+    };
+
+    try {
+        // Se agrega BASE_URL como en tus otras funciones
+        const response = await fetch(`${BASE_URL}/api/trainees/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al guardar el registro.');
         }
 
-        const payload = {
-            trainee_type: document.getElementById('trainee_type').value,
-            last_name_paternal: document.getElementById('last_name_paternal').value.trim(),
-            last_name_maternal: document.getElementById('last_name_maternal').value.trim(),
-            first_name: document.getElementById('first_name').value.trim(),
-            gender: document.getElementById('gender').value,
-            email: document.getElementById('email').value.trim()
-        };
+        alert(data.message);
+        document.getElementById('form-trainee-registration').reset();
+        volverAFormacionCards();
 
-        try {
-            const response = await fetch('/api/trainees/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Error al guardar el registro.');
-            }
-
-            alert('¡Registro exitoso! Se han guardado los datos correctamente.');
-            document.getElementById('form-trainee-registration').reset();
-            volverAFormacionCards();
-
-        } catch (error) {
-            alert(error.message);
-            console.error('Error en registro de trainee:', error);
-        } finally {
-            if (btnSubmit) {
-                btnSubmit.disabled = false;
-                btnSubmit.innerText = 'Completar Registro';
-            }
+    } catch (error) {
+        alert(error.message);
+        console.error('Error en registro de trainee:', error);
+    } finally {
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = 'Completar Registro';
         }
     }
+}
 </script>
 </body>
 </html>
