@@ -271,11 +271,15 @@
 
 
 
-<!-- NUEVA TARJETA PÚBLICA: ACCESO MÉDICOS EN FORMACIÓN -->
 <div class="card card-trainees" style="border-top: 8px solid var(--azul-trainees);">
     <h3 style="color: #1e3a8a; margin: 0 0 10px 0; font-size: 1.50em; text-align: center;">MIP'S, Pasantes y Residentes</h3>
     <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Acceso exclusivo para el personal médico en formación mediante clave digital autorizada.</p>
-    <button class="btn-save" style="background: #1e3a8a; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;" onclick="abrirLoginTrainees()">INGRESAR CREDENCIAL</button>
+    
+    <button class="btn-save" 
+            style="background: #1e3a8a; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;" 
+            onclick="window.location.href='/personal-en-formacion'">
+        INGRESAR CREDENCIAL
+    </button>
 </div>
 
 
@@ -1284,72 +1288,6 @@
 
 
 
-
-<!-- ========================================================================================================================================================= -->
-<!--                                                                    PERSONAL EN FORMACIÓN                                                                          -->
-<!-- ========================================================================================================================================================= -->
-
-
-
-
-<!-- ========================================================================= -->
-<!-- PANTALLA PRINCIPAL DE ADIESTRAMIENTO (MIP'S, PASANTES Y RESIDENTES)       -->
-<!-- ========================================================================= -->
-<!-- ========================================================================= -->
-<!-- ========================================================================= -->
-<div id="panel-medicos-formacion" class="view" style="display: none; padding: 20px;">
-    <!-- Barra superior con línea divisoria azul trainees -->
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--azul-trainees); margin-bottom: 20px; padding-bottom: 10px;">
-        <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Portal de Médicos en Formación</h2>
-        <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-trainees)'" onmouseout="this.style.background='#98989a'">← Salir del Portal</button>
-    </div>
-
-    <!-- Hero de Enseñanza y Calidad integrado con carrusel unificado -->
-    <div class="teaching-hero">
-        <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
-        <div id="phrase-container-trainees" style="font-size: 1.1em; font-style: italic; color: var(--dorado-calidad); margin-top: 8px; font-weight: 300; min-height: 2.2em; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-in-out;">"Cargando pensamiento institucional..."</div>
-    </div>
-
-    <!-- GRID PRINCIPAL DE OPCIONES (MISMO ESTILO QUE COORDINACIÓN MÉDICA) -->
-    <div class="login-grid" style="margin-top: 20px;">
-        
-        <!-- TARJETA A: MIP'S -->
-        <div class="card" style="border-top: 8px solid var(--azul-trainees);">
-            <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.50em; margin-top: 0;">Médicos Internos (MIP)</h3>
-            <p>Registro de adscripción, bitácora de rotación hospitalaria y entrega de documentos base de pregrado.</p>
-            <button onclick="abrirRegistroFormacion('MIP')" class="btn-save" style="background: var(--azul-trainees); color: white !important;">ABRIR REGISTRO MIP</button>
-        </div>
-
-        <!-- TARJETA B: PASANTES -->
-        <div class="card" style="border-top: 8px solid var(--azul-trainees);">
-            <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.50em; margin-top: 0;">Médicos Pasantes</h3>
-            <p>Control de programas comunitarios, informes mensuales de actividades y validación académica.</p>
-            <button onclick="abrirRegistroFormacion('PASANTE')" class="btn-save" style="background: var(--azul-trainees); color: white !important;">ABRIR REGISTRO PASANTE</button>
-        </div>
-
-        <!-- TARJETA C: RESIDENTES -->
-        <div class="card" style="border-top: 8px solid var(--azul-trainees);">
-            <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.50em; margin-top: 0;">Médicos Residentes</h3>
-            <p>Control de protocolos de investigación clínica, asignación de guardias y bitácora de calidad.</p>
-            <button onclick="abrirRegistroFormacion('RESIDENTE')" class="btn-save" style="background: var(--azul-trainees); color: white !important;">ABRIR REGISTRO RESIDENTE</button>
-        </div>
-
-    </div>
-
-    <!-- TARJETA DE CARGA DINÁMICA DEBAJO DE LAS TARJETAS -->
-    <div id="tarjeta-registro-trainee-container" style="display: none; margin-top: 30px; background: #fff; border: 1px solid var(--azul-trainees); border-top: 5px solid var(--azul-trainees); padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-        <h3 id="titulo-dinamico-registro" style="color: var(--azul-trainees); margin-top: 0; border-bottom: 2px solid var(--azul-trainees); padding-bottom: 8px; text-transform: uppercase;">Formulario de Carga</h3>
-        <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Complete sus datos de adscripción institucional. Los campos marcados con (*) son mandatorios.</p>
-        
-        <div style="padding: 30px; background: #fdfdfd; border: 1px dashed #ccc; text-align: center; color: #777; border-radius: 4px; font-weight: bold;">
-            📋 Formulario de Registro Listo para Modelar los Campos de Carga de Archivos
-        </div>
-    </div>
-</div>
-
-
- <!-- Busca el cierre de tu último panel (el de médicos en formación) -->
-    </div> <!-- Fin de panel-medicos-formacion -->
 
 
 

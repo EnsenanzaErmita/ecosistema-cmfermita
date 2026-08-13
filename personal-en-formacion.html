@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal en Formación - MIP'S, Pasantes y Residentes</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+:root {
+            --azul-trainees: #1e3a8a;
+            --dorado-calidad: #b45309;
+            --fondo-gris: #f3f4f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--fondo-gris);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .login-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .teaching-hero {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+
+
+
+<!-- ========================================================================================================================================================= -->
+<!--                                                                  PERSONAL EN FORMACIÓN                                                                    -->
+<!-- ========================================================================================================================================================= -->
+
+
+<div id="panel-medicos-formacion" class="view" style="display: block; padding: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--azul-trainees); margin-bottom: 20px; padding-bottom: 10px;">
+            <h2 style="color: #611232; margin:0; font-family: 'Segoe UI', sans-serif;">Portal de Médicos en Formación</h2>
+            <button onclick="window.location.href='/'" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-trainees)'" onmouseout="this.style.background='#98989a'">← Salir del Portal</button>
+        </div>
+
+        <div class="teaching-hero">
+            <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
+            <div id="phrase-container-trainees" style="font-size: 1.1em; font-style: italic; color: var(--dorado-calidad); margin-top: 8px; font-weight: 300; min-height: 2.2em; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease-in-out;">"Cargando pensamiento institucional..."</div>
+        </div>
+
+        <div class="login-grid" style="margin-top: 20px;">
+            <div class="card" style="border-top: 8px solid var(--azul-trainees);">
+                <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.50em; margin-top: 0;">Médicos Internos (MIP)</h3>
+                <p>Registro de adscripción, bitácora de rotación hospitalaria y entrega de documentos base de pregrado.</p>
+                <button onclick="abrirRegistroFormacion('MIP')" class="btn-save" style="background: var(--azul-trainees); color: white !important;">ABRIR REGISTRO MIP</button>
+            </div>
+
+            <div class="card" style="border-top: 8px solid var(--azul-trainees);">
+                <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.50em; margin-top: 0;">Médicos Pasantes</h3>
+                <p>Control de programas comunitarios, informes mensuales de actividades y validación académica.</p>
+                <button onclick="abrirRegistroFormacion('PASANTE')" class="btn-save" style="background: var(--azul-trainees); color: white !important;">ABRIR REGISTRO PASANTE</button>
+            </div>
+
+            <div class="card" style="border-top: 8px solid var(--azul-trainees);">
+                <h3 style="color: var(--azul-trainees); text-align: center; font-size: 1.50em; margin-top: 0;">Médicos Residentes</h3>
+                <p>Control de protocolos de investigación clínica, asignación de guardias y bitácora de calidad.</p>
+                <button onclick="abrirRegistroFormacion('RESIDENTE')" class="btn-save" style="background: var(--azul-trainees); color: white !important;">ABRIR REGISTRO RESIDENTE</button>
+            </div>
+        </div>
+
+        <div id="tarjeta-registro-trainee-container" style="display: none; margin-top: 30px; background: #fff; border: 1px solid var(--azul-trainees); border-top: 5px solid var(--azul-trainees); padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h3 id="titulo-dinamico-registro" style="color: var(--azul-trainees); margin-top: 0; border-bottom: 2px solid var(--azul-trainees); padding-bottom: 8px; text-transform: uppercase;">Formulario de Carga</h3>
+            <p style="font-size: 0.85em; color: #666; margin-bottom: 15px;">Complete sus datos de adscripción institucional. Los campos marcados con (*) son mandatorios.</p>
+            
+            <div style="padding: 30px; background: #fdfdfd; border: 1px dashed #ccc; text-align: center; color: #777; border-radius: 4px; font-weight: bold;">
+                📋 Formulario de Registro Listo para Modelar los Campos de Carga de Archivos
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        // Función para desplegar el formulario dinámico según la tarjeta elegida
+        function abrirRegistroFormacion(tipo) {
+            const container = document.getElementById('tarjeta-registro-trainee-container');
+            const titulo = document.getElementById('titulo-dinamico-registro');
+            
+            titulo.innerText = `Formulario de Carga - Médico ${tipo}`;
+            container.style.display = 'block';
+            
+            // Desplazamiento suave al formulario
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+
+
+</html>

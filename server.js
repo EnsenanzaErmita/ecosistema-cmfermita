@@ -1460,6 +1460,12 @@ app.put('/api/preventive-patients/update', (req, res) => {
 // =========================================================================
 // 4. SERVIR EL HTML
 // =========================================================================
+
+// Vista para Personal en Formación (MIPs, Pasantes y Residentes)
+app.get('/personal-en-formacion', (req, res) => {
+    res.sendFile(path.join(__dirname, 'personal-en-formacion.html'));
+});
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
