@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v1.5.0
+        v1.6.0
     </div>
 
 
@@ -277,7 +277,7 @@
     
     <button class="btn-save" 
             style="background: #1e3a8a; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;" 
-            onclick="abrirLoginTrainees()">
+            onclick="entrar('TRAINEES')">
         INGRESAR CREDENCIAL
     </button>
 </div>
@@ -2045,16 +2045,25 @@
 function entrar(rol) {
     const rolUpper = rol.trim().toUpperCase();
 
-    // 🚀 CORREGIDO: Agregamos MEDICINA PREVENTIVA para que solicite usuario y contraseña en pantalla
+    // Si es TRAINEES, mostramos su modal
+    if (rolUpper === 'TRAINEES') {
+        const modalTrainee = document.getElementById('login-trainees-modal');
+        if (modalTrainee) {
+            document.getElementById('trainee-key-input').value = '';
+            modalTrainee.style.display = 'flex';
+        } else {
+            alert('Error: No se encontró el modal "login-trainees-modal" en el HTML.');
+        }
+        return;
+    }
+
     if (rolUpper === 'COORDINACIÓN MÉDICA' || rolUpper === 'COORDINACION' || rolUpper === 'ADMINISTRADOR' || rolUpper === 'ADMIN' || rolUpper === 'MEDICINA PREVENTIVA') {
-        
         moduloDestino = (rolUpper === 'COORDINACION') ? 'COORDINACIÓN MÉDICA' : rolUpper;
         if (moduloDestino === 'ADMIN') moduloDestino = 'ADMINISTRADOR';
         
         document.getElementById('login-username').value = '';
         document.getElementById('login-password').value = '';
 
-        // Adaptamos dinámicamente los títulos según el botón pulsado
         if (moduloDestino === 'ADMINISTRADOR') {
             document.getElementById('login-title').innerText = 'Control del Administrador';
             document.getElementById('login-subtitle').innerText = 'Acceso restringido para el Administrador Maestro';
@@ -2074,7 +2083,6 @@ function entrar(rol) {
         if (targetPanel) targetPanel.classList.add('active-view');
     }
 }
-
 
 
 
