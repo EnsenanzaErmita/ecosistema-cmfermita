@@ -291,6 +291,12 @@
 
                 <input type="hidden" id="trainee_type" name="trainee_type" value="">
 
+
+<div class="form-group">
+    <label for="rfc">RFC (Con Homoclave):</label>
+    <input type="text" id="rfc" name="rfc" placeholder="EJ: ABCD900101XXX" maxlength="13" style="text-transform: uppercase;" required>
+</div>
+
                 <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 200px;">
                         <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">Apellido Paterno *</label>
@@ -459,17 +465,18 @@ async function guardarRegistroTrainee(e) {
         btnSubmit.innerText = 'Guardando registro...';
     }
 
+    // Capturamos todos los campos incluyendo el RFC
     const payload = {
         trainee_type: document.getElementById('trainee_type').value,
         last_name_paternal: document.getElementById('last_name_paternal').value.trim(),
         last_name_maternal: document.getElementById('last_name_maternal').value.trim(),
         first_name: document.getElementById('first_name').value.trim(),
         gender: document.getElementById('gender').value,
-        email: document.getElementById('email').value.trim()
+        email: document.getElementById('email').value.trim(),
+        rfc: document.getElementById('rfc').value.trim().toUpperCase() // <--- RFC en mayúsculas
     };
 
     try {
-        // Se agrega BASE_URL como en tus otras funciones
         const response = await fetch(`${BASE_URL}/api/trainees/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -484,7 +491,9 @@ async function guardarRegistroTrainee(e) {
 
         alert(data.message);
         document.getElementById('form-trainee-registration').reset();
-        volverAFormacionCards();
+        if (typeof volverAFormacionCards === 'function') {
+            volverAFormacionCards();
+        }
 
     } catch (error) {
         alert(error.message);

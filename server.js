@@ -1434,86 +1434,108 @@ app.put('/api/preventive-patients/update', (req, res) => {
 
 
 // ENDPOINT: Registrar Médico en Formación y notificar por correo
+// ENDPOINT: Registrar Médico en Formación (Con validación de RFC único)
 app.post('/api/trainees/register', (req, res) => {
-    const { trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email } = req.body;
+    const { trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email, rfc } = req.body;
 
-    // 1. Validar campos obligatorios
-    if (!trainee_type || !last_name_paternal || !last_name_maternal || !first_name || !gender || !email) {
+    // 1. Validar que todos los campos requeridos estén presentes
+    if (!trainee_type || !last_name_paternal || !last_name_maternal || !first_name || !gender || !email || !rfc) {
         return res.status(400).json({ 
             success: false, 
-            message: 'Todos los campos son obligatorios.' 
+            message: 'Todos los campos, incluyendo el RFC, son obligatorios.' 
         });
     }
 
     const emailTrim = email.trim().toLowerCase();
+    const rfcTrim = rfc.trim().toUpperCase();
 
-    // 2. Inserción en la base de datos (Clever Cloud)
-    const sqlInsert = `
-        INSERT INTO trainees 
-        (trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email) 
-        VALUES (?, ?, ?, ?, ?, ?)
-    `;
-
-    pool.query(sqlInsert, [
-        trainee_type.trim().toUpperCase(), 
-        last_name_paternal.trim(), 
-        last_name_maternal.trim(), 
-        first_name.trim(), 
-        gender, 
-        emailTrim
-    ], (err, result) => {
-        if (err) {
-            console.error('Error al insertar médico en formación en BD:', err);
+    // 2. VERIFICACIÓN DE DUPLICIDAD POR RFC
+    const sqlCheckRfc = 'SELECT id, first_name, last_name_paternal FROM trainees WHERE rfc = ?';
+    pool.query(sqlCheckRfc, [rfcTrim], (errCheck, resultsCheck) => {
+        if (errCheck) {
+            console.error('Error al verificar duplicidad de RFC:', errCheck);
             return res.status(500).json({ 
                 success: false, 
-                message: 'Error en el servidor al intentar registrar la información.' 
+                message: 'Error interno en el servidor al validar el RFC.' 
             });
         }
 
-        // 3. Envío de Correo por la API de Brevo
-        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-        sendSmtpEmail.subject = `🏛️ Confirmación de Registro (${trainee_type}) - C.M.F. Ermita`;
-        sendSmtpEmail.htmlContent = `
-            <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
-                <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
-                    <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad</p>
-                </div>
-                <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
-                    <p>Estimado(a) <strong>${first_name} ${last_name_paternal} ${last_name_maternal}</strong>:</p>
-                    <p>Confirmamos que su registro como médico en formación (<strong>${trainee_type}</strong>) se ha completado exitosamente en nuestro sistema.</p>
-                    
-                    <div style="background: white; border-left: 5px solid #611232; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0;">
-                        <span style="font-size: 0.85em; color: #666; display: block; font-weight: bold; text-transform: uppercase;">Correo Vinculado:</span>
-                        <strong style="font-size: 1.1em; color: #611232;">${emailTrim}</strong>
-                    </div>
-
-                    <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
-                        *Este es un mensaje automático de confirmación.
-                    </p>
-                </div>
-            </div>
-        `;
-        sendSmtpEmail.sender = { "name": "C.M.F. ERMITA - ISSSTE", "email": "cmfermitacalidad@gmail.com" };
-        sendSmtpEmail.to = [{ "email": emailTrim }];
-
-        apiInstance.sendTransacEmail(sendSmtpEmail)
-            .then(() => {
-                return res.status(200).json({ 
-                    success: true, 
-                    message: 'Registro guardado y correo notificado exitosamente.' 
-                });
-            })
-            .catch((errorMail) => {
-                console.error('Error al enviar correo por API de Brevo:', errorMail);
-                return res.status(200).json({ 
-                    success: true, 
-                    message: 'Registro guardado en el sistema, pero no se pudo enviar el correo de notificación.' 
-                });
+        if (resultsCheck && resultsCheck.length > 0) {
+            const registrado = resultsCheck[0];
+            return res.status(400).json({ 
+                success: false, 
+                message: `El RFC [${rfcTrim}] ya se encuentra registrado a nombre de: ${registrado.first_name} ${registrado.last_name_paternal}.` 
             });
+        }
+
+        // 3. Inserción en la base de datos (Clever Cloud)
+        const sqlInsert = `
+            INSERT INTO trainees 
+            (trainee_type, last_name_paternal, last_name_maternal, first_name, gender, email, rfc) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        pool.query(sqlInsert, [
+            trainee_type.trim().toUpperCase(), 
+            last_name_paternal.trim(), 
+            last_name_maternal.trim(), 
+            first_name.trim(), 
+            gender, 
+            emailTrim,
+            rfcTrim
+        ], (err, result) => {
+            if (err) {
+                console.error('Error al insertar médico en formación en BD:', err);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Error en el servidor al intentar registrar la información.' 
+                });
+            }
+
+            // 4. Envío de Correo por la API de Brevo
+            const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+            sendSmtpEmail.subject = `🏛️ Confirmación de Registro (${trainee_type}) - C.M.F. Ermita`;
+            sendSmtpEmail.htmlContent = `
+                <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
+                    <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
+                        <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad</p>
+                    </div>
+                    <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
+                        <p>Estimado(a) <strong>${first_name} ${last_name_paternal} ${last_name_maternal}</strong>:</p>
+                        <p>Confirmamos que su registro como médico en formación (<strong>${trainee_type}</strong>) se ha completado exitosamente.</p>
+                        
+                        <div style="background: white; border-left: 5px solid #611232; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0;">
+                            <p style="margin: 0; font-size: 0.9em;"><strong>RFC Registrado:</strong> ${rfcTrim}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9em;"><strong>Correo Vinculado:</strong> ${emailTrim}</p>
+                        </div>
+
+                        <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
+                            *Este es un mensaje automático de confirmación.
+                        </p>
+                    </div>
+                </div>
+            `;
+            sendSmtpEmail.sender = { "name": "C.M.F. ERMITA - ISSSTE", "email": "cmfermitacalidad@gmail.com" };
+            sendSmtpEmail.to = [{ "email": emailTrim }];
+
+            apiInstance.sendTransacEmail(sendSmtpEmail)
+                .then(() => {
+                    return res.status(200).json({ 
+                        success: true, 
+                        message: 'Registro guardado y correo notificado exitosamente.' 
+                    });
+                })
+                .catch((errorMail) => {
+                    console.error('Error al enviar correo por API de Brevo:', errorMail);
+                    return res.status(200).json({ 
+                        success: true, 
+                        message: 'Registro guardado en el sistema, pero no se pudo enviar el correo de notificación.' 
+                    });
+                });
+        });
     });
 });
-
 
 
 
