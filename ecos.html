@@ -324,11 +324,7 @@
         </div>
 
         <div class="ecos-subgrid">
-<div class="card-ecos-sub" onclick="
-    document.getElementById('panel-general-ecos').style.display = 'none';
-    document.getElementById('panel-solicitud-personal').style.display = 'block';
-    if (typeof cargarHistorialSolicitudes === 'function') cargarHistorialSolicitudes();
-" style="cursor: pointer;">
+<div class="card-ecos-sub" onclick="cambiarVistaEcos('solicitud')" style="cursor: pointer;">
     <h4>Solicitud de Personal para Jornadas</h4>
     <p>Gestiona, crea y consulta el historial de solicitudes de personal en formación asignado a jornadas.</p>
     <button class="btn-ecos-action">Acceder al Módulo</button>
@@ -339,10 +335,7 @@
 
 <div id="panel-solicitud-personal" class="view" style="display: none;">
 
-<button type="button" onclick="
-    document.getElementById('panel-solicitud-personal').style.display = 'none';
-    document.getElementById('panel-general-ecos').style.display = 'block';
-" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">
+<button type="button" onclick="cambiarVistaEcos('general')" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">
     &larr; Volver al Panel General ECOS
 </button>
 
@@ -478,19 +471,28 @@ function cambiarVistaEcos(vista) {
     const panelSolicitud = document.getElementById('panel-solicitud-personal');
 
     if (vista === 'solicitud') {
+        // Ocultar general
         panelGeneral.style.display = 'none';
+        panelGeneral.classList.remove('active-view');
+        
+        // Mostrar solicitud
         panelSolicitud.style.display = 'block';
-        // Cargamos el historial al entrar a este panel por si hay registros nuevos
+        panelSolicitud.classList.add('active-view');
+
+        // Cargar historial
         if (typeof cargarHistorialSolicitudes === 'function') {
             cargarHistorialSolicitudes();
         }
     } else {
+        // Mostrar general
         panelGeneral.style.display = 'block';
+        panelGeneral.classList.add('active-view');
+        
+        // Ocultar solicitud
         panelSolicitud.style.display = 'none';
+        panelSolicitud.classList.remove('active-view');
     }
 }
-
-
 
 
 
