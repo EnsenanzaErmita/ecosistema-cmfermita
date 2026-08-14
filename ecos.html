@@ -220,7 +220,7 @@
         </div>
     </header>
 
-    <div class="main-content">
+<div class="main-content">
         <div class="container">
 
             <div class="teaching-hero">
@@ -235,16 +235,16 @@
 
             <div class="login-grid">
                 
-                <div class="card" style="border-top-color: var(--azul-ecos);">
+                <div class="card" style="background: #eff6ff;">
                     <h3>Nueva Solicitud</h3>
                     <p>Seleccione de la lista los trainees que requiere para su jornada institucional. La petición será enviada al formador de enseñanza.</p>
-                    <button class="btn" onclick="abrirModalSolicitud()">Generar Solicitud</button>
+                    <button class="btn-save" onclick="abrirModalSolicitud()">Solicitud de Personal para Jornadas</button>
                 </div>
 
-                <div class="card" style="border-top-color: var(--guinda);">
-                    <h3>Historial de Solicitudes</h3>
-                    <p>Consulte el estatus, detalle y seguimiento de las solicitudes de jornadas realizadas previamente.</p>
-                    <button class="btn" style="background-color: var(--guinda);" onclick="toggleHistorial()">Ver Historial</button>
+                <div class="card" style="border-top-color: var(--guinale); background: #fdfaf6; border-top-color: var(--guinda);">
+                    <h3 style="color: var(--guinda);">Historial</h3>
+                    <p>Consulte el estatus, seguimiento y detalle de las solicitudes de personal para jornadas realizadas.</p>
+                    <button class="btn-save" style="background: var(--guinda);" onclick="toggleHistorial()">Historial de Solicitudes</button>
                 </div>
 
             </div>
@@ -260,7 +260,7 @@
     </div>
 
     <div id="modal-solicitud" style="display:none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
-        <div style="background: white; margin: 3% auto; padding: 25px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+        <div style="background: white; margin: 3% auto; padding: 25px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2); text-align: left;">
             <h3 style="color: var(--azul-ecos); margin-top:0;">Seleccionar Trainees para la Jornada</h3>
             <p style="font-size: 0.9em; color: #6b7280;">Marque las casillas de los participantes que desea incluir:</p>
             
@@ -269,11 +269,10 @@
 
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
                 <button class="btn-secondary" onclick="cerrarModalSolicitud()">Cancelar</button>
-                <button class="btn" style="width: auto;" onclick="enviarSolicitudJornada()">Enviar Solicitud a Enseñanza</button>
+                <button class="btn-save" style="width: auto; margin-top: 0;" onclick="enviarSolicitudJornada()">Enviar Solicitud a Enseñanza</button>
             </div>
         </div>
     </div>
-
 
 
 
