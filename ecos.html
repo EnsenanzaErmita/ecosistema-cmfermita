@@ -296,156 +296,270 @@
 </head>
 <body>
 
-
 <header>
-        <h1>C.M.F. ERMITA - ADMINISTRACIÓN DE SERVICIOS</h1>
-        <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-            v2.2.0
-        </div>
-    </header>
+    <h1>C.M.F. ERMITA - ADMINISTRACIÓN DE SERVICIOS</h1>
+    <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
+        v2.2.0
+    </div>
+</header>
+
+
+
 
 <div class="container">
-    <div class="ecos-panel-container">
-        <h3 class="ecos-panel-title">Solicitud de Personal para jornadas</h3>
-        <p class="ecos-panel-subtitle">Gestión y control operativo del personal en formación asignado a las jornadas institucionales.</p>
 
-        <div class="ecos-subgrid">
-            
-            <div class="card-ecos-sub">
-                <h4>Nueva Solicitud</h4>
-                <p>Crea, configura y envía una nueva solicitud de personal médico o en formación para las próximas jornadas.</p>
-                <button class="btn-ecos-action" onclick="abrirNuevaSolicitudEcos()">Crear Solicitud</button>
+    <div id="panel-general-ecos" style="display: block;">
+        <div class="ecos-panel-container">
+            <h3 class="ecos-panel-title">Panel General ECOS</h3>
+            <p class="ecos-panel-subtitle">Módulo central de gestión y control operativo del ecosistema.</p>
+
+            <div class="ecos-subgrid">
+                <div class="card-ecos-sub" onclick="cambiarVistaEcos('solicitud')" style="cursor: pointer;">
+                    <h4>Solicitud de Personal para Jornadas</h4>
+                    <p>Gestiona, crea y consulta el historial de solicitudes de personal en formación asignado a jornadas.</p>
+                    <button class="btn-ecos-action">Acceder al Módulo</button>
+                </div>
             </div>
+        </div>
+    </div>
 
-            <div class="card-ecos-sub" style="border-top-color: #0284c7;">
-                <h4>Historial</h4>
-                <p>Consulta el registro histórico, estatus de aprobación (pendientes, aprobadas, rechazadas) y bitácoras anteriores.</p>
-                <button class="btn-ecos-action" style="background-color: #0284c7;" onclick="abrirHistorialEcos()">Ver Historial</button>
+    <div id="panel-solicitud-personal" style="display: none;">
+        <button type="button" onclick="cambiarVistaEcos('general')" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">
+            &larr; Volver al Panel General ECOS
+        </button>
+
+        <div class="ecos-panel-container">
+            <h3 class="ecos-panel-title">Solicitud de Personal para jornadas</h3>
+            <p class="ecos-panel-subtitle">Gestión y control operativo del personal en formación asignado a las jornadas institucionales.</p>
+
+            <div class="ecos-subgrid">
+                
+                <div class="card-ecos-sub">
+                    <h4>Nueva Solicitud</h4>
+                    <p>Crea, configura y envía una nueva solicitud de personal médico o en formación para las próximas jornadas.</p>
+                    <button class="btn-ecos-action" onclick="abrirModalSolicitud()">Crear Solicitud</button>
+                </div>
+
+                <div class="card-ecos-sub" style="border-top-color: #0284c7;">
+                    <h4>Historial</h4>
+                    <p>Consulta el registro histórico, estatus de aprobación (pendientes, aprobadas, rechazadas) y bitácoras anteriores.</p>
+                    <button class="btn-ecos-action" style="background-color: #0284c7;" onclick="abrirHistorialEcos()">Ver Historial</button>
+                </div>
+
             </div>
+        </div>
 
+        <div id="historial-solicitudes" style="margin-top: 20px;">
+            <p style="color: #64748b; text-align: center;">Cargando historial...</p>
+        </div>
+    </div>
+
+</div>
+
+<div id="modal-solicitud" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background-color: #fff; margin: 5% auto; padding: 25px; border-radius: 10px; width: 60%; max-width: 700px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        <span class="close" onclick="cerrarModalSolicitud()" style="float: right; font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa;">&times;</span>
+        
+        <h3 style="color: var(--azul-ecos, #2563eb); margin-top: 0;">Nueva Solicitud de Personal para Jornada</h3>
+        <p style="font-size: 0.9em; color: #64748b;">Selecciona al personal en formación (`trainees`) que se requiere para la jornada:</p>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="motivo-solicitud" style="font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 5px;">Motivo / Descripción de la Jornada:</label>
+            <textarea id="motivo-solicitud" rows="2" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px;" placeholder="Ej. Jornada de vacunación comunitaria zona norte..."></textarea>
+        </div>
+
+        <div style="font-weight: 600; margin-bottom: 8px; font-size: 0.9em;">Listado de Trainees Disponibles:</div>
+        
+        <div id="lista-trainees-disponibles" style="max-height: 220px; overflow-y: auto; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; background: #f8fafc; margin-bottom: 20px;">
+            <p style="color: #64748b; text-align: center;">Cargando lista de trainees...</p>
+        </div>
+
+        <div style="text-align: right;">
+            <button type="button" onclick="cerrarModalSolicitud()" style="padding: 10px 18px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; margin-right: 10px; font-weight: 600;">Cancelar</button>
+            <button type="button" onclick="enviarSolicitudJornada()" style="padding: 10px 18px; background: var(--azul-ecos, #2563eb); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Enviar Solicitud a Formadores</button>
         </div>
     </div>
 </div>
 
-
-    <footer>
-        <p>&copy; 2026 Todos los derechos reservados</p>
-        <p>Desarrollado por: <strong>González Zamudio Manuel Alejandro</strong></p>
-        <p>Colaboración: <strong>Aldana Rodríguez Said Israel</strong></p>
-        <p style="font-size: 0.75em; opacity: 0.7; margin-top: 10px;">Clínica de Medicina Familiar Ermita - ISSSTE</p>
-    </footer>
-
+<footer>
+    <p>&copy; 2026 Todos los derechos reservados</p>
+    <p>Desarrollado por: <strong>González Zamudio Manuel Alejandro</strong></p>
+    <p>Colaboración: <strong>Aldana Rodríguez Said Israel</strong></p>
+    <p style="font-size: 0.75em; opacity: 0.7; margin-top: 10px;">Clínica de Medicina Familiar Ermita - ISSSTE</p>
+</footer>
 
 
 
-    <script>
-        const BASE_URL = window.location.origin;
 
-        // Validar acceso inicial (puedes ajustar según tu lógica de sesión)
-        window.onload = function() {
+
+
+<script>
+    const BASE_URL = window.location.origin;
+
+    // Validar acceso inicial y cargar el historial al abrir la vista
+    window.onload = function() {
+        cargarHistorialSolicitudes();
+    };
+
+    // 1. Abrir modal y cargar listado de trainees desde la API
+    async function abrirModalSolicitud() {
+        document.getElementById('modal-solicitud').style.display = 'block';
+        
+        // Limpiar campo de motivo cada vez que se abra
+        const inputMotivo = document.getElementById('motivo-solicitud');
+        if (inputMotivo) inputMotivo.value = '';
+
+        const contenedor = document.getElementById('lista-trainees-disponibles');
+        contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">Cargando trainees...</p>';
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/trainees/all`);
+            const data = await response.json();
+
+            if (data.success && data.trainees.length > 0) {
+                contenedor.innerHTML = data.trainees.map(t => `
+                    <div class="trainee-item" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" class="chk-trainee" value="${t.id}" style="width: 16px; height: 16px;">
+                            <span><strong>${t.first_name} ${t.last_name_paternal}</strong> (${t.service_category || 'Sin Servicio'})</span>
+                        </label>
+                        <span style="font-size: 0.85em; background: #e5e7eb; padding: 2px 8px; border-radius: 10px; color: #374151;">${t.role_type || 'Trainee'}</span>
+                    </div>
+                `).join('');
+            } else {
+                contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">No hay trainees registrados.</p>';
+            }
+        } catch (error) {
+            console.error('Error al cargar trainees:', error);
+            contenedor.innerHTML = '<p style="color:red; text-align:center;">Error de conexión al cargar trainees.</p>';
+        }
+    }
+
+    // Cerrar el modal
+    function cerrarModalSolicitud() {
+        document.getElementById('modal-solicitud').style.display = 'none';
+    }
+
+
+
+
+
+// Función para cambiar de vista en ECOS
+function cambiarVistaEcos(vista) {
+    const panelGeneral = document.getElementById('panel-general-ecos');
+    const panelSolicitud = document.getElementById('panel-solicitud-personal');
+
+    if (vista === 'solicitud') {
+        panelGeneral.style.display = 'none';
+        panelSolicitud.style.display = 'block';
+        // Cargamos el historial al entrar a este panel por si hay registros nuevos
+        if (typeof cargarHistorialSolicitudes === 'function') {
             cargarHistorialSolicitudes();
-        };
+        }
+    } else {
+        panelGeneral.style.display = 'block';
+        panelSolicitud.style.display = 'none';
+    }
+}
 
-        async function abrirModalSolicitud() {
-            document.getElementById('modal-solicitud').style.display = 'block';
-            const contenedor = document.getElementById('lista-trainees-disponibles');
-            contenedor.innerHTML = '<p style="text-align:center;">Cargando trainees...</p>';
 
-            try {
-                const response = await fetch(`${BASE_URL}/api/trainees/all`);
-                const data = await response.json();
 
-                if (data.success && data.trainees.length > 0) {
-                    contenedor.innerHTML = data.trainees.map(t => `
-                        <div class="trainee-item">
-                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                                <input type="checkbox" class="chk-trainee" value="${t.id}">
-                                <span><strong>${t.first_name} ${t.last_name_paternal}</strong> (${t.service_category || 'Sin Servicio'})</span>
-                            </label>
-                            <span style="font-size: 0.85em; background: #e5e7eb; padding: 2px 8px; border-radius: 10px;">${t.role_type || 'Trainee'}</span>
-                        </div>
-                    `).join('');
-                } else {
-                    contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">No hay trainees registrados.</p>';
-                }
-            } catch (error) {
-                console.error('Error al cargar trainees:', error);
-                contenedor.innerHTML = '<p style="color:red; text-align:center;">Error de conexión.</p>';
-            }
+
+
+
+
+
+
+    // 2 y 4. Enviar la selección de trainees junto con el motivo al backend
+    async function enviarSolicitudJornada() {
+        const checkboxes = document.querySelectorAll('.chk-trainee:checked');
+        const traineeIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+        if (traineeIds.length === 0) {
+            alert('Debe seleccionar al menos un trainee para la solicitud.');
+            return;
         }
 
-        function cerrarModalSolicitud() {
-            document.getElementById('modal-solicitud').style.display = 'none';
+        // Capturar el motivo escrito (asegúrate de tener un input/textarea con id="motivo-solicitud" en tu HTML del modal)
+        const motivoInput = document.getElementById('motivo-solicitud');
+        const motivo = motivoInput ? motivoInput.value.trim() : '';
+
+        if (!motivo) {
+            alert('Por favor, ingresa el motivo o descripción de la solicitud para los formadores.');
+            if (motivoInput) motivoInput.focus();
+            return;
         }
 
-        async function enviarSolicitudJornada() {
-            const checkboxes = document.querySelectorAll('.chk-trainee:checked');
-            const traineeIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+        const requesterEmployeeId = localStorage.getItem('current_employee_id') || 1; 
 
-            if (traineeIds.length === 0) {
-                alert('Debe seleccionar al menos un trainee para la solicitud.');
-                return;
+        try {
+            const response = await fetch(`${BASE_URL}/api/ecos/request`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    requester_employee_id: requesterEmployeeId, 
+                    trainee_ids: traineeIds,
+                    motivo: motivo 
+                })
+            });
+
+            const data = await response.json();
+            alert(data.message || 'Solicitud procesada correctamente.');
+
+            if (data.success) {
+                cerrarModalSolicitud();
+                cargarHistorialSolicitudes();
             }
-
-            // Aquí se simularía el ID del usuario logueado en ECOS (puedes adaptarlo a tu variable de sesión actual)
-            const requesterEmployeeId = localStorage.getItem('current_employee_id') || 1; 
-
-            try {
-                const response = await fetch(`${BASE_URL}/api/ecos/request`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ requester_employee_id: requesterEmployeeId, trainee_ids: traineeIds })
-                });
-
-                const data = await response.json();
-                alert(data.message);
-
-                if (data.success) {
-                    cerrarModalSolicitud();
-                    cargarHistorialSolicitudes();
-                }
-            } catch (error) {
-                console.error('Error al enviar solicitud:', error);
-                alert('Ocurrió un error al enviar la solicitud.');
-            }
+        } catch (error) {
+            console.error('Error al enviar solicitud:', error);
+            alert('Ocurrió un error de red al enviar la solicitud.');
         }
+    }
 
-        async function cargarHistorialSolicitudes() {
-            const contenedor = document.getElementById('historial-solicitudes');
-            try {
-                const response = await fetch(`${BASE_URL}/api/ecos/requests`);
-                const data = await response.json();
+    // Cargar historial de solicitudes existentes
+    async function cargarHistorialSolicitudes() {
+        const contenedor = document.getElementById('historial-solicitudes');
+        if (!contenedor) return;
 
-                if (data.success && data.requests.length > 0) {
-                    contenedor.innerHTML = `
-                        <table>
+        try {
+            const response = await fetch(`${BASE_URL}/api/ecos/requests`);
+            const data = await response.json();
+
+            if (data.success && data.requests.length > 0) {
+                contenedor.innerHTML = `
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9em;">
                             <thead>
-                                <tr>
-                                    <th>ID Solicitud</th>
-                                    <th>Solicitante</th>
-                                    <th>Fecha</th>
-                                    <th>Estado</th>
+                                <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                                    <th style="padding: 10px;">ID Solicitud</th>
+                                    <th style="padding: 10px;">Solicitante</th>
+                                    <th style="padding: 10px;">Motivo</th>
+                                    <th style="padding: 10px;">Fecha</th>
+                                    <th style="padding: 10px;">Estado</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${data.requests.map(r => `
-                                    <tr>
-                                        <td>#${r.id}</td>
-                                        <td>${r.requester_name || 'Personal ECOS'}</td>
-                                        <td>${new Date(r.created_at).toLocaleString()}</td>
-                                        <td><span style="background: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${r.status}</span></td>
+                                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                                        <td style="padding: 10px;"><strong>#${r.id}</strong></td>
+                                        <td style="padding: 10px;">${r.requester_name || 'Personal ECOS'}</td>
+                                        <td style="padding: 10px; color: #4b5563;">${r.motivo || 'Sin motivo especificado'}</td>
+                                        <td style="padding: 10px;">${new Date(r.created_at).toLocaleString()}</td>
+                                        <td style="padding: 10px;"><span style="background: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85em;">${r.status}</span></td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
-                    `;
-                } else {
-                    contenedor.innerHTML = '<p style="color: #6b7280;">No hay solicitudes registradas aún.</p>';
-                }
-            } catch (error) {
-                contenedor.innerHTML = '<p style="color: red;">Error al cargar el historial.</p>';
+                    </div>
+                `;
+            } else {
+                contenedor.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">No hay solicitudes registradas aún.</p>';
             }
+        } catch (error) {
+            console.error('Error al cargar historial:', error);
+            contenedor.innerHTML = '<p style="color: red; text-align: center;">Error al cargar el historial de solicitudes.</p>';
         }
-    </script>
+    }
+</script>
 </body>
 </html>
