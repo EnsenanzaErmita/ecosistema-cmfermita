@@ -308,51 +308,59 @@
 
 <div class="container">
 
-    <div id="panel-general-ecos" style="display: block;">
-        <div class="ecos-panel-container">
-            <h3 class="ecos-panel-title">Panel General ECOS</h3>
-            <p class="ecos-panel-subtitle">Módulo central de gestión y control operativo del ecosistema.</p>
+<div id="panel-general-ecos" class="view active-view" style="display: block;">
+    <div class="ecos-panel-container">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h3 class="ecos-panel-title" style="margin: 0;">Panel General ECOS</h3>
+                <p class="ecos-panel-subtitle" style="margin: 5px 0 0 0;">Módulo central de gestión y control operativo del ecosistema.</p>
+            </div>
+            
+            <button onclick="activarModulo('section-login', this)" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-admin)'" onmouseout="this.style.background='#98989a'">
+                &larr; Volver al Menú Principal
+            </button>
+        </div>
 
-            <div class="ecos-subgrid">
-                <div class="card-ecos-sub" onclick="cambiarVistaEcos('solicitud')" style="cursor: pointer;">
-                    <h4>Solicitud de Personal para Jornadas</h4>
-                    <p>Gestiona, crea y consulta el historial de solicitudes de personal en formación asignado a jornadas.</p>
-                    <button class="btn-ecos-action">Acceder al Módulo</button>
-                </div>
+        <div class="ecos-subgrid">
+            <div class="card-ecos-sub" onclick="cambiarVistaEcos('solicitud')" style="cursor: pointer;">
+                <h4>Solicitud de Personal para Jornadas</h4>
+                <p>Gestiona, crea y consulta el historial de solicitudes de personal en formación asignado a jornadas.</p>
+                <button class="btn-ecos-action">Acceder al Módulo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="panel-solicitud-personal" class="view" style="display: none;">
+    <button type="button" onclick="cambiarVistaEcos('general')" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">
+        &larr; Volver al Panel General ECOS
+    </button>
+
+    <div class="ecos-panel-container">
+        <h3 class="ecos-panel-title">Solicitud de Personal para jornadas</h3>
+        <p class="ecos-panel-subtitle">Gestión y control operativo del personal en formación asignado a las jornadas institucionales.</p>
+
+        <div class="ecos-subgrid">
+            <div class="card-ecos-sub">
+                <h4>Nueva Solicitud</h4>
+                <p>Crea, configura y envía una nueva solicitud de personal médico o en formación para las próximas jornadas.</p>
+                <button class="btn-ecos-action" onclick="abrirModalSolicitud()">Crear Solicitud</button>
+            </div>
+
+            <div class="card-ecos-sub" style="border-top-color: #0284c7;">
+                <h4>Historial</h4>
+                <p>Consulta el registro histórico, estatus de aprobación y bitácoras anteriores.</p>
+                <button class="btn-ecos-action" style="background-color: #0284c7;" onclick="abrirHistorialEcos()">Ver Historial</button>
             </div>
         </div>
     </div>
 
-    <div id="panel-solicitud-personal" style="display: none;">
-        <button type="button" onclick="cambiarVistaEcos('general')" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">
-            &larr; Volver al Panel General ECOS
-        </button>
-
-        <div class="ecos-panel-container">
-            <h3 class="ecos-panel-title">Solicitud de Personal para jornadas</h3>
-            <p class="ecos-panel-subtitle">Gestión y control operativo del personal en formación asignado a las jornadas institucionales.</p>
-
-            <div class="ecos-subgrid">
-                
-                <div class="card-ecos-sub">
-                    <h4>Nueva Solicitud</h4>
-                    <p>Crea, configura y envía una nueva solicitud de personal médico o en formación para las próximas jornadas.</p>
-                    <button class="btn-ecos-action" onclick="abrirModalSolicitud()">Crear Solicitud</button>
-                </div>
-
-                <div class="card-ecos-sub" style="border-top-color: #0284c7;">
-                    <h4>Historial</h4>
-                    <p>Consulta el registro histórico, estatus de aprobación (pendientes, aprobadas, rechazadas) y bitácoras anteriores.</p>
-                    <button class="btn-ecos-action" style="background-color: #0284c7;" onclick="abrirHistorialEcos()">Ver Historial</button>
-                </div>
-
-            </div>
-        </div>
-
-        <div id="historial-solicitudes" style="margin-top: 20px;">
-            <p style="color: #64748b; text-align: center;">Cargando historial...</p>
-        </div>
+    <div id="historial-solicitudes" style="margin-top: 20px;">
+        <p style="color: #64748b; text-align: center;">Cargando historial...</p>
     </div>
+</div>
+
 
 </div>
 

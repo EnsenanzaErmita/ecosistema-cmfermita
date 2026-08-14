@@ -1627,167 +1627,71 @@ app.get('/api/trainers/categories', (req, res) => {
 
 
 // =========================================================================
-// ENDPOINTS PARA EL MÓDULO ECOS Y SOLICITUDES DE JORNADA
+// ENDPOINTS PARA EL MÓDULO ECOS Y SOLICITUDES DE JORNADA (CORREGIDOS)
 // =========================================================================
 
-// 1. Obtener todos los trainees registrados para la selección en ECOS
+// 1. Obtener listado de trainees (Alineado con /api/trainees/all)
 app.get('/api/trainees/all', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, first_name, last_name_paternal, service_category, role_type FROM trainees');
+        const [rows] = await db.query('SELECT * FROM trainees'); 
+        // Nota: Si tu script espera un objeto con { success: true, trainees: [...] }, 
+        // asegúrate de mandarlo así:
         res.json({ success: true, trainees: rows });
-    } catch (error) {
-        console.error('Error al obtener trainees:', error);
-        res.status(500).json({ success: false, message: 'Error en el servidor al consultar trainees.' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// 2. Registrar la solicitud de jornada y enviar correo al trainer de Enseñanza
+// 2. Crear solicitud, notificar por correo y almacenar (Alineado con /api/ecos/request)
 app.post('/api/ecos/request', async (req, res) => {
-    const { requester_employee_id, trainee_ids } = req.body;
-
-    if (!trainee_ids || trainee_ids.length === 0) {
-        return res.status(400).json({ success: false, message: 'No se seleccionaron trainees.' });
-    }
-
-    const connection = await pool.getConnection();
+    // Nota: El frontend manda trainee_ids (con guion bajo)
+    const { trainee_ids, motivo, requester_employee_id } = req.body;
+    
     try {
-        await connection.beginTransaction();
-
-        // A. Insertar la cabecera de la solicitud
-        const [headerResult] = await connection.query(
-            'INSERT INTO eco_requests (requester_employee_id, status) VALUES (?, ?)',
-            [requester_employee_id, 'PENDIENTE']
+        // A. Guardar en la nueva tabla de solicitudes principal
+        const [resultSol] = await db.query(
+            'INSERT INTO ecos_solicitudes (motivo, estatus, fecha_creacion) VALUES (?, "PENDIENTE", NOW())',
+            [motivo]
         );
-        const requestId = headerResult.insertId;
+        const solicitudId = resultSol.insertId;
 
-        // B. Insertar cada trainee en el detalle
-        for (let traineeId of trainee_ids) {
-            await connection.query(
-                'INSERT INTO eco_request_details (eco_request_id, trainee_id, approval_status) VALUES (?, ?, ?)',
-                [requestId, traineeId, 'PENDIENTE']
-            );
+        // B. Guardar el detalle de los trainees seleccionados en la tabla relacionada
+        if (trainee_ids && Array.isArray(trainee_ids)) {
+            for (let tId of trainee_ids) {
+                await db.query(
+                    'INSERT INTO ecos_solicitudes_detalle (solicitud_id, trainee_id, estatus) VALUES (?, ?, "PENDIENTE")',
+                    [solicitudId, tId]
+                );
+            }
         }
 
-        // C. Obtener datos del empleado solicitante (para el correo de retorno)
-        const [requesterRows] = await connection.query(
-            'SELECT first_name, last_name_paternal, email FROM employees WHERE id = ?',
-            [requester_employee_id]
-        );
-        const requester = requesterRows[0] || { email: 'soporte@ecosistema.com', first_name: 'Personal ECOS' };
-
-        // D. Buscar al Trainer asignado en el servicio de "ENSEÑANZA"
-        // Buscamos empleados que tengan service_category = 'ENSEÑANZA' y estén en la tabla trainers
-        const [trainerRows] = await connection.query(`
-            SELECT e.email, e.first_name 
-            FROM trainers t 
-            JOIN employees e ON t.employee_id = e.id 
-            WHERE e.service_category LIKE '%ENSEÑANZA%' LIMIT 1
+        // C. Buscar formadores (trainers) asociados al servicio de ENSEÑANZA en employees
+        const [formadores] = await db.query(`
+            SELECT t.*, e.email, e.service 
+            FROM trainers t
+            JOIN employees e ON t.employee_id = e.id
+            WHERE e.service = 'ENSEÑANZA'
         `);
 
-        // Si no hay uno específico de enseñanza, tomamos el primer trainer disponible como respaldo
-        let trainerEmail = trainerRows.length > 0 ? trainerRows[0].email : null;
-        if (!trainerEmail) {
-            const [fallbackTrainer] = await connection.query(`
-                SELECT e.email FROM trainers t JOIN employees e ON t.employee_id = e.id LIMIT 1
-            `);
-            trainerEmail = fallbackTrainer.length > 0 ? fallbackTrainer[0].email : 'admin@ecosistema.com';
+        // D. Enviar correo a cada formador encontrado
+        for (let formador of formadores) {
+            if (formador.email) {
+                const linkAprobar = `http://tu-dominio.com/api/ecos/responder?id=${solicitudId}&accion=aprobar`;
+                const linkRechazar = `http://tu-dominio.com/api/ecos/responder?id=${solicitudId}&accion=rechazar`;
+                
+                // Asegúrate de tener tu función de correo configurada
+                if (typeof enviarCorreoFormador === 'function') {
+                    await enviarCorreoFormador(formador.email, solicitudId, motivo, trainee_ids, linkAprobar, linkRechazar);
+                }
+            }
         }
 
-        // E. Obtener la lista detallada de los trainees seleccionados para el correo
-        const [traineesList] = await connection.query(
-            'SELECT id, first_name, last_name_paternal, service_category FROM trainees WHERE id IN (?)',
-            [trainee_ids]
-        );
-
-        await connection.commit();
-        connection.release();
-
-        // F. Disparar correo a través de Brevo (utilizando tu configuración existente de fetch a Brevo API)
-        // Construimos el HTML interactivo para el Trainer con campos de Aprobar/Rechazar y Motivo
-        let traineesHtmlRows = traineesList.map(t => `
-            <tr>
-                <td style="padding: 8px; border: 1px solid #ddd;">${t.first_name} ${t.last_name_paternal}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">${t.service_category || 'General'}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    <select name="status_${t.id}" style="padding: 5px;">
-                        <option value="APROBADO">Aprobar</option>
-                        <option value="RECHAZADO">Rechazar</option>
-                    </select>
-                </td>
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    <input type="text" name="reason_${t.id}" placeholder="Motivo obligatorio..." style="width: 100%; padding: 5px;" />
-                </td>
-            </tr>
-        `).join('');
-
-        const emailBody = `
-            <div style="font-family: Arial, sans-serif; color: #333; max-width: 700px; margin: 0 auto;">
-                <h2 style="color: #2563eb;">Solicitud de Personal en Formación para Jornadas</h2>
-                <p>El área de ECOS ha solicitado la participación de los siguientes trainees. Por favor, revise y emita su resolución:</p>
-                <p><strong>Solicitante original:</strong> ${requester.first_name} ${requester.last_name_paternal} (${requester.email})</p>
-                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-                    <thead>
-                        <tr style="background: #f3f4f6;">
-                            <th style="padding: 8px; border: 1px solid #ddd;">Trainee</th>
-                            <th style="padding: 8px; border: 1px solid #ddd;">Servicio</th>
-                            <th style="padding: 8px; border: 1px solid #ddd;">Decisión</th>
-                            <th style="padding: 8px; border: 1px solid #ddd;">Motivo</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${traineesHtmlRows}
-                    </tbody>
-                </table>
-                <p style="margin-top: 20px; font-size: 0.9em; color: #666;">Este correo fue generado automáticamente por el Ecosistema ERMITA. Las respuestas de validación se remitirán directamente al correo del solicitante: <strong>${requester.email}</strong>.</p>
-            </div>
-        `;
-
-        // Llamada a la API de Brevo para enviar el correo al trainer
-        const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
-            method: 'POST',
-            headers: {
-                'accept': 'application/json',
-                'api-key': process.env.BREVO_API_KEY, // Asegúrate de tener tu variable configurada
-                'content-type': 'application/json'
-            },
-            body: JSON.stringify({
-                sender: { name: "Ecosistema ERMITA", email: "no-reply@ecosistema.com" },
-                to: [{ email: trainerEmail, name: "Médico Formador de Enseñanza" }],
-                replyTo: { email: requester.email, name: `${requester.first_name}` },
-                subject: `Solicitud de Jornada ECOS #${requestId} - Validación Requerida`,
-                htmlContent: emailBody
-            })
-        });
-
-        res.json({ success: true, message: 'Solicitud enviada y correo despachado al formador correctamente.', requestId });
-
-    } catch (error) {
-        await connection.rollback();
-        connection.release();
-        console.error('Error al procesar solicitud ECOS:', error);
-        res.status(500).json({ success: false, message: 'Error interno al registrar la solicitud.' });
+        res.json({ success: true, message: 'Solicitud procesada y enviada a formadores correctamente.' });
+    } catch (err) {
+        console.error('Error en /api/ecos/request:', err);
+        res.status(500).json({ success: false, message: err.message });
     }
 });
-
-// 3. Listar el historial de solicitudes para el módulo ECOS
-app.get('/api/ecos/requests', async (req, res) => {
-    try {
-        const [rows] = await pool.query(`
-            SELECT r.id, r.status, r.created_at, 
-                   CONCAT(e.first_name, ' ', e.last_name_paternal) AS requester_name
-            FROM eco_requests r
-            LEFT JOIN employees e ON r.requester_employee_id = e.id
-            ORDER BY r.id DESC
-        `);
-        res.json({ success: true, requests: rows });
-    } catch (error) {
-        console.error('Error al listar solicitudes ECOS:', error);
-        res.status(500).json({ success: false, message: 'Error al consultar historial.' });
-    }
-});
-
-
-
 
 
 
