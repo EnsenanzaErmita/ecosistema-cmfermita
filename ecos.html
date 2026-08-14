@@ -412,34 +412,36 @@
     };
 
     // 1. Función independiente para obtener y pintar los trainees desde la API
-    async function cargarTraineesDisponibles() {
-        const contenedor = document.getElementById('lista-trainees-disponibles');
-        if (!contenedor) return;
+async function cargarTraineesDisponibles() {
+    const contenedor = document.getElementById('lista-trainees-disponibles');
+    if (!contenedor) return;
 
-        contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">Cargando trainees...</p>';
+    contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">Cargando trainees...</p>';
 
-        try {
-            const response = await fetch(`${BASE_URL}/api/trainees/all`);
-            const data = await response.json();
+    try {
+        const response = await fetch(`${BASE_URL}/api/trainees/all`);
+        const data = await response.json();
 
-            if (data.success && data.trainees.length > 0) {
-                contenedor.innerHTML = data.trainees.map(t => `
-                    <div class="trainee-item" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <input type="checkbox" class="chk-trainee" value="${t.id}" style="width: 16px; height: 16px;">
-                            <span><strong>${t.first_name} ${t.last_name_paternal}</strong> (${t.service_category || 'Sin Servicio'})</span>
-                        </label>
-                        <span style="font-size: 0.85em; background: #e5e7eb; padding: 2px 8px; border-radius: 10px; color: #374151;">${t.role_type || 'Trainee'}</span>
-                    </div>
-                `).join('');
-            } else {
-                contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">No hay trainees registrados.</p>';
-            }
-        } catch (error) {
-            console.error('Error al cargar trainees:', error);
-            contenedor.innerHTML = '<p style="color:red; text-align:center;">Error de conexión al cargar trainees.</p>';
+        if (data.success && data.trainees.length > 0) {
+            contenedor.innerHTML = data.trainees.map(t => `
+                <div class="trainee-item" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" class="chk-trainee" value="${t.id}" style="width: 16px; height: 16px;">
+                        <span><strong>${t.first_name || ''} ${t.last_name_paternal || ''}</strong> (${t.service_category || 'Sin Servicio'})</span>
+                    </label>
+                    <span style="font-size: 0.85em; background: #e5e7eb; padding: 2px 8px; border-radius: 10px; color: #374151;">${t.trainee_type || 'Trainee'}</span>
+                </div>
+            `).join('');
+        } else {
+            contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">No hay trainees registrados.</p>';
         }
+    } catch (error) {
+        console.error('Error al cargar trainees:', error);
+        contenedor.innerHTML = '<p style="color:red; text-align:center;">Error de conexión al cargar trainees.</p>';
     }
+}
+
+
 
     // Abrir modal y disparar la carga de trainees
     async function abrirModalSolicitud() {
