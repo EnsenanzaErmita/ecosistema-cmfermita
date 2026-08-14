@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecosistema ERMITA - Módulo ECOS</title>
+
+
+<style>
+
+
+        :root {
+            --guinda: #611232;
+            --gris-oscuro: #98989a;
+            --gris-claro: #f4f4f4;
+            --blanco: #ffffff;
+            --negro-footer: #111111;
+            --verde-issste: #285c4d;
+            --dorado-calidad: #b38e5d;
+            --azul-issste: #1d4ed8;
+            --morado-issste: #800080;
+            /* Variables faltantes agregadas para los estatus */
+            --amarillo: #b45309;
+            --verde: #15803d;
+            --rojo: #b91c1c;
+	    --azul-admin: #374151;
+	    --azul-trainees: #1e3a8a;
+        }
+
+        html, body { height: 100%; margin: 0; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--gris-claro); 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        header { background-color: var(--guinda); color: var(--blanco); padding: 20px; text-align: center; border-bottom: 4px solid var(--gris-oscuro); }
+
+        .main-content { flex: 1; padding: 20px; }        
+        .container { max-width: 1300px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* LOGIN GRID - 4 SECCIONES */
+        .login-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+
+        .card { 
+    padding: 25px; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    background: #fff; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    transition: transform 0.2s; 
+    min-height: 280px; /* Asegura un tamaño uniforme mínimo para todas las tarjetas */
+    height: auto; /* Permite que la tarjeta se estire si agregas más texto a futuro */
+    box-sizing: border-box; /* Evita que el padding altere las dimensiones reales */
+}
+
+
+
+.card p {
+    font-size: 0.85em; 
+    text-align: center;
+    color: #555;
+    margin-top: 10px;
+    margin-bottom: auto; /* 💡 TRUCO CLAVE: Empuja magnéticamente al botón hacia la parte inferior de la tarjeta */
+    padding-bottom: 15px;
+}
+
+
+
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { margin-top: 0; font-size: 1.2em; border-bottom: 2px solid var(--gris-claro); padding-bottom: 10px; }
+        
+        /* Colores por Rol */
+        .card-admin { border-top: 8px solid var(--azul-admin); }
+        .card-doctor { border-top: 8px solid #5d8ab3; } 
+        .card-staff { border-top: 8px solid var(--guinda); }
+        .card-patient { border-top: 8px solid var(--guinda); }
+        .card-rol { border: 2px solid #ddd; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .card-coord { border-top: 8px solid var(--morado-issste); }
+        .card-archivo { border-top: 8px solid var(--guinda); }
+        .card-office { border-top: 8px solid #db2777 !important; } 
+        .card-assign { border-top: 8px solid #ea580c !important; } 
+
+        .teaching-hero { background: #fdfaf6; border: 2px solid var(--dorado-calidad); padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 25px; }
+
+	/* ESTILO PARA LOS PENSAMIENTOS INSTITUCIONALES EN EL HERO */
+	#phrase-container {
+	    font-size: 1.1em;
+	    font-style: italic;
+	    color: var(--dorado-calidad); /* Letras blancas para contrastar con el fondo guinda del hero */
+	    margin-top: 8px;
+	    font-weight: 300;
+	    transition: opacity 0.8s ease-in-out; /* Transición suave de 0.8 segundos */
+	    opacity: 1;
+	    min-height: 2.2em; /* Evita que el diseño de la caja salte si la frase es larga */
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    max-width: 700px;
+	    margin-left: auto;
+	    margin-right: auto;
+	}
+
+
+        /* PIE DE PÁGINA */
+        footer { background-color: var(--negro-footer); color: var(--blanco); text-align: center; padding: 25px 10px; font-size: 0.95em; border-top: 3px solid var(--dorado-calidad); }
+        footer strong { color: var(--dorado-calidad); }
+
+        /* NAVEGACIÓN PANEL ARCHIVO */
+        .nav-archivo { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            margin-bottom: 25px; 
+            background: #f0f0f0; 
+            padding: 15px; 
+            border-radius: 8px; 
+        }
+
+        .btn-nav { 
+            padding: 12px 15px; 
+            border: none; 
+            background: var(--gris-oscuro); 
+            color: white; 
+            cursor: pointer; 
+            font-weight: bold; 
+            border-radius: 4px; 
+            flex: 1; 
+            min-width: 180px;
+        }
+
+        .btn-nav.active { background: var(--guinda); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-nav:hover { background: var(--dorado-calidad); }
+
+        /* SECCIONES DE CONTENIDO */
+        .section-content { display: none; padding: 25px; border: 1px solid #ddd; border-radius: 8px; background: #fff; margin-top: 10px; }
+        .section-content.active { display: block; animation: fadeIn 0.4s; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* FORMULARIOS Y TABLAS */
+        .header-registro {
+            color: white; padding: 15px; border-radius: 8px 8px 0 0;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: center;
+        }
+        .form-box { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 20px; border: 1px solid #eee; border-top: none; }
+        
+        /* CORRECCIÓN RESPONSIVA: Cambiado de columnas fijas a adaptables con auto-fit */
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+        label { display: block; font-size: 0.8em; font-weight: bold; color: #555; margin-bottom: 5px; }
+        
+        /* UNIFICACIÓN: Removido el duplicado inferior y mantenido una sola regla limpia */
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--gris-oscuro); border-radius: 4px; box-sizing: border-box; margin-top: 5px; }
+        .full-width { grid-column: span 3; }
+        
+        .btn-save { padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-action { padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f4f4f4; color: var(--guinda); }
+
+        .panel-nuevo { background: #eff6ff; border-left: 5px solid var(--azul-issste); }
+        .panel-nuevo label { color: var(--azul-issste); }
+        .panel-actual { background: #fdf0f5; border-left: 5px solid var(--guinda); }
+
+        /* Badges corregidos con las nuevas variables del root */
+        .badge { padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; display: inline-block; }
+        .badge-pendiente { background: #fef3c7; color: var(--amarillo); }
+        .badge-aprobada { background: #dcfce7; color: var(--verde); }
+        .badge-rechazada { background: #fee2e2; color: var(--rojo); }
+
+        .view { display: none; }
+        .active-view { display: block !important; }
+
+        .error-msg { color: #cc0000; font-weight: bold; margin-top: 10px; display: none; }
+
+
+	@keyframes pulse {
+	    0% { transform: scale(1); }
+	    50% { transform: scale(1.05); box-shadow: 0 2px 10px rgba(220,38,38,0.5); }
+	    100% { transform: scale(1); }
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</style>
+
+
+
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h2 style="color: var(--azul-ecos); margin: 0;">📋 Módulo ECOS - Gestión de Jornadas</h2>
+            <button class="btn-secondary" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        </div>
+
+        <div style="background: #eff6ff; border-left: 5px solid var(--azul-ecos); padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+            <h3 style="margin-top: 0; color: #1e40af;">Solicitud de Personal en Formación para Jornadas</h3>
+            <p style="margin-bottom: 15px; color: #374151;">Seleccione de la lista los trainees que requiere para su jornada institucional. La petición será enviada al formador de enseñanza para su validación.</p>
+            <button class="btn" onclick="abrirModalSolicitud()">Nueva Solicitud de Jornada</button>
+        </div>
+
+        <h3 style="color: #374151;">Historial de Solicitudes Realizadas</h3>
+        <div id="historial-solicitudes">
+            <p style="color: #6b7280;">Cargando solicitudes...</p>
+        </div>
+    </div>
+
+    <div id="modal-solicitud" style="display:none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+        <div style="background: white; margin: 3% auto; padding: 25px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto;">
+            <h3 style="color: var(--azul-ecos); margin-top:0;">Seleccionar Trainees para la Jornada</h3>
+            <p style="font-size: 0.9em; color: #6b7280;">Marque las casillas de los participantes que desea incluir:</p>
+            
+            <div id="lista-trainees-disponibles" style="max-height: 350px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 5px; padding: 10px; background: #f9fafb;">
+                </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn-secondary" onclick="cerrarModalSolicitud()">Cancelar</button>
+                <button class="btn" onclick="enviarSolicitudJornada()">Enviar Solicitud a Enseñanza</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = window.location.origin;
+
+        // Validar acceso inicial (puedes ajustar según tu lógica de sesión)
+        window.onload = function() {
+            cargarHistorialSolicitudes();
+        };
+
+        async function abrirModalSolicitud() {
+            document.getElementById('modal-solicitud').style.display = 'block';
+            const contenedor = document.getElementById('lista-trainees-disponibles');
+            contenedor.innerHTML = '<p style="text-align:center;">Cargando trainees...</p>';
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/trainees/all`);
+                const data = await response.json();
+
+                if (data.success && data.trainees.length > 0) {
+                    contenedor.innerHTML = data.trainees.map(t => `
+                        <div class="trainee-item">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" class="chk-trainee" value="${t.id}">
+                                <span><strong>${t.first_name} ${t.last_name_paternal}</strong> (${t.service_category || 'Sin Servicio'})</span>
+                            </label>
+                            <span style="font-size: 0.85em; background: #e5e7eb; padding: 2px 8px; border-radius: 10px;">${t.role_type || 'Trainee'}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">No hay trainees registrados.</p>';
+                }
+            } catch (error) {
+                console.error('Error al cargar trainees:', error);
+                contenedor.innerHTML = '<p style="color:red; text-align:center;">Error de conexión.</p>';
+            }
+        }
+
+        function cerrarModalSolicitud() {
+            document.getElementById('modal-solicitud').style.display = 'none';
+        }
+
+        async function enviarSolicitudJornada() {
+            const checkboxes = document.querySelectorAll('.chk-trainee:checked');
+            const traineeIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+            if (traineeIds.length === 0) {
+                alert('Debe seleccionar al menos un trainee para la solicitud.');
+                return;
+            }
+
+            // Aquí se simularía el ID del usuario logueado en ECOS (puedes adaptarlo a tu variable de sesión actual)
+            const requesterEmployeeId = localStorage.getItem('current_employee_id') || 1; 
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/ecos/request`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ requester_employee_id: requesterEmployeeId, trainee_ids: traineeIds })
+                });
+
+                const data = await response.json();
+                alert(data.message);
+
+                if (data.success) {
+                    cerrarModalSolicitud();
+                    cargarHistorialSolicitudes();
+                }
+            } catch (error) {
+                console.error('Error al enviar solicitud:', error);
+                alert('Ocurrió un error al enviar la solicitud.');
+            }
+        }
+
+        async function cargarHistorialSolicitudes() {
+            const contenedor = document.getElementById('historial-solicitudes');
+            try {
+                const response = await fetch(`${BASE_URL}/api/ecos/requests`);
+                const data = await response.json();
+
+                if (data.success && data.requests.length > 0) {
+                    contenedor.innerHTML = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID Solicitud</th>
+                                    <th>Solicitante</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.requests.map(r => `
+                                    <tr>
+                                        <td>#${r.id}</td>
+                                        <td>${r.requester_name || 'Personal ECOS'}</td>
+                                        <td>${new Date(r.created_at).toLocaleString()}</td>
+                                        <td><span style="background: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${r.status}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    contenedor.innerHTML = '<p style="color: #6b7280;">No hay solicitudes registradas aún.</p>';
+                }
+            } catch (error) {
+                contenedor.innerHTML = '<p style="color: red;">Error al cargar el historial.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
