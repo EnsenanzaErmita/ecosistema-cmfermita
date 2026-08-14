@@ -324,19 +324,27 @@
         </div>
 
         <div class="ecos-subgrid">
-            <div class="card-ecos-sub" onclick="cambiarVistaEcos('solicitud')" style="cursor: pointer;">
-                <h4>Solicitud de Personal para Jornadas</h4>
-                <p>Gestiona, crea y consulta el historial de solicitudes de personal en formación asignado a jornadas.</p>
-                <button class="btn-ecos-action">Acceder al Módulo</button>
-            </div>
+<div class="card-ecos-sub" onclick="
+    document.getElementById('panel-general-ecos').style.display = 'none';
+    document.getElementById('panel-solicitud-personal').style.display = 'block';
+    if (typeof cargarHistorialSolicitudes === 'function') cargarHistorialSolicitudes();
+" style="cursor: pointer;">
+    <h4>Solicitud de Personal para Jornadas</h4>
+    <p>Gestiona, crea y consulta el historial de solicitudes de personal en formación asignado a jornadas.</p>
+    <button class="btn-ecos-action">Acceder al Módulo</button>
+</div>
         </div>
     </div>
 </div>
 
 <div id="panel-solicitud-personal" class="view" style="display: none;">
-    <button type="button" onclick="cambiarVistaEcos('general')" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">
-        &larr; Volver al Panel General ECOS
-    </button>
+
+<button type="button" onclick="
+    document.getElementById('panel-solicitud-personal').style.display = 'none';
+    document.getElementById('panel-general-ecos').style.display = 'block';
+" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">
+    &larr; Volver al Panel General ECOS
+</button>
 
     <div class="ecos-panel-container">
         <h3 class="ecos-panel-title">Solicitud de Personal para jornadas</h3>
