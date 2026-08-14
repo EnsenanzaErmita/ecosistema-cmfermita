@@ -233,16 +233,29 @@
                 <button class="btn-secondary" onclick="window.location.href='index.html'">← Volver al Menú</button>
             </div>
 
-            <div style="background: #eff6ff; border-left: 5px solid var(--azul-ecos); padding: 20px; margin-bottom: 25px; border-radius: 4px;">
-                <h3 style="margin-top: 0; color: #1e40af;">Solicitud de Personal en Formación para Jornadas</h3>
-                <p style="margin-bottom: 15px; color: #374151;">Seleccione de la lista los trainees que requiere para su jornada institucional. La petición será enviada al formador de enseñanza para su validación.</p>
-                <button class="btn" onclick="abrirModalSolicitud()">Nueva Solicitud de Jornada</button>
+            <div class="login-grid">
+                
+                <div class="card" style="border-top-color: var(--azul-ecos);">
+                    <h3>Nueva Solicitud</h3>
+                    <p>Seleccione de la lista los trainees que requiere para su jornada institucional. La petición será enviada al formador de enseñanza.</p>
+                    <button class="btn" onclick="abrirModalSolicitud()">Generar Solicitud</button>
+                </div>
+
+                <div class="card" style="border-top-color: var(--guinda);">
+                    <h3>Historial de Solicitudes</h3>
+                    <p>Consulte el estatus, detalle y seguimiento de las solicitudes de jornadas realizadas previamente.</p>
+                    <button class="btn" style="background-color: var(--guinda);" onclick="toggleHistorial()">Ver Historial</button>
+                </div>
+
             </div>
 
-            <h3 style="color: #374151;">Historial de Solicitudes Realizadas</h3>
-            <div id="historial-solicitudes">
-                <p style="color: #6b7280;">Cargando solicitudes...</p>
+            <div id="seccion-historial" class="submenu-section">
+                <h3 style="color: var(--guinda); margin-top: 0;">Historial de Solicitudes Realizadas</h3>
+                <div id="historial-solicitudes">
+                    <p style="color: #6b7280;">Cargando solicitudes...</p>
+                </div>
             </div>
+
         </div>
     </div>
 
@@ -256,10 +269,13 @@
 
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
                 <button class="btn-secondary" onclick="cerrarModalSolicitud()">Cancelar</button>
-                <button class="btn" onclick="enviarSolicitudJornada()">Enviar Solicitud a Enseñanza</button>
+                <button class="btn" style="width: auto;" onclick="enviarSolicitudJornada()">Enviar Solicitud a Enseñanza</button>
             </div>
         </div>
     </div>
+
+
+
 
     <footer>
         <p>&copy; 2026 Todos los derechos reservados</p>
