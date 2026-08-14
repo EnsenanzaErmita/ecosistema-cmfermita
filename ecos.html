@@ -411,15 +411,11 @@
         cargarHistorialSolicitudes();
     };
 
-    // 1. Abrir modal y cargar listado de trainees desde la API
-    async function abrirModalSolicitud() {
-        document.getElementById('modal-solicitud').style.display = 'block';
-        
-        // Limpiar campo de motivo cada vez que se abra
-        const inputMotivo = document.getElementById('motivo-solicitud');
-        if (inputMotivo) inputMotivo.value = '';
-
+    // 1. Función independiente para obtener y pintar los trainees desde la API
+    async function cargarTraineesDisponibles() {
         const contenedor = document.getElementById('lista-trainees-disponibles');
+        if (!contenedor) return;
+
         contenedor.innerHTML = '<p style="text-align:center; color:#6b7280;">Cargando trainees...</p>';
 
         try {
@@ -445,62 +441,52 @@
         }
     }
 
+    // Abrir modal y disparar la carga de trainees
+    async function abrirModalSolicitud() {
+        document.getElementById('modal-solicitud').style.display = 'block';
+        
+        // Limpiar campo de motivo cada vez que se abra
+        const inputMotivo = document.getElementById('motivo-solicitud');
+        if (inputMotivo) inputMotivo.value = '';
+
+        // Llamamos a la función de carga
+        await cargarTraineesDisponibles();
+    }
+
     // Cerrar el modal
     function cerrarModalSolicitud() {
         document.getElementById('modal-solicitud').style.display = 'none';
     }
 
-
-
-
-function salirAlMenu() {
-    sessionStorage.removeItem('trainee_auth'); // Limpia el permiso
-    window.location.href = '/';
-}
-
-
-
-
-
-
-
-
-// Función para cambiar de vista en ECOS
-function cambiarVistaEcos(vista) {
-    const panelGeneral = document.getElementById('panel-general-ecos');
-    const panelSolicitud = document.getElementById('panel-solicitud-personal');
-
-    if (vista === 'solicitud') {
-        // Ocultar general
-        panelGeneral.style.display = 'none';
-        panelGeneral.classList.remove('active-view');
-        
-        // Mostrar solicitud
-        panelSolicitud.style.display = 'block';
-        panelSolicitud.classList.add('active-view');
-
-        // Cargar historial
-        if (typeof cargarHistorialSolicitudes === 'function') {
-            cargarHistorialSolicitudes();
-        }
-    } else {
-        // Mostrar general
-        panelGeneral.style.display = 'block';
-        panelGeneral.classList.add('active-view');
-        
-        // Ocultar solicitud
-        panelSolicitud.style.display = 'none';
-        panelSolicitud.classList.remove('active-view');
+    function salirAlMenu() {
+        sessionStorage.removeItem('trainee_auth'); 
+        window.location.href = '/';
     }
-}
 
+    // Función para cambiar de vista en ECOS
+    function cambiarVistaEcos(vista) {
+        const panelGeneral = document.getElementById('panel-general-ecos');
+        const panelSolicitud = document.getElementById('panel-solicitud-personal');
 
+        if (vista === 'solicitud') {
+            panelGeneral.style.display = 'none';
+            panelGeneral.classList.remove('active-view');
+            
+            panelSolicitud.style.display = 'block';
+            panelSolicitud.classList.add('active-view');
 
+            // Ahora sí existe esta función y cargará los datos correctamente
+            cargarTraineesDisponibles();
+            cargarHistorialSolicitudes();
+        } else {
+            panelGeneral.style.display = 'block';
+            panelGeneral.classList.add('active-view');
+            panelSolicitud.style.display = 'none';
+            panelSolicitud.classList.remove('active-view');
+        }
+    }
 
-
-
-
-    // 2 y 4. Enviar la selección de trainees junto con el motivo al backend
+    // Enviar la selección de trainees junto con el motivo al backend
     async function enviarSolicitudJornada() {
         const checkboxes = document.querySelectorAll('.chk-trainee:checked');
         const traineeIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
@@ -510,7 +496,6 @@ function cambiarVistaEcos(vista) {
             return;
         }
 
-        // Capturar el motivo escrito (asegúrate de tener un input/textarea con id="motivo-solicitud" en tu HTML del modal)
         const motivoInput = document.getElementById('motivo-solicitud');
         const motivo = motivoInput ? motivoInput.value.trim() : '';
 
