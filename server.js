@@ -1630,69 +1630,44 @@ app.get('/api/trainers/categories', (req, res) => {
 // ENDPOINTS PARA EL MÓDULO ECOS Y SOLICITUDES DE JORNADA (CORREGIDOS)
 // =========================================================================
 
-// 1. Obtener listado de trainees (Alineado con /api/trainees/all)
-app.get('/api/trainees/all', async (req, res) => {
-    try {
-        const [rows] = await db.query('SELECT * FROM trainees'); 
-        // Nota: Si tu script espera un objeto con { success: true, trainees: [...] }, 
-        // asegúrate de mandarlo así:
-        res.json({ success: true, trainees: rows });
-    } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
-    }
-});
-
-// 2. Crear solicitud, notificar por correo y almacenar (Alineado con /api/ecos/request)
-app.post('/api/ecos/request', async (req, res) => {
-    // Nota: El frontend manda trainee_ids (con guion bajo)
-    const { trainee_ids, motivo, requester_employee_id } = req.body;
+// =========================================================================
+// 1. Obtener listado de trainees (Alineado con tu estilo de callbacks)
+// =========================================================================
+app.get('/api/trainees/all', (req, res) => {
+    const sql = 'SELECT * FROM trainees';
     
-    try {
-        // A. Guardar en la nueva tabla de solicitudes principal
-        const [resultSol] = await db.query(
-            'INSERT INTO ecos_solicitudes (motivo, estatus, fecha_creacion) VALUES (?, "PENDIENTE", NOW())',
-            [motivo]
-        );
-        const solicitudId = resultSol.insertId;
-
-        // B. Guardar el detalle de los trainees seleccionados en la tabla relacionada
-        if (trainee_ids && Array.isArray(trainee_ids)) {
-            for (let tId of trainee_ids) {
-                await db.query(
-                    'INSERT INTO ecos_solicitudes_detalle (solicitud_id, trainee_id, estatus) VALUES (?, ?, "PENDIENTE")',
-                    [solicitudId, tId]
-                );
-            }
+    pool.query(sql, (err, rows) => {
+        if (err) {
+            console.error('Error al obtener trainees:', err);
+            return res.status(500).json({ success: false, error: err.message });
         }
-
-        // C. Buscar formadores (trainers) asociados al servicio de ENSEÑANZA en employees
-        const [formadores] = await db.query(`
-            SELECT t.*, e.email, e.service 
-            FROM trainers t
-            JOIN employees e ON t.employee_id = e.id
-            WHERE e.service = 'ENSEÑANZA'
-        `);
-
-        // D. Enviar correo a cada formador encontrado
-        for (let formador of formadores) {
-            if (formador.email) {
-                const linkAprobar = `http://tu-dominio.com/api/ecos/responder?id=${solicitudId}&accion=aprobar`;
-                const linkRechazar = `http://tu-dominio.com/api/ecos/responder?id=${solicitudId}&accion=rechazar`;
-                
-                // Asegúrate de tener tu función de correo configurada
-                if (typeof enviarCorreoFormador === 'function') {
-                    await enviarCorreoFormador(formador.email, solicitudId, motivo, trainee_ids, linkAprobar, linkRechazar);
-                }
-            }
-        }
-
-        res.json({ success: true, message: 'Solicitud procesada y enviada a formadores correctamente.' });
-    } catch (err) {
-        console.error('Error en /api/ecos/request:', err);
-        res.status(500).json({ success: false, message: err.message });
-    }
+        res.json({ success: true, trainees: rows });
+    });
 });
 
+
+
+
+// Obtener el historial o listado de solicitudes
+app.get('/api/ecos/requests', (req, res) => {
+    const sql = `
+        SELECT s.id, s.motivo, s.estatus, s.fecha_creacion, 
+               GROUP_CONCAT(CONCAT(t.first_name, ' ', t.last_name_paternal) SEPARATOR ', ') AS trainees_nombres
+        FROM ecos_solicitudes s
+        LEFT JOIN ecos_solicitudes_detalle d ON s.id = d.solicitud_id
+        LEFT JOIN trainees t ON d.trainee_id = t.id
+        GROUP BY s.id
+        ORDER BY s.fecha_creacion DESC
+    `;
+
+    pool.query(sql, (err, rows) => {
+        if (err) {
+            console.error('Error en /api/ecos/requests:', err);
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json({ success: true, requests: rows });
+    });
+});
 
 
 // 3. Obtener el historial o listado de solicitudes (Alineado con /api/ecos/requests)
@@ -1718,6 +1693,79 @@ app.get('/api/ecos/requests', async (req, res) => {
 
 
 
+
+// Crear solicitud, notificar por correo y almacenar
+app.post('/api/ecos/request', (req, res) => {
+    const { trainee_ids, motivo, requester_employee_id } = req.body;
+    
+    // A. Guardar en la tabla de solicitudes principal
+    const sqlSol = 'INSERT INTO ecos_solicitudes (motivo, estatus, fecha_creacion) VALUES (?, "PENDIENTE", NOW())';
+    
+    pool.query(sqlSol, [motivo], (err, resultSol) => {
+        if (err) {
+            console.error('Error al insertar solicitud:', err);
+            return res.status(500).json({ success: false, message: err.message });
+        }
+
+        const solicitudId = resultSol.insertId;
+
+        // B. Guardar el detalle de los trainees seleccionados
+        let traineesProcesados = 0;
+        const insertarDetalles = () => {
+            if (!trainee_ids || !Array.isArray(trainee_ids) || trainee_ids.length === 0) {
+                buscarFormadoresYEnviarCorreo();
+                return;
+            }
+
+            trainee_ids.forEach((tId) => {
+                const sqlDetalle = 'INSERT INTO ecos_solicitudes_detalle (solicitud_id, trainee_id, estatus) VALUES (?, ?, "PENDIENTE")';
+                pool.query(sqlDetalle, [solicitudId, tId], (errDet) => {
+                    if (errDet) console.error('Error al insertar detalle:', errDet);
+                    traineesProcesados++;
+                    if (traineesProcesados === trainee_ids.length) {
+                        buscarFormadoresYEnviarCorreo();
+                    }
+                });
+            });
+        };
+
+        // C. Buscar formadores y D. Enviar correo
+        const buscarFormadoresYEnviarCorreo = () => {
+            const sqlFormadores = `
+                SELECT t.*, e.email, e.service 
+                FROM trainers t
+                JOIN employees e ON t.employee_id = e.id
+                WHERE e.service = 'ENSEÑANZA'
+            `;
+
+            pool.query(sqlFormadores, async (errForm, formadores) => {
+                if (errForm) {
+                    console.error('Error al buscar formadores:', errForm);
+                    return res.json({ success: true, message: 'Solicitud creada, pero hubo un error al buscar formadores para el correo.' });
+                }
+
+                for (let formador of formadores) {
+                    if (formador.email) {
+                        const linkAprobar = `http://tu-dominio.com/api/ecos/responder?id=${solicitudId}&accion=aprobar`;
+                        const linkRechazar = `http://tu-dominio.com/api/ecos/responder?id=${solicitudId}&accion=rechazar`;
+                        
+                        if (typeof enviarCorreoFormador === 'function') {
+                            try {
+                                await enviarCorreoFormador(formador.email, solicitudId, motivo, trainee_ids, linkAprobar, linkRechazar);
+                            } catch (mailErr) {
+                                console.error('Error enviando correo:', mailErr);
+                            }
+                        }
+                    }
+                }
+
+                res.json({ success: true, message: 'Solicitud procesada y enviada a formadores correctamente.' });
+            });
+        };
+
+        insertarDetalles();
+    });
+});
 
 
 
