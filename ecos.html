@@ -451,6 +451,55 @@
 
 
 
+    // =========================================================================
+    // 3. CONTROL DE VISTAS INDEPENDIENTES (CONMUTADOR DE MÓDULOS)
+    // =========================================================================
+    function activarModulo(moduloId, boton) {
+        const todasLasVistas = document.querySelectorAll('.view');
+        todasLasVistas.forEach(vista => {
+            vista.classList.remove('active-view');
+            vista.style.display = 'none';
+        });
+
+        const moduloObjetivo = document.getElementById(moduloId);
+        if (moduloObjetivo) {
+            moduloObjetivo.classList.add('active-view');
+            moduloObjetivo.style.display = 'block';
+        }
+
+        // Al ingresar al módulo de control de personal, se actualiza la tabla de manera automática
+        if (moduloId === 'modulo-personal' || moduloId === 'mod-lista') {
+            cargarListaPersonalNube();
+        }
+
+	// Agrega esta regla dentro de la función activarModulo:
+	if (moduloId === 'modulo-consultorios') {
+	    cargarListaConsultoriosNube();
+	}
+
+	if (moduloId === 'modulo-asociaciones') {
+	    prepararModuloAsociaciones();
+	}
+
+
+	if (moduloId === 'modulo-solicitud-cambio') {
+	    cargarConsultoriosFormularioPacientes();
+	}
+
+	if (moduloId === 'vista-coordinacion') {
+	    cargarSolicitudesCoordinacionNube();
+	}
+
+
+
+    }
+
+
+
+
+
+
+
 
 // Función para cambiar de vista en ECOS
 function cambiarVistaEcos(vista) {
