@@ -222,7 +222,7 @@
 
     <!-- Cambia este número manualmente cada vez que vayas a actualizar Git -->
     <div style="font-size: 0.9em; color: #ff9800; font-weight: bold; margin-top: 5px;">
-        v2.1.0
+        v2.2.0
     </div>
 
 
@@ -296,9 +296,8 @@
 <div class="card" style="border-top: 8px solid #2563eb; background: #eff6ff; text-align: center;">
     <h3 style="color: #2563eb; margin-top: 0; font-size: 1.50em;">Módulo ECOS</h3>
     <p>Gestión y solicitudes de personal en formación para jornadas institucionales.</p>
-    <button onclick="window.location.href='ecos.html'" class="btn-save" style="background: #2563eb; color: white !important;">INGRESAR A ECOS</button>
+    <button onclick="entrar('ECOS')" class="btn-save" style="background: #2563eb; color: white !important;">INGRESAR A ECOS</button>
 </div>
-
 
 
 
@@ -2066,6 +2065,7 @@
     // =========================================================================
     // 2. SISTEMA DE LOGIN Y CONTROL DE MODALES
     // =========================================================================
+
 function entrar(rol) {
     const rolUpper = rol.trim().toUpperCase();
 
@@ -2081,7 +2081,8 @@ function entrar(rol) {
         return;
     }
 
-    if (rolUpper === 'COORDINACIÓN MÉDICA' || rolUpper === 'COORDINACION' || rolUpper === 'ADMINISTRADOR' || rolUpper === 'ADMIN' || rolUpper === 'MEDICINA PREVENTIVA') {
+    // 🚀 INCLUIMOS 'ECOS' EN LOS ROLES QUE ABREN EL MODAL DE LOGIN
+    if (rolUpper === 'COORDINACIÓN MÉDICA' || rolUpper === 'COORDINACION' || rolUpper === 'ADMINISTRADOR' || rolUpper === 'ADMIN' || rolUpper === 'MEDICINA PREVENTIVA' || rolUpper === 'ECOS') {
         moduloDestino = (rolUpper === 'COORDINACION') ? 'COORDINACIÓN MÉDICA' : rolUpper;
         if (moduloDestino === 'ADMIN') moduloDestino = 'ADMINISTRADOR';
         
@@ -2094,6 +2095,9 @@ function entrar(rol) {
         } else if (moduloDestino === 'MEDICINA PREVENTIVA') {
             document.getElementById('login-title').innerText = 'Medicina Preventiva';
             document.getElementById('login-subtitle').innerText = 'Ingrese Usuario (RFC) y Clave de Acceso';
+        } else if (moduloDestino === 'ECOS') {
+            document.getElementById('login-title').innerText = 'Módulo ECOS';
+            document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal ECOS';
         } else {
             document.getElementById('login-title').innerText = 'Coordinación Médica';
             document.getElementById('login-subtitle').innerText = 'Acceso exclusivo para personal de Coordinación';
@@ -2128,9 +2132,30 @@ async function procesarLogin(e) {
         const rolNormalizado = data.user.roleName ? data.user.roleName.trim().toUpperCase() : '';
         const servicioNormalizado = data.user.serviceName ? data.user.serviceName.trim().toUpperCase() : '';
 
+        // 🚀 REGLA DE CONTROL PARA EL BOTÓN DE ECOS
+        if (moduloDestino === 'ECOS') {
+            // Permitimos el paso si es: ADMIN, o tiene ROL ECOS, o es Empleado del SERVICIO ECOS
+            if (rolNormalizado === 'ADMINISTRADOR' || rolNormalizado === 'ADMIN' || rolNormalizado === 'ECOS' || servicioNormalizado === 'ECOS') {
+                
+                cerrarLogin();
+                alert(`¡Acceso Concedido!\nBienvenido al Módulo ECOS.\nIdentificador: ${data.user.username}`);
+                
+                localStorage.setItem('usuarioLogueado', JSON.stringify(data.user));
+                // Guardamos también el ID del empleado para la vinculación en las solicitudes de jornada
+                if (data.user.id) {
+                    localStorage.setItem('current_employee_id', data.user.id);
+                }
+
+                // Redirigimos directamente al archivo ecos.html que creamos por separado
+                window.location.href = 'ecos.html';
+                return;
+            } else {
+                throw new Error('Acceso Denegado:\nSu cuenta no cuenta con el Rol o el Servicio (ECOS) requerido para este módulo.');
+            }
+        }
+
         // 🚀 REGLA DE CONTROL PARA EL BOTÓN DE MEDICINA PREVENTIVA
         if (moduloDestino === 'MEDICINA PREVENTIVA') {
-            // Permitimos el paso si es: ADMIN, o tiene ROL de Medicina Preventiva, o es Empleado del SERVICIO Medicina Preventiva
             if (rolNormalizado === 'ADMINISTRADOR' || rolNormalizado === 'ADMIN' || rolNormalizado === 'MEDICINA PREVENTIVA' || servicioNormalizado === 'MEDICINA PREVENTIVA') {
                 
                 cerrarLogin();
@@ -2138,7 +2163,6 @@ async function procesarLogin(e) {
                 
                 localStorage.setItem('usuarioLogueado', JSON.stringify(data.user));
 
-                // Apagamos la raíz del login y encendemos el panel intermedio de preventiva
                 const sectionLogin = document.getElementById('section-login');
                 if (sectionLogin) {
                     sectionLogin.classList.remove('active-view');
@@ -2150,7 +2174,7 @@ async function procesarLogin(e) {
                     panelPrev.classList.add('active-view');
                     panelPrev.style.display = 'block';
                 }
-                return; // Concluye con éxito
+                return;
             } else {
                 throw new Error('Acceso Denegado:\nSu cuenta no cuenta con el Rol o la Adscripción requerida para el área de Medicina Preventiva.');
             }
@@ -2192,9 +2216,6 @@ async function procesarLogin(e) {
     }
 }
 
-
-
-
 // FUNCIÓN RESTAURADA: Oculta la ventana modal flotante de inicio de sesión
 function cerrarLogin() {
     const modalLogin = document.getElementById('login-modal');
@@ -2202,8 +2223,6 @@ function cerrarLogin() {
         modalLogin.style.display = 'none';
     }
 }
-
-
 
 
 
