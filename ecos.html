@@ -193,6 +193,90 @@
 
 
 
+/* Contenedor general del panel ECOS */
+.ecos-panel-container {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.ecos-panel-title {
+    color: var(--azul-ecos, #2563eb);
+    font-size: 1.5em;
+    margin-top: 0;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 12px;
+}
+
+.ecos-panel-subtitle {
+    font-size: 0.95em;
+    color: #475569;
+    margin-bottom: 20px;
+}
+
+/* Sub-grid para las tarjetas internas (Nueva Solicitud e Historial) */
+.ecos-subgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+/* Tarjetas internas unificadas */
+.card-ecos-sub {
+    background: var(--blanco);
+    border: 1px solid #e2e8f0;
+    border-top: 6px solid var(--azul-ecos, #2563eb);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-ecos-sub:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card-ecos-sub h4 {
+    color: var(--azul-ecos, #2563eb);
+    font-size: 1.2em;
+    margin: 0 0 10px 0;
+}
+
+.card-ecos-sub p {
+    font-size: 0.88em;
+    color: #64748b;
+    flex-grow: 1;
+    margin: 0 0 15px 0;
+}
+
+/* Botón interno */
+.btn-ecos-action {
+    background-color: var(--azul-ecos, #2563eb);
+    color: white !important;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    width: 100%;
+    text-align: center;
+    transition: filter 0.2s;
+}
+
+.btn-ecos-action:hover {
+    filter: brightness(1.1);
+}
+
 
 
 
@@ -220,60 +304,28 @@
         </div>
     </header>
 
-<div class="main-content">
-        <div class="container">
+<div class="container">
+    <div class="ecos-panel-container">
+        <h3 class="ecos-panel-title">Solicitud de Personal para jornadas</h3>
+        <p class="ecos-panel-subtitle">Gestión y control operativo del personal en formación asignado a las jornadas institucionales.</p>
 
-            <div class="teaching-hero">
-                <h2 style="color: var(--dorado-calidad); margin: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px;">Coordinación de Enseñanza y Calidad</h2>
-                <div id="phrase-container">"Cargando pensamiento institucional..."</div>
-            </div>
-
-            <div class="header-modulo">
-                <h2 style="color: var(--azul-ecos); margin: 0;">📋 Módulo ECOS - Gestión de Jornadas</h2>
-                <button class="btn-secondary" onclick="window.location.href='index.html'">← Volver al Menú</button>
-            </div>
-
-            <div class="login-grid">
-                
-                <div class="card" style="background: #eff6ff;">
-                    <h3>Nueva Solicitud</h3>
-                    <p>Seleccione de la lista los trainees que requiere para su jornada institucional. La petición será enviada al formador de enseñanza.</p>
-                    <button class="btn-save" onclick="abrirModalSolicitud()">Solicitud de Personal para Jornadas</button>
-                </div>
-
-                <div class="card" style="border-top-color: var(--guinale); background: #fdfaf6; border-top-color: var(--guinda);">
-                    <h3 style="color: var(--guinda);">Historial</h3>
-                    <p>Consulte el estatus, seguimiento y detalle de las solicitudes de personal para jornadas realizadas.</p>
-                    <button class="btn-save" style="background: var(--guinda);" onclick="toggleHistorial()">Historial de Solicitudes</button>
-                </div>
-
-            </div>
-
-            <div id="seccion-historial" class="submenu-section">
-                <h3 style="color: var(--guinda); margin-top: 0;">Historial de Solicitudes Realizadas</h3>
-                <div id="historial-solicitudes">
-                    <p style="color: #6b7280;">Cargando solicitudes...</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <div id="modal-solicitud" style="display:none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
-        <div style="background: white; margin: 3% auto; padding: 25px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2); text-align: left;">
-            <h3 style="color: var(--azul-ecos); margin-top:0;">Seleccionar Trainees para la Jornada</h3>
-            <p style="font-size: 0.9em; color: #6b7280;">Marque las casillas de los participantes que desea incluir:</p>
+        <div class="ecos-subgrid">
             
-            <div id="lista-trainees-disponibles" style="max-height: 350px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 5px; padding: 10px; background: #f9fafb;">
-                </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                <button class="btn-secondary" onclick="cerrarModalSolicitud()">Cancelar</button>
-                <button class="btn-save" style="width: auto; margin-top: 0;" onclick="enviarSolicitudJornada()">Enviar Solicitud a Enseñanza</button>
+            <div class="card-ecos-sub">
+                <h4>Nueva Solicitud</h4>
+                <p>Crea, configura y envía una nueva solicitud de personal médico o en formación para las próximas jornadas.</p>
+                <button class="btn-ecos-action" onclick="abrirNuevaSolicitudEcos()">Crear Solicitud</button>
             </div>
+
+            <div class="card-ecos-sub" style="border-top-color: #0284c7;">
+                <h4>Historial</h4>
+                <p>Consulta el registro histórico, estatus de aprobación (pendientes, aprobadas, rechazadas) y bitácoras anteriores.</p>
+                <button class="btn-ecos-action" style="background-color: #0284c7;" onclick="abrirHistorialEcos()">Ver Historial</button>
+            </div>
+
         </div>
     </div>
-
+</div>
 
 
     <footer>
