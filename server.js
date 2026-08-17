@@ -1705,9 +1705,10 @@ app.post('/api/ecos/request', (req, res) => {
         return res.status(400).json({ success: false, message: 'Faltan datos obligatorios (motivo o trainees seleccionados).' });
     }
 
-    const sqlSol = 'INSERT INTO eco_request (requester_employee_id, status, created_at) VALUES (?, "PENDIENTE", NOW())';
+    // Incluimos el motivo en el encabezado
+    const sqlSol = 'INSERT INTO eco_request (requester_employee_id, motivo, status, created_at) VALUES (?, ?, "PENDIENTE", NOW())';
     
-    pool.query(sqlSol, [requester_employee_id || null], (err, resultSol) => {
+    pool.query(sqlSol, [requester_employee_id || null, motivo], (err, resultSol) => {
         if (err) {
             console.error('Error al insertar solicitud principal:', err);
             return res.status(500).json({ success: false, message: err.message });
@@ -1716,9 +1717,6 @@ app.post('/api/ecos/request', (req, res) => {
         const ecoRequestId = resultSol.insertId;
 
         const buscarFormadoresYEnviarCorreo = () => {
-            // Buscamos los datos de los trainees seleccionados (Nombre, Apellidos, etc.)
-            // Asegúrate de que tu tabla de trainees se llame 'trainees' y tenga campos como first_name y last_name_paternal
-            // (Si sus nombres están en otra tabla, ajusta el JOIN según corresponda).
             const placeholders = trainee_ids.map(() => '?').join(',');
             const sqlTraineesInfo = `SELECT id, first_name, last_name_paternal, last_name_maternal FROM trainees WHERE id IN (${placeholders})`;
 
@@ -1732,13 +1730,12 @@ app.post('/api/ecos/request', (req, res) => {
 
                 pool.query(sqlFormadores, async (errForm, formadores) => {
                     if (errForm) {
-                        console.error('Error al buscar formadores de enseñanza:', errForm);
+                        console.error('Error al buscar formadores:', errForm);
                         return res.json({ success: true, message: 'Solicitud creada con éxito, pero falló la búsqueda de formadores.' });
                     }
 
                     for (let formador of formadores) {
                         if (formador.email) {
-                            // Enlace a una vista o interfaz donde evaluarán en lote
                             const linkEvaluacion = `https://ecosistema-cmfermita.onrender.com/evaluar-solicitud.html?eco_request_id=${ecoRequestId}`;
 
                             let htmlTraineesList = `<ul style="padding-left: 20px;">`;
@@ -1762,7 +1759,7 @@ app.post('/api/ecos/request', (req, res) => {
                                         <p><strong>Motivo de la solicitud:</strong> ${motivo}</p>
                                         <p><strong>Personal en formación incluido:</strong></p>
                                         ${htmlTraineesList}
-                                        <p>Para calificar a cada integrante, registrar sus motivos e **enviar la respuesta completa en un solo envío**, por favor acceda al siguiente enlace:</p>
+                                        <p>Para calificar a cada integrante, registrar sus motivos e <strong>enviar la respuesta completa en un solo envío</strong>, por favor acceda al siguiente enlace:</p>
                                         
                                         <div style="text-align: center; margin: 25px 0;">
                                             <a href="${linkEvaluacion}" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.95em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -1807,7 +1804,7 @@ app.post('/api/ecos/request', (req, res) => {
             });
         };
 
-        registrarDetallesYContinuar();
+        registrarDetallesYContinuار();
     });
 });
 
@@ -2008,7 +2005,8 @@ app.get('/evaluar-solicitud.html', (req, res) => {
     const sql = `
         SELECT 
             T.id AS trainee_id, T.first_name, T.last_name_paternal, T.last_name_maternal,
-            ER.id AS eco_request_id, ER.motivo
+            ERD.id AS detail_id, ERD.reason AS detail_reason,
+            ER.id AS eco_request_id, ER.motivo AS request_motivo
         FROM eco_request_details ERD
         JOIN trainees T ON ERD.trainee_id = T.id
         JOIN eco_request ER ON ERD.eco_request_id = ER.id
@@ -2017,7 +2015,6 @@ app.get('/evaluar-solicitud.html', (req, res) => {
 
     pool.query(sql, [ecoRequestId], (err, results) => {
         if (err) {
-            // IMPRIME EL ERROR EXACTO EN TU CONSOLA Y EN LA PANTALLA
             console.error('ERROR DETALLADO DE MYSQL:', err);
             return res.status(500).send(`<h3>Error de Base de Datos:</h3><pre>${err.sqlMessage || err.message}</pre>`);
         }
@@ -2026,11 +2023,13 @@ app.get('/evaluar-solicitud.html', (req, res) => {
             return res.status(404).send('<h3>Solicitud no encontrada o ya procesada.</h3>');
         }
 
-        const motivo = results[0].motivo || 'Sin especificar';
+        const requestMotivo = results[0].request_motivo || 'Sin especificar';
 
         let traineesHtml = '';
         results.forEach(row => {
             const nombreCompleto = `${row.first_name || ''} ${row.last_name_paternal || ''} ${row.last_name_maternal || ''}`.trim();
+            const motivoPrevio = row.detail_reason || '';
+
             traineesHtml += `
                 <div style="background: white; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                     <h3 style="margin: 0 0 10px 0; color: #611232;">👤 ${nombreCompleto || 'Trainee ID: ' + row.trainee_id}</h3>
@@ -2045,8 +2044,8 @@ app.get('/evaluar-solicitud.html', (req, res) => {
                     </div>
 
                     <div>
-                        <label style="font-weight: bold; font-size: 0.9em; display:block; margin-bottom: 5px;">Motivo / Comentarios (Opcional):</label>
-                        <textarea class="reason-input" rows="2" placeholder="Escriba el motivo..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"></textarea>
+                        <label style="font-weight: bold; font-size: 0.9em; display:block; margin-bottom: 5px;">Motivo de Aprobación / Rechazo:</label>
+                        <textarea class="reason-input" rows="2" placeholder="Escriba el motivo..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">${motivoPrevio}</textarea>
                     </div>
                 </div>
             `;
@@ -2075,8 +2074,10 @@ app.get('/evaluar-solicitud.html', (req, res) => {
                         <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Evaluación de Solicitud de Personal (#${ecoRequestId})</p>
                     </div>
                     <div class="content">
-                        <p><strong>Motivo de la Solicitud:</strong> ${motivo}</p>
-                        <p style="font-size: 0.9em; color: #555; margin-bottom: 20px;">Por favor, califique a cada miembro del personal en formación y envíe su respuesta conjunta:</p>
+                        <p style="background: #f9fafb; padding: 12px; border-left: 4px solid #b38e5d; margin-bottom: 20px;">
+                            <strong>Motivo de la Solicitud (Encabezado):</strong><br>${requestMotivo}
+                        </p>
+                        <p style="font-size: 0.9em; color: #555; margin-bottom: 20px;">Por favor, califique a cada miembro del personal en formación, asigne su motivo correspondiente y envíe su respuesta conjunta:</p>
                         
                         <div id="evaluaciones-form">
                             ${traineesHtml}
@@ -2139,8 +2140,6 @@ app.get('/evaluar-solicitud.html', (req, res) => {
         res.send(htmlPage);
     });
 });
-
-
 
 
 
