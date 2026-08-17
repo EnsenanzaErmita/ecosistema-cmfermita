@@ -1650,24 +1650,27 @@ app.get('/api/trainees/all', (req, res) => {
 
 // Obtener el historial o listado de solicitudes
 app.get('/api/ecos/requests', (req, res) => {
+    // Usamos tus tablas y columnas reales: eco_request y eco_request_details
     const sql = `
-        SELECT s.id, s.motivo, s.estatus, s.fecha_creacion, 
+        SELECT s.id, s.motivo, s.status, s.created_at, 
                GROUP_CONCAT(CONCAT(t.first_name, ' ', t.last_name_paternal) SEPARATOR ', ') AS trainees_nombres
-        FROM ecos_solicitudes s
-        LEFT JOIN ecos_solicitudes_detalle d ON s.id = d.solicitud_id
+        FROM eco_request s
+        LEFT JOIN eco_request_details d ON s.id = d.eco_request_id
         LEFT JOIN trainees t ON d.trainee_id = t.id
         GROUP BY s.id
-        ORDER BY s.fecha_creacion DESC
+        ORDER BY s.created_at DESC
     `;
 
-    pool.query(sql, (err, rows) => {
+    pool.query(sql, (err, results) => {
         if (err) {
-            console.error('Error en /api/ecos/requests:', err);
-            return res.status(500).json({ success: false, error: err.message });
+            console.error('Error al obtener las solicitudes:', err);
+            return res.status(500).json({ success: false, message: err.message });
         }
-        res.json({ success: true, requests: rows });
+        res.json({ success: true, data: results });
     });
 });
+
+
 
 
 // 3. Obtener el historial o listado de solicitudes (Alineado con /api/ecos/requests)
