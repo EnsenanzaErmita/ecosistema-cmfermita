@@ -1997,6 +1997,7 @@ app.post('/api/ecos/responder-lote', (req, res) => {
 
 
 // Ruta para mostrar la interfaz de evaluación en el navegador
+// Ruta corregida para mostrar la interfaz de evaluación en el navegador
 app.get('/evaluar-solicitud.html', (req, res) => {
     const ecoRequestId = req.query.eco_request_id;
 
@@ -2004,10 +2005,11 @@ app.get('/evaluar-solicitud.html', (req, res) => {
         return res.status(400).send('<h3>Error: Enlace de solicitud no válido o incompleto.</h3>');
     }
 
-    // Consultar la solicitud y los trainees asociados
+    // Consulta SQL corregida con el SELECT agregado al inicio
     const sql = `
-        T.id AS trainee_id, T.first_name, T.last_name_paternal, T.last_name_maternal,
-        ER.id AS eco_request_id, ER.motivo
+        SELECT 
+            T.id AS trainee_id, T.first_name, T.last_name_paternal, T.last_name_maternal,
+            ER.id AS eco_request_id, ER.motivo
         FROM eco_request_details ERD
         JOIN trainees T ON ERD.trainee_id = T.id
         JOIN eco_request ER ON ERD.eco_request_id = ER.id
@@ -2015,13 +2017,17 @@ app.get('/evaluar-solicitud.html', (req, res) => {
     `;
 
     pool.query(sql, [ecoRequestId], (err, results) => {
-        if (err || !results || results.length === 0) {
+        if (err) {
+            console.error('Error al consultar detalles para evaluación:', err);
+            return res.status(500).send('<h3>Error interno al cargar la solicitud.</h3>');
+        }
+
+        if (!results || results.length === 0) {
             return res.status(404).send('<h3>Solicitud no encontrada o ya procesada.</h3>');
         }
 
         const motivo = results[0].motivo || 'Sin especificar';
 
-        // Construir dinámicamente las tarjetas de evaluación para cada trainee
         let traineesHtml = '';
         results.forEach(row => {
             const nombreCompleto = `${row.first_name || ''} ${row.last_name_paternal || ''} ${row.last_name_maternal || ''}`.trim();
@@ -2046,7 +2052,6 @@ app.get('/evaluar-solicitud.html', (req, res) => {
             `;
         });
 
-        // HTML completo de la página de respuesta
         const htmlPage = `
             <!DOCTYPE html>
             <html lang="es">
@@ -2101,7 +2106,7 @@ app.get('/evaluar-solicitud.html', (req, res) => {
                         fetch('/api/ecos/responder-lote', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: json_encode_seguro({ eco_request_id: ecoRequestId, evaluaciones })
+                            body: JSON.stringify({ eco_request_id: ecoRequestId, evaluaciones })
                         })
                         .then(res => res.json())
                         .then(data => {
@@ -2119,15 +2124,12 @@ app.get('/evaluar-solicitud.html', (req, res) => {
                         })
                         .catch(err => {
                             console.error(err);
-                            document.getElementById('resultado-mensaje').style.color = 'red';
-                            document.getElementById('resultado-mensaje').innerText = 'Error de conexión con el servidor.';
+                            const msgDiv = document.getElementById('resultado-mensaje');
+                            msgDiv.style.color = 'red';
+                            msgDiv.innerText = 'Error de conexión con el servidor.';
                             btn.disabled = false;
                             btn.innerText = 'ENVIAR RESPUESTA COMPLETA';
                         });
-                    }
-
-                    function json_encode_seguro(obj) {
-                        return JSON.stringify(obj);
                     }
                 </script>
             </body>
@@ -2137,8 +2139,6 @@ app.get('/evaluar-solicitud.html', (req, res) => {
         res.send(htmlPage);
     });
 });
-
-
 
 
 
