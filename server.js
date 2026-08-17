@@ -1952,6 +1952,7 @@ app.get('/api/ecos/responder', (req, res) => {
 // Ruta para recibir la evaluación masiva de una solicitud
 // Ruta para recibir la evaluación masiva de una solicitud
 // Ruta para recibir la evaluación masiva de una solicitud
+// Ruta para recibir la evaluación masiva y notificar por categorías independientes
 app.post('/api/ecos/responder-lote', async (req, res) => {
     const { eco_request_id, evaluaciones } = req.body; 
 
@@ -1975,14 +1976,14 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
             }
             procesados++;
 
-            // Cuando terminemos de procesar todos los elementos del lote
+            // Cuando terminemos de actualizar todos los detalles en la base de datos
             if (procesados === evaluaciones.length) {
                 if (huboError) {
                     return res.status(500).json({ success: false, message: 'Algunas evaluaciones no pudieron guardarse.' });
                 }
 
                 try {
-                    // 1. Verificar si ya no quedan pendientes para marcar la solicitud como COMPLETADO
+                    // 1. Revisar si ya no quedan pendientes para marcar la solicitud como COMPLETADO
                     const [detallesPendientes] = await pool.promise().query(
                         `SELECT COUNT(*) AS total FROM eco_request_details WHERE eco_request_id = ? AND approval_status = 'PENDIENTE'`,
                         [eco_request_id]
@@ -1994,68 +1995,105 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
                             [eco_request_id]
                         );
 
-                        // ==========================================
-                        // 2. AQUÍ ES DONDE SE DEBE IMPLEMENTAR EL ENVÍO DE CORREOS
-                        // ==========================================
-                        
-                        // A. Obtener el service_category de los trainees de esta solicitud y el correo del solicitante
-                        const [requestData] = await pool.promise().query(
-                            `SELECT r.*, t.service_category, u.email AS requester_email 
+                        // 2. Obtener la información del solicitante general y los trainees evaluados con sus categorías
+                        const [requestInfo] = await pool.promise().query(
+                            `SELECT r.*, u.email AS requester_email 
                              FROM eco_request r
-                             LEFT JOIN eco_request_details erd ON r.id = erd.eco_request_id
-                             LEFT JOIN trainees t ON erd.trainee_id = t.id
                              LEFT JOIN users u ON r.user_id = u.id 
-                             WHERE r.id = ? LIMIT 1`,
+                             WHERE r.id = ?`,
                             [eco_request_id]
                         );
 
-                        if (requestData.length > 0) {
-                            const solicitud = requestData[0];
-                            const serviceCategory = solicitud.service_category;
-                            const requesterEmail = solicitud.requester_email;
+                        const requesterEmail = requestInfo.length > 0 ? requestInfo[0].requester_email : null;
 
-                            // B. Obtener los correos de los empleados/formadores cuya categoría coincida
+                        // 3. Obtener los detalles y la categoría (service_category) de cada trainee de esta solicitud
+                        const [traineesDetails] = await pool.promise().query(
+                            `SELECT t.id, t.first_name, t.last_name_paternal, t.service_category, erd.approval_status, erd.reason
+                             FROM eco_request_details erd
+                             JOIN trainees t ON erd.trainee_id = t.id
+                             WHERE erd.eco_request_id = ?`,
+                            [eco_request_id]
+                        );
+
+                        // 4. Agrupar los trainees por su categoría (Ej: 'MEDICO', 'NUTRICION', etc.)
+                        const traineesPorCategoria = {};
+                        traineesDetails.forEach(tr => {
+                            const cat = tr.service_category || 'GENERAL';
+                            if (!traineesPorCategoria[cat]) {
+                                traineesPorCategoria[cat] = [];
+                            }
+                            traineesPorCategoria[cat].push(tr);
+                        });
+
+                        // 5. Enviar correos segmentados por cada categoría detectada
+                        for (const categoria in traineesPorCategoria) {
+                            const listaTrainees = traineesPorCategoria[categoria];
+
+                            // Buscar los formadores (empleados) cuya categoría coincida exactamente con la del grupo
                             const [formadores] = await pool.promise().query(
                                 `SELECT email FROM employees WHERE category = ?`,
-                                [serviceCategory]
+                                [categoria]
                             );
 
                             const formadoresEmails = formadores.map(f => f.email).filter(Boolean);
 
-                            // C. Consolidar los destinatarios únicos (Solicitante + Formadores de esa categoría)
-                            const destinatarios = [];
-                            if (requesterEmail) destinatarios.push(requesterEmail);
-                            formadoresEmails.forEach(email => {
-                                if (!destinatarios.includes(email)) destinatarios.push(email);
-                            });
+                            // Armar lista de destinatarios para esta categoría específica (Formadores + Solicitante)
+                            const destinatariosCategoria = [...formadoresEmails];
+                            if (requesterEmail && !destinatariosCategoria.includes(requesterEmail)) {
+                                destinatariosCategoria.push(requesterEmail);
+                            }
 
-                            // D. Enviar el correo usando tu transportador configurado (ej. Nodemailer)
-                            if (destinatarios.length > 0) {
-                                const mailOptions = {
-                                    from: '"Ecosistema ERMITA" <tu-correo@dominio.com>',
-                                    to: destinatarios.join(', '),
-                                    subject: `Solicitud #${eco_request_id} Completada`,
-                                    text: `La solicitud de cambio de consultorio #${eco_request_id} ha sido completada y evaluada con éxito.`
-                                };
+                            if (destinatariosCategoria.length > 0) {
+                                // Construir el HTML con los trainees de esta categoría específica
+                                let htmlTraineesList = `<ul style="padding-left: 20px;">`;
+                                listaTrainees.forEach(tr => {
+                                    const nombreCompleto = `${tr.first_name || ''} ${tr.last_name_paternal || ''}`.trim();
+                                    htmlTraineesList += `<li style="margin-bottom: 8px;">
+                                        <strong>${nombreCompleto}</strong><br>
+                                        Estatus: <span style="color: ${tr.approval_status === 'APROBADO' ? 'green' : 'red'};">${tr.approval_status}</span><br>
+                                        Motivo/Comentario: ${tr.reason || 'Sin comentarios'}
+                                    </li>`;
+                                });
+                                htmlTraineesList += `</ul>`;
 
-                                // Si tienes configurado un 'transporter' en tu server.js, descomenta la siguiente línea:
-                                // await transporter.sendMail(mailOptions);
-                                console.log('📧 Correos notificados a:', destinatarios);
+                                const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+                                sendSmtpEmail.subject = `📋 Resultados de Evaluación (${categoria}) - Solicitud #${eco_request_id}`;
+                                sendSmtpEmail.htmlContent = `
+                                    <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
+                                        <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
+                                            <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
+                                            <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Reporte de Evaluación - Área: ${categoria}</p>
+                                        </div>
+                                        <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
+                                            <p>Se ha completado la evaluación para el personal del área de <strong>${categoria}</strong> vinculados a la solicitud #${eco_request_id}:</p>
+                                            ${htmlTraineesList}
+                                            <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
+                                                Atentamente,<br>Sistema Ecosistema ERMITA
+                                            </p>
+                                        </div>
+                                    </div>
+                                `;
+                                sendSmtpEmail.sender = { "name": "C.M.F. ERMITA - ISSSTE", "email": "cmfermitacalidad@gmail.com" };
+                                sendSmtpEmail.to = destinatariosCategoria.map(email => ({ email }));
+
+                                try {
+                                    await apiInstance.sendTransacEmail(sendSmtpEmail);
+                                    console.log(`✅ Correo de categoría [${categoria}] enviado a:`, destinatariosCategoria);
+                                } catch (mailErr) {
+                                    console.error(`❌ Error enviando correo de categoría [${categoria}]:`, mailErr);
+                                }
                             }
                         }
                     }
-                } catch (mailProcessErr) {
-                    console.error('Error en el proceso de notificación por correo:', mailProcessErr);
+                } catch (emailProcessErr) {
+                    console.error('Error procesando las notificaciones segmentadas:', emailProcessErr);
                 }
 
-                // Finalmente se responde al cliente web con éxito
-                res.json({ success: true, message: 'Todas las respuestas se han registrado y enviado con éxito.' });
+                res.json({ success: true, message: 'Todas las respuestas se han registrado y notificado por categorías correctamente.' });
             }
         });
     });
 });
-
-
 
 
 
