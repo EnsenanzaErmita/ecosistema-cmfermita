@@ -1705,29 +1705,28 @@ app.post('/api/ecos/request', (req, res) => {
         return res.status(400).json({ success: false, message: 'Faltan datos obligatorios (motivo o trainees).' });
     }
 
-    // 1. Insertar el encabezado con el motivo general
+    // 1. Insertamos el encabezado en tu tabla 'eco_request'
     const sqlSol = 'INSERT INTO eco_request (requester_employee_id, motivo, status, created_at) VALUES (?, ?, "PENDIENTE", NOW())';
     
     pool.query(sqlSol, [requester_employee_id || null, motivo], (err, resultSol) => {
         if (err) {
             console.error('Error al insertar solicitud principal:', err);
-            return res.status(500).json({ success: false, message: 'Error en base de datos al crear encabezado: ' + err.message });
+            return res.status(500).json({ success: false, message: 'Error al crear la solicitud: ' + err.message });
         }
 
         const ecoRequestId = resultSol.insertId;
 
-        // 2. Preparar los datos para insertar TODOS los detalles en una sola consulta masiva
-        // Usamos null o una cadena vacía para 'reason' según lo que permita tu tabla
+        // 2. Insertamos los detalles de los trainees de forma masiva
         const detallesValues = trainee_ids.map(tId => [ecoRequestId, tId, 'PENDIENTE', null]);
         const sqlDetalles = 'INSERT INTO eco_request_details (eco_request_id, trainee_id, approval_status, reason) VALUES ?';
 
         pool.query(sqlDetalles, [detallesValues], async (errDet) => {
             if (errDet) {
                 console.error('Error detallado al registrar los trainees:', errDet);
-                return res.status(500).json({ success: false, message: 'Error de BD al registrar los detalles: ' + errDet.message });
+                return res.status(500).json({ success: false, message: 'Error al registrar los detalles: ' + errDet.message });
             }
 
-            // 3. Buscar la información de los trainees y formadores para enviar los correos
+            // 3. Buscar información de trainees y formadores para notificar por Brevo
             const placeholders = trainee_ids.map(() => '?').join(',');
             const sqlTraineesInfo = `SELECT id, first_name, last_name_paternal, last_name_maternal FROM trainees WHERE id IN (${placeholders})`;
 
@@ -1742,8 +1741,7 @@ app.post('/api/ecos/request', (req, res) => {
                 pool.query(sqlFormadores, async (errForm, formadores) => {
                     if (errForm) {
                         console.error('Error al buscar formadores:', errForm);
-                        // Aunque falle el correo, la solicitud ya se guardó con éxito en las tablas
-                        return res.json({ success: true, message: 'Solicitud guardada correctamente, pero falló la búsqueda de formadores.' });
+                        return res.json({ success: true, message: 'Solicitud creada correctamente, pero falló la búsqueda de formadores.' });
                     }
 
                     for (let formador of formadores) {
@@ -1798,15 +1796,12 @@ app.post('/api/ecos/request', (req, res) => {
                         }
                     }
 
-                    // RESPUESTA EXITOSA FINAL AL CLIENTE
                     res.json({ success: true, message: 'Solicitud creada correctamente y correos enviados a formadores.' });
                 });
             });
         });
     });
 });
-
-
 
 
 
