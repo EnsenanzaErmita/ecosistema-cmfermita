@@ -1956,6 +1956,8 @@ app.get('/api/ecos/responder', (req, res) => {
 // Ruta para recibir la evaluación masiva y notificar con logs detallados
 // Ruta para recibir la evaluación masiva y notificar de forma directa
 // Ruta para recibir la evaluación masiva y notificar tanto al solicitante (por RFC en employees) como a los formadores por categoría
+// Ruta para recibir la evaluación masiva con la lógica exacta de solicitante y trainers por categoría
+// Ruta para recibir la evaluación masiva con la relación exacta por requester_employee_id y trainers por categoría
 app.post('/api/ecos/responder-lote', async (req, res) => {
     const { eco_request_id, evaluaciones } = req.body; 
 
@@ -1997,19 +1999,19 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
             console.log(`✅ Solicitud #${eco_request_id} marcada como COMPLETADO.`);
         }
 
-        // 3. Obtener la solicitud y recuperar el correo del empleado solicitante usando su RFC en la tabla 'employees'
+        // 3. RECUPERAR CORREO DEL SOLICITANTE USANDO requester_employee_id
         const [requestInfo] = await pool.promise().query(
             `SELECT r.*, e.email AS requester_email, e.first_name AS req_name 
              FROM eco_request r
-             LEFT JOIN employees e ON r.user_rfc = e.rfc 
+             JOIN employees e ON r.requester_employee_id = e.id 
              WHERE r.id = ?`,
             [eco_request_id]
         );
 
         const requesterEmail = requestInfo.length > 0 ? requestInfo[0].requester_email : null;
-        console.log(`👤 Correo del empleado solicitante (por RFC):`, requesterEmail || 'No encontrado');
+        console.log(`👤 Correo del empleado solicitante (vía requester_employee_id):`, requesterEmail || 'No encontrado');
 
-        // 4. Obtener los detalles y la categoría (service_category) de cada trainee de esta solicitud
+        // 4. RECUPERAR TRAINEES Y SUS DETALLES
         const [traineesDetails] = await pool.promise().query(
             `SELECT t.id, t.first_name, t.last_name_paternal, t.service_category, erd.approval_status, erd.reason
              FROM eco_request_details erd
@@ -2018,9 +2020,9 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
             [eco_request_id]
         );
 
-        console.log(`👥 Trainees recuperados:`, traineesDetails.map(t => ({ id: t.id, nombre: t.first_name, categoria: t.service_category })));
+        console.log(`👥 Trainees recuperados para la solicitud:`, traineesDetails.map(t => ({ id: t.id, nombre: t.first_name, categoria: t.service_category })));
 
-        // 5. Agrupar los trainees por su categoría (Ej: 'MÉDICOS', 'NUTRICIONISTA', etc.)
+        // 5. AGRUPAR TRAINEES POR SU service_category
         const traineesPorCategoria = {};
         traineesDetails.forEach(tr => {
             const cat = tr.service_category ? tr.service_category.trim() : 'GENERAL';
@@ -2030,28 +2032,30 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
             traineesPorCategoria[cat].push(tr);
         });
 
-        console.log(`📂 Categorías detectadas para enviar correo:`, Object.keys(traineesPorCategoria));
+        console.log(`📂 Categorías detectadas:`, Object.keys(traineesPorCategoria));
 
-        // 6. Enviar correos segmentados por categoría (incluyendo a formadores y al solicitante)
+        // 6. PROCESAR CORREOS POR CATEGORÍA
         for (const categoria in traineesPorCategoria) {
             const listaTrainees = traineesPorCategoria[categoria];
             console.log(`\n--- Procesando categoría: [${categoria}] ---`);
 
-            // Buscar los formadores (empleados) cuya categoría coincida
-            const [formadores] = await pool.promise().query(
-                `SELECT email FROM employees WHERE category = ?`,
+            // Buscar en employees los registros que coincidan con la categoría Y que estén marcados como trainers
+            const [trainers] = await pool.promise().query(
+                `SELECT email FROM employees WHERE category = ? AND (is_trainer = 1 OR is_trainer = '1' OR is_trainer = true)`,
                 [categoria]
             );
 
-            const formadoresEmails = formadores.map(f => f.email).filter(Boolean);
+            console.log(`👨‍🏫 Trainers encontrados en 'employees' para [${categoria}]:`, trainers);
 
-            // Unir formadores de esta categoría + el empleado solicitante original (si tiene correo)
-            const destinatariosCategoria = [...formadoresEmails];
+            const trainersEmails = trainers.map(f => f.email).filter(Boolean);
+
+            // Destinatarios de esta categoría: Los trainers de esa categoría + El solicitante original
+            const destinatariosCategoria = [...trainersEmails];
             if (requesterEmail && !destinatariosCategoria.includes(requesterEmail)) {
                 destinatariosCategoria.push(requesterEmail);
             }
 
-            console.log(`📧 Destinatarios finales para [${categoria}]:`, destinatariosCategoria);
+            console.log(`📧 Destinatarios finales para la categoría [${categoria}] (Trainers + Solicitante):`, destinatariosCategoria);
 
             if (destinatariosCategoria.length > 0) {
                 let htmlTraineesList = `<ul style="padding-left: 20px;">`;
@@ -2087,23 +2091,25 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
 
                 try {
                     await apiInstance.sendTransacEmail(sendSmtpEmail);
-                    console.log(`🚀 ÉXITO: Correo enviado a la categoría [${categoria}] ->`, destinatariosCategoria);
+                    console.log(`🚀 ÉXITO: Correo enviado correctamente para la categoría [${categoria}] a:`, destinatariosCategoria);
                 } catch (mailErr) {
                     console.error(`❌ ERROR al enviar correo Brevo para [${categoria}]:`, mailErr);
                 }
             } else {
-                console.log(`⚠️ No se encontraron destinatarios válidos para [${categoria}].`);
+                console.log(`⚠️ No se encontraron trainers ni destinatarios válidos para la categoría [${categoria}].`);
             }
         }
         console.log(`----------------------------------------\n`);
 
-        res.json({ success: true, message: 'Respuestas guardadas y correos segmentados por RFC y categoría procesados correctamente.' });
+        res.json({ success: true, message: 'Respuestas guardadas y correos enviados según las reglas de negocio.' });
 
     } catch (err) {
         console.error('❌ Error crítico general en el endpoint responder-lote:', err);
         res.status(500).json({ success: false, message: 'Error interno en el servidor: ' + err.message });
     }
 });
+
+
 
 
 
