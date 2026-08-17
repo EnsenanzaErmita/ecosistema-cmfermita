@@ -1951,10 +1951,10 @@ app.get('/api/ecos/responder', (req, res) => {
 
 // Ruta para recibir la evaluación masiva de una solicitud
 // Ruta para recibir la evaluación masiva de una solicitud
+// Ruta para recibir la evaluación masiva de una solicitud
 app.post('/api/ecos/responder-lote', async (req, res) => {
     const { eco_request_id, evaluaciones } = req.body; 
 
-    // CORREGIDO: Se valida 'evaluaciones' (en español) tal como llega del body
     if (!eco_request_id || !evaluaciones || !Array.isArray(evaluaciones)) {
         return res.status(400).json({ success: false, message: 'Datos incompletos para procesar la respuesta.' });
     }
@@ -1981,8 +1981,8 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
                     return res.status(500).json({ success: false, message: 'Algunas evaluaciones no pudieron guardarse.' });
                 }
 
-                // Opcional: Revisar si ya no quedan pendientes para marcar la solicitud como COMPLETADO
                 try {
+                    // 1. Verificar si ya no quedan pendientes para marcar la solicitud como COMPLETADO
                     const [detallesPendientes] = await pool.promise().query(
                         `SELECT COUNT(*) AS total FROM eco_request_details WHERE eco_request_id = ? AND approval_status = 'PENDIENTE'`,
                         [eco_request_id]
@@ -1993,17 +1993,67 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
                             `UPDATE eco_request SET status = 'COMPLETADO' WHERE id = ?`,
                             [eco_request_id]
                         );
+
+                        // ==========================================
+                        // 2. AQUÍ ES DONDE SE DEBE IMPLEMENTAR EL ENVÍO DE CORREOS
+                        // ==========================================
+                        
+                        // A. Obtener el service_category de los trainees de esta solicitud y el correo del solicitante
+                        const [requestData] = await pool.promise().query(
+                            `SELECT r.*, t.service_category, u.email AS requester_email 
+                             FROM eco_request r
+                             LEFT JOIN eco_request_details erd ON r.id = erd.eco_request_id
+                             LEFT JOIN trainees t ON erd.trainee_id = t.id
+                             LEFT JOIN users u ON r.user_id = u.id 
+                             WHERE r.id = ? LIMIT 1`,
+                            [eco_request_id]
+                        );
+
+                        if (requestData.length > 0) {
+                            const solicitud = requestData[0];
+                            const serviceCategory = solicitud.service_category;
+                            const requesterEmail = solicitud.requester_email;
+
+                            // B. Obtener los correos de los empleados/formadores cuya categoría coincida
+                            const [formadores] = await pool.promise().query(
+                                `SELECT email FROM employees WHERE category = ?`,
+                                [serviceCategory]
+                            );
+
+                            const formadoresEmails = formadores.map(f => f.email).filter(Boolean);
+
+                            // C. Consolidar los destinatarios únicos (Solicitante + Formadores de esa categoría)
+                            const destinatarios = [];
+                            if (requesterEmail) destinatarios.push(requesterEmail);
+                            formadoresEmails.forEach(email => {
+                                if (!destinatarios.includes(email)) destinatarios.push(email);
+                            });
+
+                            // D. Enviar el correo usando tu transportador configurado (ej. Nodemailer)
+                            if (destinatarios.length > 0) {
+                                const mailOptions = {
+                                    from: '"Ecosistema ERMITA" <tu-correo@dominio.com>',
+                                    to: destinatarios.join(', '),
+                                    subject: `Solicitud #${eco_request_id} Completada`,
+                                    text: `La solicitud de cambio de consultorio #${eco_request_id} ha sido completada y evaluada con éxito.`
+                                };
+
+                                // Si tienes configurado un 'transporter' en tu server.js, descomenta la siguiente línea:
+                                // await transporter.sendMail(mailOptions);
+                                console.log('📧 Correos notificados a:', destinatarios);
+                            }
+                        }
                     }
-                } catch (updateErr) {
-                    console.error('Error al actualizar estatus global de la solicitud:', updateErr);
+                } catch (mailProcessErr) {
+                    console.error('Error en el proceso de notificación por correo:', mailProcessErr);
                 }
 
+                // Finalmente se responde al cliente web con éxito
                 res.json({ success: true, message: 'Todas las respuestas se han registrado y enviado con éxito.' });
             }
         });
     });
 });
-
 
 
 
