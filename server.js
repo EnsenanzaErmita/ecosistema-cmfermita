@@ -2005,7 +2005,6 @@ app.get('/evaluar-solicitud.html', (req, res) => {
         return res.status(400).send('<h3>Error: Enlace de solicitud no válido o incompleto.</h3>');
     }
 
-    // Consulta SQL corregida con el SELECT agregado al inicio
     const sql = `
         SELECT 
             T.id AS trainee_id, T.first_name, T.last_name_paternal, T.last_name_maternal,
@@ -2018,8 +2017,9 @@ app.get('/evaluar-solicitud.html', (req, res) => {
 
     pool.query(sql, [ecoRequestId], (err, results) => {
         if (err) {
-            console.error('Error al consultar detalles para evaluación:', err);
-            return res.status(500).send('<h3>Error interno al cargar la solicitud.</h3>');
+            // IMPRIME EL ERROR EXACTO EN TU CONSOLA Y EN LA PANTALLA
+            console.error('ERROR DETALLADO DE MYSQL:', err);
+            return res.status(500).send(`<h3>Error de Base de Datos:</h3><pre>${err.sqlMessage || err.message}</pre>`);
         }
 
         if (!results || results.length === 0) {
@@ -2033,7 +2033,7 @@ app.get('/evaluar-solicitud.html', (req, res) => {
             const nombreCompleto = `${row.first_name || ''} ${row.last_name_paternal || ''} ${row.last_name_maternal || ''}`.trim();
             traineesHtml += `
                 <div style="background: white; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <h3 style="margin: 0 0 10px 0; color: #611232;">👤 ${nombreCompleto}</h3>
+                    <h3 style="margin: 0 0 10px 0; color: #611232;">👤 ${nombreCompleto || 'Trainee ID: ' + row.trainee_id}</h3>
                     <input type="hidden" class="trainee-id" value="${row.trainee_id}">
                     
                     <div style="margin-bottom: 10px;">
@@ -2139,8 +2139,6 @@ app.get('/evaluar-solicitud.html', (req, res) => {
         res.send(htmlPage);
     });
 });
-
-
 
 
 
