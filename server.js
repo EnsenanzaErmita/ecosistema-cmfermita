@@ -1695,32 +1695,37 @@ app.get('/api/ecos/requests', async (req, res) => {
 
 
 // Crear solicitud, notificar por correo y almacenar
+// =========================================================================
+// RUTA 1: Crear solicitud, guardar detalle individual y notificar a Formadores ("ENSEÑANZA")
+// =========================================================================
 app.post('/api/ecos/request', (req, res) => {
     const { trainee_ids, motivo, requester_employee_id } = req.body;
+
+    if (!motivo || !trainee_ids || !Array.isArray(trainee_ids) || trainee_ids.length === 0) {
+        return res.status(400).json({ success: false, message: 'Faltan datos obligatorios (motivo o trainees seleccionados).' });
+    }
+
+    // A. Guardar en la tabla principal (eco_request)
+    // Nota: 'requester_employee_id' se guarda si lo mandas desde el frontend, de lo contrario se puede omitir o mandar NULL
+    const sqlSol = 'INSERT INTO eco_request (requester_employee_id, status, created_at) VALUES (?, "PENDIENTE", NOW())';
     
-    // A. Guardar en la tabla de solicitudes principal
-    const sqlSol = 'INSERT INTO ecos_solicitudes (motivo, estatus, fecha_creacion) VALUES (?, "PENDIENTE", NOW())';
-    
-    pool.query(sqlSol, [motivo], (err, resultSol) => {
+    pool.query(sqlSol, [requester_employee_id || null], (err, resultSol) => {
         if (err) {
-            console.error('Error al insertar solicitud:', err);
+            console.error('Error al insertar solicitud principal:', err);
             return res.status(500).json({ success: false, message: err.message });
         }
 
-        const solicitudId = resultSol.insertId;
+        const ecoRequestId = resultSol.insertId;
 
-        // B. Guardar el detalle de los trainees seleccionados
+        // B. Guardar el detalle de cada trainee seleccionado en eco_request_details
         let traineesProcesados = 0;
-        const insertarDetalles = () => {
-            if (!trainee_ids || !Array.isArray(trainee_ids) || trainee_ids.length === 0) {
-                buscarFormadoresYEnviarCorreo();
-                return;
-            }
-
+        
+        const registrarDetallesYContinuar = () => {
             trainee_ids.forEach((tId) => {
-                const sqlDetalle = 'INSERT INTO ecos_solicitudes_detalle (solicitud_id, trainee_id, estatus) VALUES (?, ?, "PENDIENTE")';
-                pool.query(sqlDetalle, [solicitudId, tId], (errDet) => {
-                    if (errDet) console.error('Error al insertar detalle:', errDet);
+                const sqlDetalle = 'INSERT INTO eco_request_details (eco_request_id, trainee_id, approval_status, reason) VALUES (?, ?, "PENDIENTE", NULL)';
+                pool.query(sqlDetalle, [ecoRequestId, tId], (errDet) => {
+                    if (errDet) console.error('Error al insertar detalle de trainee:', errDet);
+                    
                     traineesProcesados++;
                     if (traineesProcesados === trainee_ids.length) {
                         buscarFormadoresYEnviarCorreo();
@@ -1729,10 +1734,10 @@ app.post('/api/ecos/request', (req, res) => {
             });
         };
 
-        // C. Buscar formadores y D. Enviar correo
+        // C. Buscar formadores (trainers) cuyo service en employees sea 'ENSEÑANZA'
         const buscarFormadoresYEnviarCorreo = () => {
             const sqlFormadores = `
-                SELECT t.*, e.email, e.service 
+                SELECT t.*, e.email, e.service, e.first_name, e.last_name_paternal 
                 FROM trainers t
                 JOIN employees e ON t.employee_id = e.id
                 WHERE e.service = 'ENSEÑANZA'
@@ -1740,32 +1745,205 @@ app.post('/api/ecos/request', (req, res) => {
 
             pool.query(sqlFormadores, async (errForm, formadores) => {
                 if (errForm) {
-                    console.error('Error al buscar formadores:', errForm);
-                    return res.json({ success: true, message: 'Solicitud creada, pero hubo un error al buscar formadores para el correo.' });
+                    console.error('Error al buscar formadores de enseñanza:', errForm);
+                    return res.json({ success: true, message: 'Solicitud creada con éxito, pero falló la búsqueda de formadores.' });
                 }
 
+                // D. Enviar correo a cada formador encontrado usando Brevo
                 for (let formador of formadores) {
                     if (formador.email) {
-                        const linkAprobar = `http://tu-dominio.com/api/ecos/responder?id=${solicitudId}&accion=aprobar`;
-                        const linkRechazar = `http://tu-dominio.com/api/ecos/responder?id=${solicitudId}&accion=rechazar`;
-                        
-                        if (typeof enviarCorreoFormador === 'function') {
-                            try {
-                                await enviarCorreoFormador(formador.email, solicitudId, motivo, trainee_ids, linkAprobar, linkRechazar);
-                            } catch (mailErr) {
-                                console.error('Error enviando correo:', mailErr);
-                            }
+                        const linkResponderBase = `https://tu-backend-en-render.onrender.com/api/ecos/responder`;
+
+                        let htmlTraineesLinks = `<ul>`;
+                        trainee_ids.forEach(tId => {
+                            htmlTraineesLinks += `
+                                <li>
+                                    Trainee ID: ${tId} - 
+                                    <a href="${linkResponderBase}?eco_request_id=${ecoRequestId}&trainee_id=${tId}&accion=aprobar" style="color: green; font-weight: bold;">[Aprobar]</a> | 
+                                    <a href="${linkResponderBase}?eco_request_id=${ecoRequestId}&trainee_id=${tId}&accion=rechazar" style="color: red; font-weight: bold;">[Rechazar]</a>
+                                </li>`;
+                        });
+                        htmlTraineesLinks += `</ul>`;
+
+                        // Configuración del envío con la API oficial de Brevo
+                        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+                        sendSmtpEmail.subject = `Nueva Solicitud de Personal para Jornadas (#${ecoRequestId})`;
+                        sendSmtpEmail.htmlContent = `
+                            <h3>Estimado/a ${formador.first_name || 'Formador'},</h3>
+                            <p>Se ha generado una nueva solicitud de personal que requiere su revisión:</p>
+                            <p><strong>Motivo:</strong> ${motivo}</p>
+                            <p>Por favor, evalúe de forma individual a los trainees seleccionados:</p>
+                            ${htmlTraineesLinks}
+                            <p>Atentamente,<br>Sistema Ecosistema ERMITA</p>
+                        `;
+                        sendSmtpEmail.sender = { name: "Ecosistema ERMITA", email: "tu-correo-verificado@dominio.com" };
+                        sendSmtpEmail.to = [{ email: formador.email, name: `${formador.first_name || ''} ${formador.last_name_paternal || ''}` }];
+
+                        try {
+                            await apiInstance.sendTransacEmail(sendSmtpEmail);
+                        } catch (mailErr) {
+                            console.error(`Error enviando correo a formador ${formador.email}:`, mailErr);
                         }
                     }
                 }
 
-                res.json({ success: true, message: 'Solicitud procesada y enviada a formadores correctamente.' });
+                res.json({ success: true, message: 'Solicitud creada correctamente y correos enviados a formadores de enseñanza.' });
             });
         };
 
-        insertarDetalles();
+        registrarDetallesYContinuar();
     });
 });
+
+
+
+
+
+
+
+// =========================================================================
+// RUTA 2: Procesar respuesta individual del formador (Aprobar/Rechazar) y notificar al solicitante
+// =========================================================================
+app.get('/api/ecos/responder', (req, res) => {
+    const { eco_request_id, trainee_id, accion, reason } = req.query;
+
+    if (!eco_request_id || !trainee_id || !accion) {
+        return res.status(400).send('<h3>Error: Faltan parámetros requeridos para procesar la respuesta.</h3>');
+    }
+
+    const nuevoEstatus = accion === 'aprobar' ? 'APROBADO' : 'RECHAZADO';
+    const motivoRechazo = reason || (accion === 'rechazar' ? 'Rechazado sin motivo especificado' : 'Aprobado');
+
+    // A. Actualizar el detalle individual del trainee en eco_request_details
+    const sqlUpdateDetalle = `
+        UPDATE eco_request_details 
+        SET approval_status = ?, reason = ? 
+        WHERE eco_request_id = ? AND trainee_id = ?
+    `;
+
+    pool.query(sqlUpdateDetalle, [nuevoEstatus, motivoRechazo, eco_request_id, trainee_id], (errUpd) => {
+        if (errUpd) {
+            console.error('Error al actualizar detalle de solicitud:', errUpd);
+            return res.status(500).send('<h3>Error en el servidor al procesar la respuesta.</h3>');
+        }
+
+        // B. Comprobar si todos los trainees de esta solicitud ya tienen una respuesta (ya no hay PENDIENTES)
+        const sqlVerificarPendientes = `
+            SELECT COUNT(*) AS pendientes 
+            FROM eco_request_details 
+            WHERE eco_request_id = ? AND approval_status = 'PENDIENTE'
+        `;
+
+        pool.query(sqlVerificarPendientes, [eco_request_id], (errVerif, rowsVerif) => {
+            if (!errVerif && rowsVerif.length > 0 && rowsVerif[0].pendientes === 0) {
+                // Si ya no quedan pendientes, actualizamos la solicitud general a ATENDIDA
+                pool.query('UPDATE eco_request SET status = "ATENDIDA" WHERE id = ?', [eco_request_id]);
+            }
+        });
+
+        // C. Buscar los datos del solicitante y los detalles para notificar por correo
+        const sqlBusquedaInfo = `
+            SELECT r.id AS request_id, e.email AS requester_email, e.first_name AS requester_name,
+                   t.first_name AS trainee_nombre, t.last_name_paternal AS trainee_paterno
+            FROM eco_request r
+            LEFT JOIN employees e ON r.requester_employee_id = e.id
+            JOIN eco_request_details d ON r.id = d.eco_request_id
+            JOIN trainees t ON d.trainee_id = t.id
+            WHERE r.id = ? AND d.trainee_id = ?
+        `;
+
+        pool.query(sqlBusquedaInfo, [eco_request_id, trainee_id], async (errInfo, infoRows) => {
+            if (!errInfo && infoRows.length > 0 && infoRows[0].requester_email) {
+                const info = infoRows[0];
+
+                // D. Enviar correo de notificación al solicitante mediante Brevo
+                const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+                sendSmtpEmail.subject = `Respuesta a Solicitud #${eco_request_id} - Trainee: ${info.trainee_nombre} ${info.trainee_paterno}`;
+                sendSmtpEmail.htmlContent = `
+                    <h3>Hola ${info.requester_name || 'Solicitante'},</h3>
+                    <p>Se ha emitido una respuesta para el/la trainee <strong>${info.trainee_nombre} ${info.trainee_paterno}</strong> perteneciente a la solicitud #${eco_request_id}:</p>
+                    <p><strong>Estatus:</strong> <span style="color: ${nuevoEstatus === 'APROBADO' ? 'green' : 'red'}; font-weight: bold;">${nuevoEstatus}</span></p>
+                    <p><strong>Motivo / Comentarios:</strong> ${motivoRechazo}</p>
+                    <br>
+                    <p>Atentamente,<br>Sistema Ecosistema ERMITA</p>
+                `;
+                sendSmtpEmail.sender = { name: "Ecosistema ERMITA", email: "tu-correo-verificado@dominio.com" };
+                sendSmtpEmail.to = [{ email: info.requester_email, name: info.requester_name || 'Solicitante' }];
+
+                try {
+                    await apiInstance.sendTransacEmail(sendSmtpEmail);
+                } catch (mailErr) {
+                    console.error('Error enviando correo de notificación al solicitante:', mailErr);
+                }
+            }
+        });
+
+        // E. PUNTO 3: Si el trainee fue APROBADO, notificar automáticamente a los trainers del servicio correspondiente
+        if (accion === 'aprobar') {
+            const sqlTraineeService = 'SELECT service_category, first_name, last_name_paternal FROM trainees WHERE id = ?';
+            
+            pool.query(sqlTraineeService, [trainee_id], (errTr, trRows) => {
+                if (!errTr && trRows.length > 0) {
+                    const traineeData = trRows[0];
+                    const serviceCategory = traineeData.service_category;
+
+                    if (serviceCategory) {
+                        const sqlTrainersServicio = `
+                            SELECT e.email, e.first_name, e.last_name_paternal 
+                            FROM trainers t
+                            JOIN employees e ON t.employee_id = e.id
+                            WHERE e.category = ? AND e.email IS NOT NULL AND TRIM(e.email) != ''
+                        `;
+
+                        pool.query(sqlTrainersServicio, [serviceCategory], async (errTrainers, trainerRows) => {
+                            if (!errTrainers && trainerRows.length > 0) {
+                                for (let trainer of trainerRows) {
+                                    const sendSmtpEmailTrainer = new SibApiV3Sdk.SendSmtpEmail();
+                                    sendSmtpEmailTrainer.subject = `Aviso de Ausencia por Jornada - Trainee: ${traineeData.first_name} ${traineeData.last_name_paternal}`;
+                                    sendSmtpEmailTrainer.htmlContent = `
+                                        <h3>Estimado/a ${trainer.first_name || 'Trainer'},</h3>
+                                        <p>Se le notifica que el/la trainee <strong>${traineeData.first_name} ${traineeData.last_name_paternal}</strong> (perteneciente a su servicio: <em>${serviceCategory}</em>) se ausentará debido a su participación en una jornada autorizada (Solicitud #${eco_request_id}).</p>
+                                        <p>Por favor, tome las previsiones necesarias en las actividades del servicio.</p>
+                                        <br>
+                                        <p>Atentamente,<br>Sistema Ecosistema ERMITA</p>
+                                    `;
+                                    sendSmtpEmailTrainer.sender = { name: "Ecosistema ERMITA", email: "tu-correo-verificado@dominio.com" };
+                                    sendSmtpEmailTrainer.to = [{ email: trainer.email, name: `${trainer.first_name || ''} ${trainer.last_name_paternal || ''}` }];
+
+                                    try {
+                                        await apiInstance.sendTransacEmail(sendSmtpEmailTrainer);
+                                    } catch (mailErr) {
+                                        console.error(`Error enviando correo de ausencia al trainer ${trainer.email}:`, mailErr);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        // Respuesta visual amigable para cuando el formador hace clic en su correo
+        res.send(`
+            <div style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
+                <h2 style="color: ${nuevoEstatus === 'APROBADO' ? '#059669' : '#dc2626'};">¡Respuesta registrada con éxito!</h2>
+                <p>Has marcado al trainee como <strong>${nuevoEstatus}</strong>.</p>
+                <p>La notificación ha sido enviada al solicitante de manera automática. Ya puedes cerrar esta ventana.</p>
+            </div>
+        `);
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 
