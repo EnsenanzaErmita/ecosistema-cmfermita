@@ -1950,11 +1950,12 @@ app.get('/api/ecos/responder', (req, res) => {
 
 
 // Ruta para recibir la evaluación masiva de una solicitud
-app.post('/api/ecos/responder-lote', (req, res) => {
+// Ruta para recibir la evaluación masiva de una solicitud
+app.post('/api/ecos/responder-lote', async (req, res) => {
     const { eco_request_id, evaluaciones } = req.body; 
-    // evaluaciones esperado como array: [{ trainee_id: X, approval_status: 'APROBADO'/'RECHAZADO', reason: '...' }, ...]
 
-    if (!eco_request_id || !evaluations || !Array.isArray(evaluaciones)) {
+    // CORREGIDO: Se valida 'evaluaciones' (en español) tal como llega del body
+    if (!eco_request_id || !evaluaciones || !Array.isArray(evaluaciones)) {
         return res.status(400).json({ success: false, message: 'Datos incompletos para procesar la respuesta.' });
     }
 
@@ -1967,18 +1968,37 @@ app.post('/api/ecos/responder-lote', (req, res) => {
             SET approval_status = ?, reason = ? 
             WHERE eco_request_id = ? AND trainee_id = ?
         `;
-        pool.query(sqlUpdate, [ev.approval_status, ev.reason || null, eco_request_id, ev.trainee_id], (err) => {
+        pool.query(sqlUpdate, [ev.approval_status, ev.reason || null, eco_request_id, ev.trainee_id], async (err) => {
             if (err) {
                 console.error('Error al actualizar detalle:', err);
                 huboError = true;
             }
             procesados++;
+
+            // Cuando terminemos de procesar todos los elementos del lote
             if (procesados === evaluaciones.length) {
                 if (huboError) {
-                    res.status(500).json({ success: false, message: 'Algunas evaluaciones no pudieron guardarse.' });
-                } else {
-                    res.json({ success: true, message: 'Todas las respuestas se han registrado y enviado con éxito.' });
+                    return res.status(500).json({ success: false, message: 'Algunas evaluaciones no pudieron guardarse.' });
                 }
+
+                // Opcional: Revisar si ya no quedan pendientes para marcar la solicitud como COMPLETADO
+                try {
+                    const [detallesPendientes] = await pool.promise().query(
+                        `SELECT COUNT(*) AS total FROM eco_request_details WHERE eco_request_id = ? AND approval_status = 'PENDIENTE'`,
+                        [eco_request_id]
+                    );
+
+                    if (detallesPendientes[0].total === 0) {
+                        await pool.promise().query(
+                            `UPDATE eco_request SET status = 'COMPLETADO' WHERE id = ?`,
+                            [eco_request_id]
+                        );
+                    }
+                } catch (updateErr) {
+                    console.error('Error al actualizar estatus global de la solicitud:', updateErr);
+                }
+
+                res.json({ success: true, message: 'Todas las respuestas se han registrado y enviado con éxito.' });
             }
         });
     });
