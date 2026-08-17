@@ -1705,7 +1705,6 @@ app.post('/api/ecos/request', (req, res) => {
         return res.status(400).json({ success: false, message: 'Faltan datos obligatorios (motivo o trainees seleccionados).' });
     }
 
-    // A. Guardar en la tabla principal (eco_request)
     const sqlSol = 'INSERT INTO eco_request (requester_employee_id, status, created_at) VALUES (?, "PENDIENTE", NOW())';
     
     pool.query(sqlSol, [requester_employee_id || null], (err, resultSol) => {
@@ -1716,76 +1715,84 @@ app.post('/api/ecos/request', (req, res) => {
 
         const ecoRequestId = resultSol.insertId;
 
-        // B. Buscar formadores (trainers) cuyo service en employees sea 'ENSEÑANZA'
         const buscarFormadoresYEnviarCorreo = () => {
-            const sqlFormadores = `
-                SELECT t.*, e.email, e.service, e.first_name, e.last_name_paternal 
-                FROM trainers t
-                JOIN employees e ON t.employee_id = e.id
-                WHERE e.service = 'ENSEÑANZA'
-            `;
+            // Buscamos los datos de los trainees seleccionados (Nombre, Apellidos, etc.)
+            // Asegúrate de que tu tabla de trainees se llame 'trainees' y tenga campos como first_name y last_name_paternal
+            // (Si sus nombres están en otra tabla, ajusta el JOIN según corresponda).
+            const placeholders = trainee_ids.map(() => '?').join(',');
+            const sqlTraineesInfo = `SELECT id, first_name, last_name_paternal, last_name_maternal FROM trainees WHERE id IN (${placeholders})`;
 
-            pool.query(sqlFormadores, async (errForm, formadores) => {
-                if (errForm) {
-                    console.error('Error al buscar formadores de enseñanza:', errForm);
-                    return res.json({ success: true, message: 'Solicitud creada con éxito, pero falló la búsqueda de formadores.' });
-                }
+            pool.query(sqlTraineesInfo, trainee_ids, (errTrainees, traineesInfo) => {
+                const sqlFormadores = `
+                    SELECT t.*, e.email, e.service, e.first_name, e.last_name_paternal 
+                    FROM trainers t
+                    JOIN employees e ON t.employee_id = e.id
+                    WHERE e.service = 'ENSEÑANZA'
+                `;
 
-                // D. Enviar correo a cada formador encontrado usando Brevo con tu configuración oficial
-                for (let formador of formadores) {
-                    if (formador.email) {
-                        const linkResponderBase = `https://ecosistema-cmfermita.onrender.com/api/ecos/responder`;
+                pool.query(sqlFormadores, async (errForm, formadores) => {
+                    if (errForm) {
+                        console.error('Error al buscar formadores de enseñanza:', errForm);
+                        return res.json({ success: true, message: 'Solicitud creada con éxito, pero falló la búsqueda de formadores.' });
+                    }
 
-                        let htmlTraineesLinks = `<ul>`;
-                        trainee_ids.forEach(tId => {
-                            htmlTraineesLinks += `
-                                <li>
-                                    Trainee ID: ${tId} - 
-                                    <a href="${linkResponderBase}?eco_request_id=${ecoRequestId}&trainee_id=${tId}&accion=aprobar" style="color: green; font-weight: bold;">[Aprobar]</a> | 
-                                    <a href="${linkResponderBase}?eco_request_id=${ecoRequestId}&trainee_id=${tId}&accion=rechazar" style="color: red; font-weight: bold;">[Rechazar]</a>
-                                </li>`;
-                        });
-                        htmlTraineesLinks += `</ul>`;
+                    for (let formador of formadores) {
+                        if (formador.email) {
+                            // Enlace a una vista o interfaz donde evaluarán en lote
+                            const linkEvaluacion = `https://ecosistema-cmfermita.onrender.com/evaluar-solicitud.html?eco_request_id=${ecoRequestId}`;
 
-                        // Configuración idéntica a la que ya te funciona con Brevo
-                        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-                        sendSmtpEmail.subject = `🏛️ Nueva Solicitud de Personal para Jornadas (#${ecoRequestId}) - C.M.F Ermita`;
-                        sendSmtpEmail.htmlContent = `
-                            <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
-                                <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
-                                    <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
-                                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad</p>
+                            let htmlTraineesList = `<ul style="padding-left: 20px;">`;
+                            traineesInfo.forEach(tr => {
+                                const nombreCompleto = `${tr.first_name || ''} ${tr.last_name_paternal || ''} ${tr.last_name_maternal || ''}`.trim();
+                                htmlTraineesList += `<li style="margin-bottom: 5px;"><strong>${nombreCompleto || 'Trainee ID: ' + tr.id}</strong></li>`;
+                            });
+                            htmlTraineesList += `</ul>`;
+
+                            const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+                            sendSmtpEmail.subject = `🏛️ Solicitud de Personal en Formación (#${ecoRequestId}) - C.M.F Ermita`;
+                            sendSmtpEmail.htmlContent = `
+                                <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
+                                    <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
+                                        <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
+                                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad</p>
+                                    </div>
+                                    <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
+                                        <p>Estimado/a <strong>${formador.first_name || 'Formador'}</strong>:</p>
+                                        <p>Se ha generado una nueva solicitud de personal que requiere su evaluación conjunta:</p>
+                                        <p><strong>Motivo de la solicitud:</strong> ${motivo}</p>
+                                        <p><strong>Personal en formación incluido:</strong></p>
+                                        ${htmlTraineesList}
+                                        <p>Para calificar a cada integrante, registrar sus motivos e **enviar la respuesta completa en un solo envío**, por favor acceda al siguiente enlace:</p>
+                                        
+                                        <div style="text-align: center; margin: 25px 0;">
+                                            <a href="${linkEvaluacion}" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.95em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                                Evaluar y Enviar Respuestas
+                                            </a>
+                                        </div>
+
+                                        <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
+                                            Atentamente,<br>Sistema Ecosistema ERMITA
+                                        </p>
+                                    </div>
                                 </div>
-                                <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
-                                    <p>Estimado/a <strong>${formador.first_name || 'Formador'}</strong>:</p>
-                                    <p>Se ha generado una nueva solicitud de personal que requiere su revisión:</p>
-                                    <p><strong>Motivo:</strong> ${motivo}</p>
-                                    <p>Por favor, evalúe de forma individual a los trainees seleccionados haciendo clic en su opción correspondiente:</p>
-                                    ${htmlTraineesLinks}
-                                    <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
-                                        Atentamente,<br>Sistema Ecosistema ERMITA
-                                    </p>
-                                </div>
-                            </div>
-                        `;
-                        sendSmtpEmail.sender = { "name": "C.M.F. ERMITA - ISSSTE", "email": "cmfermitacalidad@gmail.com" };
-                        sendSmtpEmail.to = [{ email: formador.email, name: `${formador.first_name || ''} ${formador.last_name_paternal || ''}` }];
+                            `;
+                            sendSmtpEmail.sender = { "name": "C.M.F. ERMITA - ISSSTE", "email": "cmfermitacalidad@gmail.com" };
+                            sendSmtpEmail.to = [{ email: formador.email, name: `${formador.first_name || ''} ${formador.last_name_paternal || ''}` }];
 
-                        try {
-                            await apiInstance.sendTransacEmail(sendSmtpEmail);
-                        } catch (mailErr) {
-                            console.error(`Error enviando correo a formador ${formador.email}:`, mailErr);
+                            try {
+                                await apiInstance.sendTransacEmail(sendSmtpEmail);
+                            } catch (mailErr) {
+                                console.error(`Error enviando correo a formador ${formador.email}:`, mailErr);
+                            }
                         }
                     }
-                }
 
-                res.json({ success: true, message: 'Solicitud creada correctamente y correos enviados a formadores de enseñanza.' });
+                    res.json({ success: true, message: 'Solicitud creada correctamente y correos enviados a formadores.' });
+                });
             });
         };
 
-        // C. Guardar el detalle de cada trainee seleccionado en eco_request_details
         let traineesProcesados = 0;
-        
         const registrarDetallesYContinuar = () => {
             trainee_ids.forEach((tId) => {
                 const sqlDetalle = 'INSERT INTO eco_request_details (eco_request_id, trainee_id, approval_status, reason) VALUES (?, ?, "PENDIENTE", NULL)';
@@ -1800,12 +1807,9 @@ app.post('/api/ecos/request', (req, res) => {
             });
         };
 
-        // Ejecutamos el registro de detalles
         registrarDetallesYContinuar();
     });
 });
-
-
 
 
 
@@ -1946,6 +1950,44 @@ app.get('/api/ecos/responder', (req, res) => {
 
 
 
+
+
+
+
+// Ruta para recibir la evaluación masiva de una solicitud
+app.post('/api/ecos/responder-lote', (req, res) => {
+    const { eco_request_id, evaluaciones } = req.body; 
+    // evaluaciones esperado como array: [{ trainee_id: X, approval_status: 'APROBADO'/'RECHAZADO', reason: '...' }, ...]
+
+    if (!eco_request_id || !evaluations || !Array.isArray(evaluaciones)) {
+        return res.status(400).json({ success: false, message: 'Datos incompletos para procesar la respuesta.' });
+    }
+
+    let procesados = 0;
+    let huboError = false;
+
+    evaluaciones.forEach(ev => {
+        const sqlUpdate = `
+            UPDATE eco_request_details 
+            SET approval_status = ?, reason = ? 
+            WHERE eco_request_id = ? AND trainee_id = ?
+        `;
+        pool.query(sqlUpdate, [ev.approval_status, ev.reason || null, eco_request_id, ev.trainee_id], (err) => {
+            if (err) {
+                console.error('Error al actualizar detalle:', err);
+                huboError = true;
+            }
+            procesados++;
+            if (procesados === evaluaciones.length) {
+                if (huboError) {
+                    res.status(500).json({ success: false, message: 'Algunas evaluaciones no pudieron guardarse.' });
+                } else {
+                    res.json({ success: true, message: 'Todas las respuestas se han registrado y enviado con éxito.' });
+                }
+            }
+        });
+    });
+});
 
 
 
