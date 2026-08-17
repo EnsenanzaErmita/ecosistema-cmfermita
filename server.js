@@ -1996,6 +1996,159 @@ app.post('/api/ecos/responder-lote', (req, res) => {
 
 
 
+// Ruta para mostrar la interfaz de evaluación en el navegador
+app.get('/evaluar-solicitud.html', (req, res) => {
+    const ecoRequestId = req.query.eco_request_id;
+
+    if (!ecoRequestId) {
+        return res.status(400).send('<h3>Error: Enlace de solicitud no válido o incompleto.</h3>');
+    }
+
+    // Consultar la solicitud y los trainees asociados
+    const sql = `
+        T.id AS trainee_id, T.first_name, T.last_name_paternal, T.last_name_maternal,
+        ER.id AS eco_request_id, ER.motivo
+        FROM eco_request_details ERD
+        JOIN trainees T ON ERD.trainee_id = T.id
+        JOIN eco_request ER ON ERD.eco_request_id = ER.id
+        WHERE ERD.eco_request_id = ?
+    `;
+
+    pool.query(sql, [ecoRequestId], (err, results) => {
+        if (err || !results || results.length === 0) {
+            return res.status(404).send('<h3>Solicitud no encontrada o ya procesada.</h3>');
+        }
+
+        const motivo = results[0].motivo || 'Sin especificar';
+
+        // Construir dinámicamente las tarjetas de evaluación para cada trainee
+        let traineesHtml = '';
+        results.forEach(row => {
+            const nombreCompleto = `${row.first_name || ''} ${row.last_name_paternal || ''} ${row.last_name_maternal || ''}`.trim();
+            traineesHtml += `
+                <div style="background: white; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <h3 style="margin: 0 0 10px 0; color: #611232;">👤 ${nombreCompleto}</h3>
+                    <input type="hidden" class="trainee-id" value="${row.trainee_id}">
+                    
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-weight: bold; font-size: 0.9em; display:block; margin-bottom: 5px;">Estatus de Evaluación:</label>
+                        <select class="approval-status" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            <option value="APROBADO">Aprobar</option>
+                            <option value="RECHAZADO">Rechazar</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="font-weight: bold; font-size: 0.9em; display:block; margin-bottom: 5px;">Motivo / Comentarios (Opcional):</label>
+                        <textarea class="reason-input" rows="2" placeholder="Escriba el motivo..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;"></textarea>
+                    </div>
+                </div>
+            `;
+        });
+
+        // HTML completo de la página de respuesta
+        const htmlPage = `
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Evaluación de Solicitud #${ecoRequestId} - Ecosistema Ermita</title>
+                <style>
+                    body { font-family: sans-serif; background-color: #fdf2f4; margin: 0; padding: 20px; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
+                    .header { background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d; }
+                    .content { padding: 25px; }
+                    .btn-submit { background-color: #611232; color: white; border: none; padding: 12px 20px; width: 100%; font-size: 1em; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; }
+                    .btn-submit:hover { background-color: #4a0d26; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Evaluación de Solicitud de Personal (#${ecoRequestId})</p>
+                    </div>
+                    <div class="content">
+                        <p><strong>Motivo de la Solicitud:</strong> ${motivo}</p>
+                        <p style="font-size: 0.9em; color: #555; margin-bottom: 20px;">Por favor, califique a cada miembro del personal en formación y envíe su respuesta conjunta:</p>
+                        
+                        <div id="evaluaciones-form">
+                            ${traineesHtml}
+                            <button type="button" class="btn-submit" onclick="enviarEvaluacionLote(${ecoRequestId})">ENVIAR RESPUESTA COMPLETA</button>
+                        </div>
+                        <div id="resultado-mensaje" style="margin-top: 20px; text-align: center; font-weight: bold;"></div>
+                    </div>
+                </div>
+
+                <script>
+                    function enviarEvaluacionLote(ecoRequestId) {
+                        const tarjetas = document.querySelectorAll('#evaluaciones-form > div');
+                        const evaluaciones = [];
+
+                        tarjetas.forEach(tarjeta => {
+                            const trainee_id = tarjeta.querySelector('.trainee-id').value;
+                            const approval_status = tarjeta.querySelector('.approval-status').value;
+                            const reason = tarjeta.querySelector('.reason-input').value;
+
+                            evaluaciones.push({ trainee_id, approval_status, reason });
+                        });
+
+                        const btn = document.querySelector('.btn-submit');
+                        btn.disabled = true;
+                        btn.innerText = 'Enviando...';
+
+                        fetch('/api/ecos/responder-lote', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: json_encode_seguro({ eco_request_id: ecoRequestId, evaluaciones })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            const msgDiv = document.getElementById('resultado-mensaje');
+                            if (data.success) {
+                                msgDiv.style.color = 'green';
+                                msgDiv.innerText = '¡Respuesta enviada con éxito! Ya puede cerrar esta ventana.';
+                                document.getElementById('evaluaciones-form').style.display = 'none';
+                            } else {
+                                msgDiv.style.color = 'red';
+                                msgDiv.innerText = 'Error: ' + (data.message || 'No se pudo guardar');
+                                btn.disabled = false;
+                                btn.innerText = 'ENVIAR RESPUESTA COMPLETA';
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            document.getElementById('resultado-mensaje').style.color = 'red';
+                            document.getElementById('resultado-mensaje').innerText = 'Error de conexión con el servidor.';
+                            btn.disabled = false;
+                            btn.innerText = 'ENVIAR RESPUESTA COMPLETA';
+                        });
+                    }
+
+                    function json_encode_seguro(obj) {
+                        return JSON.stringify(obj);
+                    }
+                </script>
+            </body>
+            </html>
+        `;
+
+        res.send(htmlPage);
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
