@@ -1958,6 +1958,7 @@ app.get('/api/ecos/responder', (req, res) => {
 // Ruta para recibir la evaluación masiva y notificar tanto al solicitante (por RFC en employees) como a los formadores por categoría
 // Ruta para recibir la evaluación masiva con la lógica exacta de solicitante y trainers por categoría
 // Ruta para recibir la evaluación masiva con la relación exacta por requester_employee_id y trainers por categoría
+// Ruta para recibir la evaluación masiva con la lógica exacta de filtrado de trainers por tablas intermedias
 app.post('/api/ecos/responder-lote', async (req, res) => {
     const { eco_request_id, evaluaciones } = req.body; 
 
@@ -2009,7 +2010,7 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
         );
 
         const requesterEmail = requestInfo.length > 0 ? requestInfo[0].requester_email : null;
-        console.log(`👤 Correo del empleado solicitante (vía requester_employee_id):`, requesterEmail || 'No encontrado');
+        console.log(`👤 Correo del empleado solicitante:`, requesterEmail || 'No encontrado');
 
         // 4. RECUPERAR TRAINEES Y SUS DETALLES
         const [traineesDetails] = await pool.promise().query(
@@ -2034,22 +2035,25 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
 
         console.log(`📂 Categorías detectadas:`, Object.keys(traineesPorCategoria));
 
-        // 6. PROCESAR CORREOS POR CATEGORÍA
+        // 6. PROCESAR CORREOS POR CATEGORÍA CRUZANDO employees Y trainers
         for (const categoria in traineesPorCategoria) {
             const listaTrainees = traineesPorCategoria[categoria];
             console.log(`\n--- Procesando categoría: [${categoria}] ---`);
 
-            // Buscar en employees los registros que coincidan con la categoría Y que estén marcados como trainers
-            const [trainers] = await pool.promise().query(
-                `SELECT email FROM employees WHERE category = ? AND (is_trainer = 1 OR is_trainer = '1' OR is_trainer = true)`,
-                [categoria]
-            );
+            // Consulta que cruza employees con trainers basándose en la categoría y el id del empleado
+            const sqlTrainers = `
+                SELECT DISTINCT e.email 
+                FROM employees e
+                JOIN trainers tr ON e.id = tr.employee_id
+                WHERE e.category = ?
+            `;
+            const [trainers] = await pool.promise().query(sqlTrainers, [categoria]);
 
-            console.log(`👨‍🏫 Trainers encontrados en 'employees' para [${categoria}]:`, trainers);
+            console.log(`👨‍🏫 Trainers filtrados para [${categoria}]:`, trainers);
 
             const trainersEmails = trainers.map(f => f.email).filter(Boolean);
 
-            // Destinatarios de esta categoría: Los trainers de esa categoría + El solicitante original
+            // Destinatarios de esta categoría: Los trainers validados de esa categoría + El solicitante original
             const destinatariosCategoria = [...trainersEmails];
             if (requesterEmail && !destinatariosCategoria.includes(requesterEmail)) {
                 destinatariosCategoria.push(requesterEmail);
@@ -2096,12 +2100,12 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
                     console.error(`❌ ERROR al enviar correo Brevo para [${categoria}]:`, mailErr);
                 }
             } else {
-                console.log(`⚠️ No se encontraron trainers ni destinatarios válidos para la categoría [${categoria}].`);
+                console.log(`⚠️ No se encontraron trainers válidos en la tabla trainers para la categoría [${categoria}].`);
             }
         }
         console.log(`----------------------------------------\n`);
 
-        res.json({ success: true, message: 'Respuestas guardadas y correos enviados según las reglas de negocio.' });
+        res.json({ success: true, message: 'Respuestas guardadas y correos enviados exitosamente mediante la tabla de trainers.' });
 
     } catch (err) {
         console.error('❌ Error crítico general en el endpoint responder-lote:', err);
