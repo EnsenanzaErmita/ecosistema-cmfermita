@@ -1706,7 +1706,6 @@ app.post('/api/ecos/request', (req, res) => {
     }
 
     // A. Guardar en la tabla principal (eco_request)
-    // Nota: 'requester_employee_id' se guarda si lo mandas desde el frontend, de lo contrario se puede omitir o mandar NULL
     const sqlSol = 'INSERT INTO eco_request (requester_employee_id, status, created_at) VALUES (?, "PENDIENTE", NOW())';
     
     pool.query(sqlSol, [requester_employee_id || null], (err, resultSol) => {
@@ -1717,7 +1716,74 @@ app.post('/api/ecos/request', (req, res) => {
 
         const ecoRequestId = resultSol.insertId;
 
-        // B. Guardar el detalle de cada trainee seleccionado en eco_request_details
+        // B. Buscar formadores (trainers) cuyo service en employees sea 'ENSEÑANZA'
+        const buscarFormadoresYEnviarCorreo = () => {
+            const sqlFormadores = `
+                SELECT t.*, e.email, e.service, e.first_name, e.last_name_paternal 
+                FROM trainers t
+                JOIN employees e ON t.employee_id = e.id
+                WHERE e.service = 'ENSEÑANZA'
+            `;
+
+            pool.query(sqlFormadores, async (errForm, formadores) => {
+                if (errForm) {
+                    console.error('Error al buscar formadores de enseñanza:', errForm);
+                    return res.json({ success: true, message: 'Solicitud creada con éxito, pero falló la búsqueda de formadores.' });
+                }
+
+                // D. Enviar correo a cada formador encontrado usando Brevo con tu configuración oficial
+                for (let formador of formadores) {
+                    if (formador.email) {
+                        const linkResponderBase = `https://ecosistema-cmfermita.onrender.com/api/ecos/responder`;
+
+                        let htmlTraineesLinks = `<ul>`;
+                        trainee_ids.forEach(tId => {
+                            htmlTraineesLinks += `
+                                <li>
+                                    Trainee ID: ${tId} - 
+                                    <a href="${linkResponderBase}?eco_request_id=${ecoRequestId}&trainee_id=${tId}&accion=aprobar" style="color: green; font-weight: bold;">[Aprobar]</a> | 
+                                    <a href="${linkResponderBase}?eco_request_id=${ecoRequestId}&trainee_id=${tId}&accion=rechazar" style="color: red; font-weight: bold;">[Rechazar]</a>
+                                </li>`;
+                        });
+                        htmlTraineesLinks += `</ul>`;
+
+                        // Configuración idéntica a la que ya te funciona con Brevo
+                        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+                        sendSmtpEmail.subject = `🏛️ Nueva Solicitud de Personal para Jornadas (#${ecoRequestId}) - C.M.F Ermita`;
+                        sendSmtpEmail.htmlContent = `
+                            <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
+                                <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
+                                    <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
+                                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Coordinación de Enseñanza y Calidad</p>
+                                </div>
+                                <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
+                                    <p>Estimado/a <strong>${formador.first_name || 'Formador'}</strong>:</p>
+                                    <p>Se ha generado una nueva solicitud de personal que requiere su revisión:</p>
+                                    <p><strong>Motivo:</strong> ${motivo}</p>
+                                    <p>Por favor, evalúe de forma individual a los trainees seleccionados haciendo clic en su opción correspondiente:</p>
+                                    ${htmlTraineesLinks}
+                                    <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
+                                        Atentamente,<br>Sistema Ecosistema ERMITA
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                        sendSmtpEmail.sender = { "name": "C.M.F. ERMITA - ISSSTE", "email": "cmfermitacalidad@gmail.com" };
+                        sendSmtpEmail.to = [{ email: formador.email, name: `${formador.first_name || ''} ${formador.last_name_paternal || ''}` }];
+
+                        try {
+                            await apiInstance.sendTransacEmail(sendSmtpEmail);
+                        } catch (mailErr) {
+                            console.error(`Error enviando correo a formador ${formador.email}:`, mailErr);
+                        }
+                    }
+                }
+
+                res.json({ success: true, message: 'Solicitud creada correctamente y correos enviados a formadores de enseñanza.' });
+            });
+        };
+
+        // C. Guardar el detalle de cada trainee seleccionado en eco_request_details
         let traineesProcesados = 0;
         
         const registrarDetallesYContinuar = () => {
@@ -1734,63 +1800,7 @@ app.post('/api/ecos/request', (req, res) => {
             });
         };
 
-        // C. Buscar formadores (trainers) cuyo service en employees sea 'ENSEÑANZA'
-        const buscarFormadoresYEnviarCorreo = () => {
-            const sqlFormadores = `
-                SELECT t.*, e.email, e.service, e.first_name, e.last_name_paternal 
-                FROM trainers t
-                JOIN employees e ON t.employee_id = e.id
-                WHERE e.service = 'ENSEÑANZA'
-            `;
-
-            pool.query(sqlFormadores, async (errForm, formadores) => {
-                if (errForm) {
-                    console.error('Error al buscar formadores de enseñanza:', errForm);
-                    return res.json({ success: true, message: 'Solicitud creada con éxito, pero falló la búsqueda de formadores.' });
-                }
-
-                // D. Enviar correo a cada formador encontrado usando Brevo
-                for (let formador of formadores) {
-                    if (formador.email) {
-                        const linkResponderBase = `https://tu-backend-en-render.onrender.com/api/ecos/responder`;
-
-                        let htmlTraineesLinks = `<ul>`;
-                        trainee_ids.forEach(tId => {
-                            htmlTraineesLinks += `
-                                <li>
-                                    Trainee ID: ${tId} - 
-                                    <a href="${linkResponderBase}?eco_request_id=${ecoRequestId}&trainee_id=${tId}&accion=aprobar" style="color: green; font-weight: bold;">[Aprobar]</a> | 
-                                    <a href="${linkResponderBase}?eco_request_id=${ecoRequestId}&trainee_id=${tId}&accion=rechazar" style="color: red; font-weight: bold;">[Rechazar]</a>
-                                </li>`;
-                        });
-                        htmlTraineesLinks += `</ul>`;
-
-                        // Configuración del envío con la API oficial de Brevo
-                        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-                        sendSmtpEmail.subject = `Nueva Solicitud de Personal para Jornadas (#${ecoRequestId})`;
-                        sendSmtpEmail.htmlContent = `
-                            <h3>Estimado/a ${formador.first_name || 'Formador'},</h3>
-                            <p>Se ha generado una nueva solicitud de personal que requiere su revisión:</p>
-                            <p><strong>Motivo:</strong> ${motivo}</p>
-                            <p>Por favor, evalúe de forma individual a los trainees seleccionados:</p>
-                            ${htmlTraineesLinks}
-                            <p>Atentamente,<br>Sistema Ecosistema ERMITA</p>
-                        `;
-                        sendSmtpEmail.sender = { name: "Ecosistema ERMITA", email: "tu-correo-verificado@dominio.com" };
-                        sendSmtpEmail.to = [{ email: formador.email, name: `${formador.first_name || ''} ${formador.last_name_paternal || ''}` }];
-
-                        try {
-                            await apiInstance.sendTransacEmail(sendSmtpEmail);
-                        } catch (mailErr) {
-                            console.error(`Error enviando correo a formador ${formador.email}:`, mailErr);
-                        }
-                    }
-                }
-
-                res.json({ success: true, message: 'Solicitud creada correctamente y correos enviados a formadores de enseñanza.' });
-            });
-        };
-
+        // Ejecutamos el registro de detalles
         registrarDetallesYContinuar();
     });
 });
