@@ -2197,7 +2197,7 @@ app.get('/evaluar-solicitud.html', (req, res) => {
                         <p style="background: #f9fafb; padding: 12px; border-left: 4px solid #b38e5d; margin-bottom: 20px;">
                             <strong>Motivo de la Solicitud:</strong><br>${requestMotivo}
                         </p>
-                        <p style="font-size: 0.9em; color: #555; margin-bottom: 20px;">Por favor, califique a cada miembro del personal en formación, asigne su motivo correspondiente y envíe su respuesta conjunta:</p>
+                        <p style="font-size: 0.9em; color: #555; margin-bottom: 20px;">Por favor, evalúe la solicitud del personal en formación, asigne un motivo correspondiente y envíe su respuesta:</p>
                         
                         <div id="evaluaciones-form">
                             ${traineesHtml}
@@ -2240,7 +2240,7 @@ app.get('/evaluar-solicitud.html', (req, res) => {
                                 msgDiv.style.color = 'red';
                                 msgDiv.innerText = 'Error: ' + (data.message || 'No se pudo guardar');
                                 btn.disabled = false;
-                                btn.innerText = 'ENVIAR RESPUESTA COMPLETA';
+                                btn.innerText = 'ENVIAR RESPUESTA';
                             }
                         })
                         .catch(err => {
