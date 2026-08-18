@@ -2079,10 +2079,10 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
                     <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
                         <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
                             <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
-                            <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Reporte de Evaluación - Área: ${categoria}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Agenda de Personal en Formación - Servicio: ${categoria}</p>
                         </div>
                         <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
-                            <p>Se ha completado la evaluación para el personal del área de <strong>${categoria}</strong> vinculados a la solicitud #${eco_request_id}:</p>
+                            <p>Se ha completado la solicitud para el personal en formación del servicio de <strong>${categoria}</strong> vinculados a la solicitud #${eco_request_id}:</p>
                             ${htmlTraineesList}
                             <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
                                 Atentamente,<br>Oficina de Enseñanza y Calidad<br>&copy; 2026 Todos los derechos reservados<br>VIPERMÍSTICO - ALEJANDRO GONZÁLEZ ZAMUDIO
