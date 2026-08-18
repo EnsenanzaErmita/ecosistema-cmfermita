@@ -317,27 +317,25 @@
                 <p class="ecos-panel-subtitle" style="margin: 5px 0 0 0;">Módulo central de gestión y control operativo del ecosistema.</p>
             </div>
             
-<button onclick="salirAlMenu()" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-admin)'" onmouseout="this.style.background='#98989a'">
-    &larr; Volver al Menú Principal
-</button>
-
+            <button onclick="salirAlMenu()" style="background: #98989a; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='var(--azul-admin)'" onmouseout="this.style.background='#98989a'">
+                &larr; Volver al Menú Principal
+            </button>
         </div>
 
         <div class="ecos-subgrid">
-<div class="card-ecos-sub" onclick="cambiarVistaEcos('solicitud')" style="cursor: pointer;">
-    <h4>Solicitud de Personal para Jornadas</h4>
-    <p>Gestiona, crea y consulta el historial de solicitudes de personal en formación asignado a jornadas.</p>
-    <button class="btn-ecos-action">Acceder al Módulo</button>
-</div>
+            <div class="card-ecos-sub" onclick="cambiarVistaEcos('solicitud')" style="cursor: pointer;">
+                <h4>Solicitud de Personal para Jornadas</h4>
+                <p>Gestiona, crea y consulta el historial de solicitudes de personal en formación asignado a jornadas.</p>
+                <button class="btn-ecos-action">Acceder al Módulo</button>
+            </div>
         </div>
     </div>
 </div>
 
 <div id="panel-solicitud-personal" class="view" style="display: none;">
-
-<button type="button" onclick="cambiarVistaEcos('general')" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">
-    &larr; Volver al Panel General ECOS
-</button>
+    <button type="button" onclick="cambiarVistaEcos('general')" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">
+        &larr; Volver al Panel General ECOS
+    </button>
 
     <div class="ecos-panel-container">
         <h3 class="ecos-panel-title">Solicitud de Personal para jornadas</h3>
@@ -359,10 +357,33 @@
     </div>
 </div>
 
+<div id="pantalla-historial" class="view" style="display: none;">
+    <button type="button" onclick="cerrarHistorialEcos()" style="background: #e2e8f0; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 15px;">
+        &larr; Volver al Panel de Solicitudes
+    </button>
 
+    <div class="ecos-panel-container" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <h3 class="ecos-panel-title" style="color: #0284c7; margin-top: 0;">Historial General de Solicitudes</h3>
+        <p class="ecos-panel-subtitle">Consulta todas las solicitudes registradas y su estatus de seguimiento actual.</p>
+        
+        <div style="overflow-x: auto; margin-top: 20px;">
+            <table style="width: 100%; border-collapse: collapse; background: white;">
+                <thead>
+                    <tr style="background: #f8fafc; text-align: left; border-bottom: 2px solid #e2e8f0; color: #475569;">
+                        <th style="padding: 12px;">Folio</th>
+                        <th style="padding: 12px;">Solicitante</th>
+                        <th style="padding: 12px;">Estatus</th>
+                        <th style="padding: 12px;">Fecha</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-historial-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<div id="modal-solicitud" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+</div> <div id="modal-solicitud" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
     <div class="modal-content" style="background-color: #fff; margin: 5% auto; padding: 25px; border-radius: 10px; width: 60%; max-width: 700px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
         <span class="close" onclick="cerrarModalSolicitud()" style="float: right; font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa;">&times;</span>
         
@@ -386,6 +407,8 @@
         </div>
     </div>
 </div>
+
+
 
 <footer>
     <p>&copy; 2026 Todos los derechos reservados</p>
@@ -601,6 +624,82 @@ function abrirHistorialEcos() {
         .catch(err => {
             console.error("❌ Error al cargar el historial:", err);
         });
+}
+
+
+
+
+function abrirHistorialEcos() {
+    console.log("📂 Abriendo módulo de Historial ECOS...");
+
+    // 1. Ocultar el panel o sección principal de captura/creación de solicitudes
+    const panelPrincipal = document.getElementById('panel-captura-solicitud'); // Cambia por el ID real de tu panel principal si es diferente
+    if (panelPrincipal) {
+        panelPrincipal.style.display = 'none';
+    }
+
+    // 2. Mostrar la pantalla independiente del historial
+    const pantallaHistorial = document.getElementById('pantalla-historial'); // Cambia por el ID real del contenedor de tu historial
+    if (pantallaHistorial) {
+        pantallaHistorial.style.display = 'block';
+    }
+
+    // 3. Consultar los datos al servidor y pintarlos en la tabla
+    fetch('/api/ecos/historial-solicitudes')
+        .then(response => response.json())
+        .then(data => {
+            console.log("📊 Datos de historial recibidos:", data);
+            
+            if (data.success && data.data) {
+                const tbody = document.getElementById('tabla-historial-body'); // El ID del <tbody> donde se enlistarán los registros
+                if (!tbody) {
+                    console.warn("⚠️ No se encontró el elemento 'tabla-historial-body' en el HTML.");
+                    return;
+                }
+
+                tbody.innerHTML = ''; // Limpiar la tabla antes de rellenar
+
+                if (data.data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px; color: #666;">No hay solicitudes registradas todavía.</td></tr>`;
+                    return;
+                }
+
+                // Recorrer los registros y crear las filas visuales
+                data.data.forEach(solicitud => {
+                    const nombreSolicitante = `${solicitud.req_name || 'Desconocido'} ${solicitud.req_lastname || ''}`.trim();
+                    const fechaFormateada = new Date(solicitud.created_at).toLocaleDateString('es-MX', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;"><strong>#${solicitud.id}</strong></td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${nombreSolicitante}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                            <span style="padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold; background: ${solicitud.status === 'COMPLETADO' ? '#d1fae5' : '#fef3c7'}; color: ${solicitud.status === 'COMPLETADO' ? '#065f46' : '#92400e'};">
+                                ${solicitud.status}
+                            </span>
+                        </td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${fechaFormateada}</td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            }
+        })
+        .catch(err => {
+            console.error("❌ Error al cargar el historial:", err);
+        });
+}
+
+// Opcional: Una función para regresar al panel principal cuando el usuario quiera cerrar o salir del historial
+function cerrarHistorialEcos() {
+    const pantallaHistorial = document.getElementById('pantalla-historial');
+    if (pantallaHistorial) pantallaHistorial.style.display = 'none';
+
+    const panelPrincipal = document.getElementById('panel-captura-solicitud');
+    if (panelPrincipal) panelPrincipal.style.display = 'block';
 }
 
 
