@@ -629,42 +629,44 @@ function abrirHistorialEcos() {
 
 
 
+
+
+
+
+
+
 function abrirHistorialEcos() {
     console.log("📂 Abriendo módulo de Historial ECOS...");
 
-    // 1. Ocultar el panel o sección principal de captura/creación de solicitudes
-    const panelPrincipal = document.getElementById('panel-captura-solicitud'); // Cambia por el ID real de tu panel principal si es diferente
-    if (panelPrincipal) {
-        panelPrincipal.style.display = 'none';
+    // 1. Ocultar por completo el panel de solicitudes de personal
+    const panelSolicitud = document.getElementById('panel-solicitud-personal');
+    if (panelSolicitud) {
+        panelSolicitud.style.display = 'none';
     }
 
-    // 2. Mostrar la pantalla independiente del historial
-    const pantallaHistorial = document.getElementById('pantalla-historial'); // Cambia por el ID real del contenedor de tu historial
+    // 2. Mostrar la pantalla independiente de historial
+    const pantallaHistorial = document.getElementById('pantalla-historial');
     if (pantallaHistorial) {
-        pantallaHistorial.style.display = 'block';
+        pantallaHistorial.style.display = 'block'; // Ocupará el espacio limpio
     }
 
-    // 3. Consultar los datos al servidor y pintarlos en la tabla
+    // 3. Petición al servidor para llenar la tabla
     fetch('/api/ecos/historial-solicitudes')
         .then(response => response.json())
         .then(data => {
             console.log("📊 Datos de historial recibidos:", data);
             
             if (data.success && data.data) {
-                const tbody = document.getElementById('tabla-historial-body'); // El ID del <tbody> donde se enlistarán los registros
-                if (!tbody) {
-                    console.warn("⚠️ No se encontró el elemento 'tabla-historial-body' en el HTML.");
-                    return;
-                }
+                const tbody = document.getElementById('tabla-historial-body');
+                if (!tbody) return;
 
-                tbody.innerHTML = ''; // Limpiar la tabla antes de rellenar
+                tbody.innerHTML = ''; // Limpiar filas anteriores
 
                 if (data.data.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px; color: #666;">No hay solicitudes registradas todavía.</td></tr>`;
                     return;
                 }
 
-                // Recorrer los registros y crear las filas visuales
                 data.data.forEach(solicitud => {
                     const nombreSolicitante = `${solicitud.req_name || 'Desconocido'} ${solicitud.req_lastname || ''}`.trim();
                     const fechaFormateada = new Date(solicitud.created_at).toLocaleDateString('es-MX', {
@@ -675,32 +677,42 @@ function abrirHistorialEcos() {
 
                     const fila = document.createElement('tr');
                     fila.innerHTML = `
-                        <td style="padding: 12px; border-bottom: 1px solid #eee;"><strong>#${solicitud.id}</strong></td>
-                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${nombreSolicitante}</td>
-                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;"><strong>#${solicitud.id}</strong></td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${nombreSolicitante}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
                             <span style="padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold; background: ${solicitud.status === 'COMPLETADO' ? '#d1fae5' : '#fef3c7'}; color: ${solicitud.status === 'COMPLETADO' ? '#065f46' : '#92400e'};">
                                 ${solicitud.status}
                             </span>
                         </td>
-                        <td style="padding: 12px; border-bottom: 1px solid #eee;">${fechaFormateada}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${fechaFormateada}</td>
                     `;
                     tbody.appendChild(fila);
                 });
             }
         })
-        .catch(err => {
-            console.error("❌ Error al cargar el historial:", err);
-        });
+        .catch(err => console.error("❌ Error al cargar el historial:", err));
 }
 
-// Opcional: Una función para regresar al panel principal cuando el usuario quiera cerrar o salir del historial
+
+
+
+
+
 function cerrarHistorialEcos() {
+    // Ocultar pantalla de historial
     const pantallaHistorial = document.getElementById('pantalla-historial');
-    if (pantallaHistorial) pantallaHistorial.style.display = 'none';
+    if (pantallaHistorial) {
+        pantallaHistorial.style.display = 'none';
+    }
 
-    const panelPrincipal = document.getElementById('panel-captura-solicitud');
-    if (panelPrincipal) panelPrincipal.style.display = 'block';
+    // Mostrar de nuevo el panel de solicitudes
+    const panelSolicitud = document.getElementById('panel-solicitud-personal');
+    if (panelSolicitud) {
+        panelSolicitud.style.display = 'block';
+    }
 }
+
+
 
 
 
