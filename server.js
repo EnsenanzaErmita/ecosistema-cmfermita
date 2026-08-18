@@ -1783,7 +1783,7 @@ app.post('/api/ecos/request', (req, res) => {
                                         </div>
 
                                         <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
-                                            Atentamente,<br>Sistema Ecosistema ERMITA
+                                            Atentamente,<br>Oficina de Enseñanza y Calidad<br>&copy; 2026 Todos los derechos reservados<br>VIPERMÍSTICO
                                         </p>
                                     </div>
                                 </div>
