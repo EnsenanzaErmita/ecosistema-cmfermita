@@ -357,10 +357,6 @@
             </div>
         </div>
     </div>
-
-    <div id="historial-solicitudes" style="margin-top: 20px;">
-        <p style="color: #64748b; text-align: center;">Cargando historial...</p>
-    </div>
 </div>
 
 
@@ -577,6 +573,43 @@ async function cargarTraineesDisponibles() {
             contenedor.innerHTML = '<p style="color: red; text-align: center;">Error al cargar el historial de solicitudes.</p>';
         }
     }
+
+
+
+
+function abrirHistorialEcos() {
+    console.log("📂 Abriendo módulo de Historial ECOS...");
+
+    // 1. Ocultar las demás vistas o secciones si manejas un sistema de pestañas/módulos
+    // (Asegúrate de ocultar el panel de creación u otras vistas activas si es necesario)
+    
+    // 2. Mostrar el contenedor del historial (cambia 'vista-historial' o 'seccion-historial' por el ID real de tu HTML)
+    const seccionHistorial = document.getElementById('vista-historial'); 
+    if (seccionHistorial) {
+        seccionHistorial.style.display = 'block';
+    }
+
+    // 3. Hacer la petición al servidor para cargar los registros del historial
+    fetch('/api/ecos/historial-solicitudes') // O la ruta que estés usando en tu servidor para listar el historial
+        .then(response => response.json())
+        .then(data => {
+            console.log("📊 Datos de historial recibidos:", data);
+            
+            // Aquí pintas los datos en tu tabla o contenedor HTML del historial
+            // Ejemplo: renderizarTablaHistorial(data);
+        })
+        .catch(err => {
+            console.error("❌ Error al cargar el historial:", err);
+        });
+}
+
+
+
+
+
+
+
+
 </script>
 </body>
 </html>
