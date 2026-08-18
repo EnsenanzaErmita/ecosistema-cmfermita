@@ -1783,7 +1783,7 @@ app.post('/api/ecos/request', (req, res) => {
                                         </div>
 
                                         <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
-                                            Atentamente,<br>Oficina de Enseñanza y Calidad<br>&copy; 2026 Todos los derechos reservados<br>VIPERMÍSTICO-ALEJANDRO GONZÁLEZ ZAMUDIO
+                                            Atentamente,<br>Oficina de Enseñanza y Calidad<br>&copy; 2026 Todos los derechos reservados<br>VIPERMÍSTICO - ALEJANDRO GONZÁLEZ ZAMUDIO
                                         </p>
                                     </div>
                                 </div>
@@ -1874,7 +1874,7 @@ app.get('/api/ecos/responder', (req, res) => {
                     <p><strong>Estatus:</strong> <span style="color: ${nuevoEstatus === 'APROBADO' ? 'green' : 'red'}; font-weight: bold;">${nuevoEstatus}</span></p>
                     <p><strong>Motivo / Comentarios:</strong> ${motivoRechazo}</p>
                     <br>
-                    <p>Atentamente,<br>Sistema Ecosistema ERMITA</p>
+                    <p>Atentamente,<br>Oficina de Enseñanza y Calidad<br>&copy; 2026 Todos los derechos reservados<br>VIPERMÍSTICO - ALEJANDRO GONZÁLEZ ZAMUDIO</p>
                 `;
                 sendSmtpEmail.sender = { name: "Ecosistema ERMITA", email: "tu-correo-verificado@dominio.com" };
                 sendSmtpEmail.to = [{ email: info.requester_email, name: info.requester_name || 'Solicitante' }];
@@ -1914,7 +1914,7 @@ app.get('/api/ecos/responder', (req, res) => {
                                         <p>Se le notifica que el/la trainee <strong>${traineeData.first_name} ${traineeData.last_name_paternal}</strong> (perteneciente a su servicio: <em>${serviceCategory}</em>) se ausentará debido a su participación en una jornada autorizada (Solicitud #${eco_request_id}).</p>
                                         <p>Por favor, tome las previsiones necesarias en las actividades del servicio.</p>
                                         <br>
-                                        <p>Atentamente,<br>Sistema Ecosistema ERMITA</p>
+                                        <p>Atentamente,<br>Oficina de Enseñanza y Calidad<br>&copy; 2026 Todos los derechos reservados<br>VIPERMÍSTICO - ALEJANDRO GONZÁLEZ ZAMUDIO</p>
                                     `;
                                     sendSmtpEmailTrainer.sender = { name: "Ecosistema ERMITA", email: "tu-correo-verificado@dominio.com" };
                                     sendSmtpEmailTrainer.to = [{ email: trainer.email, name: `${trainer.first_name || ''} ${trainer.last_name_paternal || ''}` }];
@@ -2085,7 +2085,7 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
                             <p>Se ha completado la evaluación para el personal del área de <strong>${categoria}</strong> vinculados a la solicitud #${eco_request_id}:</p>
                             ${htmlTraineesList}
                             <p style="font-size: 0.85em; color: #555; border-top: 1px solid #eee; padding-top:10px; margin-top:15px;">
-                                Atentamente,<br>Sistema Ecosistema ERMITA
+                                Atentamente,<br>Oficina de Enseñanza y Calidad<br>&copy; 2026 Todos los derechos reservados<br>VIPERMÍSTICO - ALEJANDRO GONZÁLEZ ZAMUDIO
                             </p>
                         </div>
                     </div>
