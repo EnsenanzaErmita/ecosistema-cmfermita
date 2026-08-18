@@ -1770,7 +1770,7 @@ app.post('/api/ecos/request', (req, res) => {
                                     </div>
                                     <div style="padding: 25px; background-color: #fdf2f4; color: #333; line-height: 1.6;">
                                         <p>Estimado/a <strong>${formador.first_name || 'Formador'}</strong>:</p>
-                                        <p>Se ha generado una nueva solicitud de personal que requiere su evaluación conjunta:</p>
+                                        <p>Se ha generado una nueva solicitud de personal en formación que requiere su revisión:</p>
                                         <p><strong>Motivo de la solicitud:</strong> ${motivo}</p>
                                         <p><strong>Personal en formación incluido:</strong></p>
                                         ${htmlTraineesList}
@@ -1949,15 +1949,6 @@ app.get('/api/ecos/responder', (req, res) => {
 
 
 
-// Ruta para recibir la evaluación masiva de una solicitud
-// Ruta para recibir la evaluación masiva de una solicitud
-// Ruta para recibir la evaluación masiva de una solicitud
-// Ruta para recibir la evaluación masiva y notificar por categorías independientes
-// Ruta para recibir la evaluación masiva y notificar con logs detallados
-// Ruta para recibir la evaluación masiva y notificar de forma directa
-// Ruta para recibir la evaluación masiva y notificar tanto al solicitante (por RFC en employees) como a los formadores por categoría
-// Ruta para recibir la evaluación masiva con la lógica exacta de solicitante y trainers por categoría
-// Ruta para recibir la evaluación masiva con la relación exacta por requester_employee_id y trainers por categoría
 // Ruta para recibir la evaluación masiva con la lógica exacta de filtrado de trainers por tablas intermedias
 app.post('/api/ecos/responder-lote', async (req, res) => {
     const { eco_request_id, evaluaciones } = req.body; 
@@ -2074,7 +2065,7 @@ app.post('/api/ecos/responder-lote', async (req, res) => {
                 htmlTraineesList += `</ul>`;
 
                 const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-                sendSmtpEmail.subject = `📋 Resultados de Evaluación (${categoria}) - Solicitud #${eco_request_id}`;
+                sendSmtpEmail.subject = `📋 Agenda de Personal en Formación (${categoria}) - Solicitud #${eco_request_id}`;
                 sendSmtpEmail.htmlContent = `
                     <div style="font-family: sans-serif; max-width: 550px; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; margin: 0 auto;">
                         <div style="background-color: #611232; color: white; padding: 20px; text-align: center; border-bottom: 3px solid #b38e5d;">
@@ -2165,7 +2156,7 @@ app.get('/evaluar-solicitud.html', (req, res) => {
                     <input type="hidden" class="trainee-id" value="${row.trainee_id}">
                     
                     <div style="margin-bottom: 10px;">
-                        <label style="font-weight: bold; font-size: 0.9em; display:block; margin-bottom: 5px;">Estatus de Evaluación:</label>
+                        <label style="font-weight: bold; font-size: 0.9em; display:block; margin-bottom: 5px;">Estatus de Solicitud:</label>
                         <select class="approval-status" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
                             <option value="APROBADO">Aprobar</option>
                             <option value="RECHAZADO">Rechazar</option>
@@ -2186,7 +2177,7 @@ app.get('/evaluar-solicitud.html', (req, res) => {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Evaluación de Solicitud #${ecoRequestId} - Ecosistema Ermita</title>
+                <title>Revisión de Solicitud #${ecoRequestId} - Oficina de Enseñanza y Calidad C.M.F. Ermita</title>
                 <style>
                     body { font-family: sans-serif; background-color: #fdf2f4; margin: 0; padding: 20px; color: #333; }
                     .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
@@ -2200,11 +2191,11 @@ app.get('/evaluar-solicitud.html', (req, res) => {
                 <div class="container">
                     <div class="header">
                         <h2 style="margin:0;">C.M.F. ERMITA - ISSSTE</h2>
-                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Evaluación de Solicitud de Personal (#${ecoRequestId})</p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color:#fbf8f3;">Solicitud de Personal en Formación (#${ecoRequestId})</p>
                     </div>
                     <div class="content">
                         <p style="background: #f9fafb; padding: 12px; border-left: 4px solid #b38e5d; margin-bottom: 20px;">
-                            <strong>Motivo de la Solicitud (Encabezado):</strong><br>${requestMotivo}
+                            <strong>Motivo de la Solicitud:</strong><br>${requestMotivo}
                         </p>
                         <p style="font-size: 0.9em; color: #555; margin-bottom: 20px;">Por favor, califique a cada miembro del personal en formación, asigne su motivo correspondiente y envíe su respuesta conjunta:</p>
                         
