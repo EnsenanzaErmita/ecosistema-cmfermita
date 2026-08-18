@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo de Enseñanza - Ecosistema ERMITA</title>
+    <style>
+        :root {
+            --guinda: #611232;
+            --gris-oscuro: #98989a;
+            --gris-claro: #f4f4f4;
+            --blanco: #ffffff;
+            --negro-footer: #111111;
+            --verde-issste: #285c4d;
+            --dorado-calidad: #b38e5d;
+            --azul-issste: #1d4ed8;
+            --morado-issste: #800080;
+            --amarillo: #b45309;
+            --verde: #15803d;
+            --rojo: #b91c1c;
+            --azul-admin: #374151;
+            --azul-trainees: #1e3a8a;
+            --verde-ensenanza: #10b981; /* Color específico para Enseñanza */
+        }
+
+        html, body { height: 100%; margin: 0; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--gris-claro); 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        header { background-color: var(--guinda); color: var(--blanco); padding: 20px; text-align: center; border-bottom: 4px solid var(--gris-oscuro); }
+        .main-content { flex: 1; padding: 20px; }        
+        .container { max-width: 1300px; margin: 0 auto; background: var(--blanco); padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        .login-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+
+        .card { 
+            padding: 25px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            background: #fff; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            transition: transform 0.2s; 
+            min-height: 280px; 
+            box-sizing: border-box; 
+        }
+
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { margin-top: 0; font-size: 1.2em; border-bottom: 2px solid var(--gris-claro); padding-bottom: 10px; color: var(--verde-issste); }
+        .card p { font-size: 0.85em; text-align: center; color: #555; margin-top: 10px; margin-bottom: auto; padding-bottom: 15px; }
+
+        .card-ensenanza { border-top: 8px solid var(--verde-ensenanza); }
+
+        .btn-save { padding: 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; background: var(--verde-ensenanza); color: white; transition: filter 0.2s; }
+        .btn-save:hover { filter: brightness(1.1); }
+
+        .btn-regresar { background: var(--gris-oscuro); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 20px; }
+        .btn-regresar:hover { background: var(--guinda); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #f4f4f4; color: var(--guinda); }
+
+        footer { background-color: var(--negro-footer); color: var(--blanco); text-align: center; padding: 25px 10px; font-size: 0.95em; border-top: 3px solid var(--dorado-calidad); }
+        footer strong { color: var(--dorado-calidad); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Ecosistema ERMITA - Módulo de Enseñanza</h1>
+    </header>
+
+    <div class="main-content">
+        <div class="container">
+            
+            <button class="btn-regresar" onclick="window.location.href='/'">← Volver al Menú Principal</button>
+
+            <div class="login-grid" style="margin-bottom: 30px;">
+                <div class="card card-ensenanza">
+                    <h3>Generar Rol de Personal en Formación</h3>
+                    <p>Módulo para la administración y calendarización de turnos y guardias del personal.</p>
+                    <button class="btn-save" onclick="alert('Módulo de Rol en desarrollo')">ACCEDER AL ROL</button>
+                </div>
+
+                <div class="card card-ensenanza">
+                    <h3>Generar Constancias</h3>
+                    <p>Emisión automatizada de constancias de acreditación y participación.</p>
+                    <button class="btn-save" onclick="alert('Módulo de Constancias en desarrollo')">ACCEDER A CONSTANCIAS</button>
+                </div>
+            </div>
+
+            <div style="background: #fdfaf6; padding: 20px; border-radius: 8px; border: 1px solid var(--dorado-calidad);">
+                <h3 style="margin-top: 0; color: var(--guinda);">Personal Asignado a Enseñanza (Service: ENSEÑANZA)</h3>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre Completo</th>
+                                <th>Servicio</th>
+                                <th>Detalle / Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-personal-ensenanza">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #666;">Cargando registros...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p>Ecosistema ERMITA &copy; 2026 - <strong>Calidad y Formación</strong></p>
+    </footer>
+
+    <script>
+        const BASE_URL = window.location.origin;
+
+        window.onload = function() {
+            cargarPersonalEnsenanza();
+        };
+
+        async function cargarPersonalEnsenanza() {
+            const tbody = document.getElementById('tabla-personal-ensenanza');
+            if (!tbody) return;
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/ensenanza/personal`);
+                const data = await response.json();
+
+                if (data.success && data.personal.length > 0) {
+                    tbody.innerHTML = data.personal.map(emp => `
+                        <tr>
+                            <td><strong>#${emp.id}</strong></td>
+                            <td>${emp.first_name || ''} ${emp.last_name_paternal || ''} ${emp.last_name_maternal || ''}</td>
+                            <td><span style="background: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 10px; font-weight: bold; font-size: 0.85em;">${emp.service || 'ENSEÑANZA'}</span></td>
+                            <td>${emp.trainee_type || emp.role || 'Personal'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #666;">No se encontraron registros con el servicio ENSEÑANZA.</td></tr>`;
+                }
+            } catch (error) {
+                console.error('Error al cargar personal:', error);
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--rojo);">Error al conectar con el servidor.</td></tr>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -2288,6 +2288,35 @@ app.get('/api/ecos/historial-solicitudes', async (req, res) => {
 
 
 
+
+
+
+
+// Endpoint para obtener el personal del módulo de Enseñanza
+app.get('/api/ensenanza/personal', async (req, res) => {
+    try {
+        // Asegúrate de ajustar 'db' o tu conexión a la base de datos según lo manejes en tu server.js
+        const [rows] = await db.query("SELECT * FROM employees WHERE service = 'ENSEÑANZA'");
+        
+        res.json({
+            success: true,
+            personal: rows
+        });
+    } catch (error) {
+        console.error("❌ Error al obtener personal de enseñanza:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error interno al consultar el personal de enseñanza."
+        });
+    }
+});
+
+
+
+
+
+
+
 // =========================================================================
 // 4. SERVIR EL HTML
 // =========================================================================
