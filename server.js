@@ -1774,11 +1774,11 @@ app.post('/api/ecos/request', (req, res) => {
                                         <p><strong>Motivo de la solicitud:</strong> ${motivo}</p>
                                         <p><strong>Personal en formación incluido:</strong></p>
                                         ${htmlTraineesList}
-                                        <p>Para calificar a cada integrante, registrar sus motivos y <strong>enviar la respuesta completa en un solo envío</strong>, por favor acceda al siguiente enlace:</p>
+                                        <p>Para revisar la solicitud del <strong>personal en formación</strong>, por favor acceda al siguiente enlace:</p>
                                         
                                         <div style="text-align: center; margin: 25px 0;">
                                             <a href="${linkEvaluacion}" target="_blank" rel="noopener noreferrer" style="background-color: #611232; color: white; border: 1px solid #b38e5d; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.95em; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                                Evaluar y Enviar Respuestas
+                                                Revisar y Enviar Respuestas
                                             </a>
                                         </div>
 
