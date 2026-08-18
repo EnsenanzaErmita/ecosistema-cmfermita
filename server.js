@@ -2266,6 +2266,26 @@ app.get('/evaluar-solicitud.html', (req, res) => {
 
 
 
+// Endpoint para obtener el historial completo de solicitudes ECOS
+app.get('/api/ecos/historial', async (req, res) => {
+    try {
+        const [rows] = await pool.promise().query(`
+            SELECT r.*, e.first_name AS req_name, e.last_name_paternal AS req_lastname 
+            FROM eco_request r
+            LEFT JOIN employees e ON r.requester_employee_id = e.id
+            ORDER BY r.id DESC
+        `);
+        res.json({ success: true, data: rows });
+    } catch (err) {
+        console.error("❌ Error al obtener el historial:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+
+
+
+
 
 
 
